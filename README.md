@@ -2,6 +2,8 @@
 
 A phone-portrait autobattler roguelike in a single HTML file. Hire a guild, socket gems into their gear to unlock skills, and descend 12 floors (plus endless).
 
+Play it: https://syxtonprime.github.io/GuildHall/ (redeploys on every push to `main`).
+
 Snapshot: v35.1 with the art chat's boss sprites (artifact version 1791123116-fe7e, 4 Oct 2026).
 
 ## Layout
