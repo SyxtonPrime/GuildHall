@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Set stones</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&amp;family=Atkinson+Hyperlegible:wght@400;700&amp;display=swap">
+<style>
+body{margin:0;background:#141126}
+img{image-rendering:pixelated;image-rendering:crisp-edges}
+</style>
+</helmet>
+<div style="width: 1280px; height: 900px; box-sizing: border-box; padding: 36px 40px; display: flex; flex-direction: column; gap: 22px; background: #141126; color: #efe9f7; font-family: 'Atkinson Hyperlegible', 'Segoe UI', sans-serif">
+<div style="display: flex; align-items: baseline; gap: 18px">
+<h1 style="margin: 0; font-family: Cinzel, Georgia, serif; font-weight: 800; font-size: 30px; color: #f2c14e; letter-spacing: 0.02em">Set stones</h1>
+<div style="font-size: 14px; color: #a79fc4">Each slotted gem is a small jewel set into that piece of gear. Empty slots show as dark settings.</div>
+</div>
+<div style="display: grid; grid-template-columns: 200px repeat(4, minmax(0, 1fr)); gap: 0 24px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: #6f679a">
+<div>Hero · loadout</div>
+<div>★ · no gems</div>
+<div>★ · 2 gems</div>
+<div>★★ · 3 gems</div>
+<div>★★★ · 4 gems</div>
+</div>
+<sc-for list="{{heroes}}" as="h" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: 200px repeat(4, minmax(0, 1fr)); gap: 0 24px; align-items: center; padding-bottom: 14px; border-bottom: 1px solid #2a2347">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="font-family: Cinzel, Georgia, serif; font-weight: 600; font-size: 18px">{{h.name}}</div>
+<div style="font-size: 13px; color: #a79fc4">{{h.kit}}</div>
+<div style="font-size: 12px; color: #6f679a">4th slot: {{h.off}}</div>
+</div>
+<sc-for list="{{h.stages}}" as="st" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; gap: 12px; align-items: flex-end">
+<div style="width: 104px; height: 104px; display: flex; align-items: center; justify-content: center; background: #1f1a33; border: 1px solid #3b3262; border-radius: 10px">
+<img src="{{st.img}}" alt="{{h.name}}" style="width: 96px; height: 96px">
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 3px">
+<div style="width: 46px; padding: 4px 0 5px; display: flex; flex-direction: column; align-items: center; gap: 3px; background: #1f1a33; border: 1px solid #3b3262; border-radius: 6px">
+<img src="{{st.img}}" alt="" style="width: 32px; height: 32px">
+<div style="width: 34px; height: 3px; border-radius: 2px; background: #e05d6f"></div>
+</div>
+<div style="font-size: 10px; color: #6f679a">battle</div>
+</div>
+</div>
+<div style="display: flex; gap: 4px">
+<sc-for list="{{st.chips}}" as="c" hint-placeholder-count="4">
+<sc-if value="{{c.filled}}" hint-placeholder-val="{{true}}">
+<div style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: #2a2347; border: 1px solid #5a4d8f; border-radius: 6px"><img src="{{c.src}}" alt="{{c.name}}" style="width: 14px; height: 14px"></div>
+</sc-if>
+<sc-if value="{{c.empty}}" hint-placeholder-val="{{false}}">
+<div style="width: 24px; height: 24px; box-sizing: border-box; border: 1px dashed #5a4d8f; border-radius: 6px"></div>
+</sc-if>
+<sc-if value="{{c.locked}}" hint-placeholder-val="{{false}}">
+<div style="width: 24px; height: 24px; box-sizing: border-box; border: 1px dotted #3b3262; border-radius: 6px; opacity: 0.6"></div>
+</sc-if>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-for>
+<div style="font-size: 12px; color: #6f679a">Slots fill in order: weapon, body, head, then the off-hand (shield or second dagger) or a second socket on a two-handed weapon. Dashed = open slot, dotted = unlocks at the next ★.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const B = '/_blob/';
+    const G = { ward: B+'5425ab08167fffe90b4afad9ab9a2633', vital: B+'bc9558eb79acc5038762621967db1066', hearthstone: B+'afa7962bcd7340fdcc4ca2aae80fa5db', swift: B+'83c266a61df3e865c1223e141c1e9fbe', edge: B+'748a065582a48e02d912b0f94f16d77c', ember: B+'88b88b8253abcb5e889ba76354269e11', venom: B+'a76412b9dcc761de4340ab8e63dfe706' };
+    const IMG = {
+      knight: ['13b999ca305cd911ca06eefe0820d4e6','95c003d8a20d6f8aa1fc991bd4195189','9aaf78ccd64ed1a8f1b025c0ff5ea151','b205ca485e7b4a14876ca015c2e33512'],
+      ranger: ['bf1a156092fa37a44b7d756c1938dd3f','6c0114f1e881338ae6f5dc672c29d707','8953074e34c27a98660239be6fd82d73','87079179f9644fa27f9ea400842392c2'],
+      rogue: ['2d74c1a5111fd9448fbf7bb32bc6bd3f','9063013d89326cbeeeebf5754f8e71e3','b274c01d5cfb9315bce99c996b497dc8','764c430fcb9198ba9ec05da8fb355fcb'],
+      cleric: ['ea424c082f2a4ad43144e5c507aa0e38','33e63064b1351f420c8645484235f249','35c2aa7269a3d16b9091219a6b5a22a5','0dc94da496691fafc143aaec71678579'],
+      berserker: ['0648da02b1af34e96877047eebb25cb4','d7eb872cc244479bd49bfb1e2bc3d02a','d15c157d32667a99273bc8f2fbdf4b6a','31764ed1e4bf23ac0e8991f746fa4d58']
+    };
+    const HEROES = [
+      ['knight', 'Knight', 'Sword + shield', 'shield', ['ward','vital','ward','hearthstone']],
+      ['ranger', 'Ranger', 'Bow, two-handed', 'bow, 2nd socket', ['swift','edge','swift','ember']],
+      ['rogue', 'Rogue', 'Twin daggers', 'off-hand dagger', ['edge','swift','edge','venom']],
+      ['cleric', 'Cleric', 'Staff, two-handed', 'staff, 2nd socket', ['vital','ward','vital','ember']],
+      ['berserker', 'Berserker', 'Greataxe, two-handed', 'axe haft, 2nd socket', ['ember','vital','ember','swift']]
+    ];
+    const STAGES = [[2,0],[2,2],[3,3],[4,4]];
+    const heroes = HEROES.map(([id, name, kit, off, gems]) => ({
+      name, kit, off,
+      stages: STAGES.map(([u, f], i) => ({
+        img: B + IMG[id][i],
+        chips: [0,1,2,3].map(k => ({ filled: k < f, empty: k >= f && k < u, locked: k >= u, src: G[gems[k]], name: gems[k] }))
+      }))
+    }));
+    return { heroes, true: true, false: false };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>At battle size</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&amp;family=Atkinson+Hyperlegible:wght@400;700&amp;display=swap">
+<style>
+body{margin:0;background:#141126}
+img{image-rendering:pixelated;image-rendering:crisp-edges}
+</style>
+</helmet>
+<div style="width: 390px; height: 700px; box-sizing: border-box; padding: 20px 16px; display: flex; flex-direction: column; gap: 14px; background: #141126; color: #efe9f7; font-family: 'Atkinson Hyperlegible', 'Segoe UI', sans-serif">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: #a79fc4">Front row · ★★★ · 4 gems each</div>
+<div style="font-size: 13px; color: #a79fc4">Knight (Ward, Vital, Ward, Hearthstone) · Rogue (Edge, Swift, Edge, Venom) · Berserker (Ember, Vital, Ember, Swift)</div>
+</div>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #6f679a">{{r.label}}</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{r.cards}}" as="c" hint-placeholder-count="3">
+<div style="box-sizing: border-box; min-height: 104px; padding: 5px 7px; display: flex; flex-direction: column; align-items: center; gap: 3px; background: #1f1a33; border: 1px solid #3b3262; border-radius: 10px">
+<img src="{{c.img}}" alt="{{c.name}}" style="width: 32px; height: 32px">
+<div style="font-size: 12px; font-weight: 700">{{c.name}} <span style="color: #f2c14e">★★★</span></div>
+<div style="align-self: stretch; height: 9px; border-radius: 4px; background: #3a2233; position: relative; overflow: hidden">
+<div style="position: absolute; top: 0; bottom: 0; left: 0; width: {{c.hp}}; background: #e05d6f; border-radius: 4px"></div>
+</div>
+<div style="align-self: stretch; display: flex; justify-content: space-between; font-size: 11px; color: #a79fc4"><span>ATK {{c.atk}}</span><span>SPD {{c.spd}}</span></div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":700}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const B = '/_blob/';
+    const set = (k, r, b) => [
+      { name: 'Knight', img: B + k, hp: '82%', atk: 7, spd: 0.8 },
+      { name: 'Rogue', img: B + r, hp: '64%', atk: 9, spd: 1.46 },
+      { name: 'Berserker', img: B + b, hp: '47%', atk: 12, spd: 1.04 }
+    ];
+    const rows = [
+      { label: 'Today · gems not shown', cards: set('265295d6944aea7446309186878dfe88', '9b0fcb87f3182bf509b5b3380b8ae4c5', '7ff15d852800a90be5d6844b207fad64') },
+      { label: 'A · Set stones', cards: set('b205ca485e7b4a14876ca015c2e33512', '764c430fcb9198ba9ec05da8fb355fcb', '31764ed1e4bf23ac0e8991f746fa4d58') },
+      { label: 'B · Stones + tint', cards: set('aca5d2252707bb3d1d19be780440a642', 'ebce62905a3e5e9acd4ec51c7102a5e9', '02f020f4a3d098a08d5cacb0fe027990') },
+      { label: 'C · Imbued gear', cards: set('b38930da052e9e3b03d07ee65b176e9d', '050d50b46725f3dca8c58cb7d6dbfa1f', '5da332b268ec0bee9044032314ad64b0') }
+    ];
+    return { rows };
+  }
+}
+</script>
+</body>
+</html>

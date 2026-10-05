@@ -1,0 +1,21 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-09-27T21:40:00Z"},
+  "title": "Guildhall Gem Sockets",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {"x": 0, "y": 0, "w": 1280, "h": 900, "title": "A · Set stones"},
+    "Tinted.dc.html": {"x": 1360, "y": 0, "w": 1280, "h": 900, "title": "B · Stones + tint"},
+    "Imbued.dc.html": {"x": 2720, "y": 0, "w": 1280, "h": 900, "title": "C · Imbued gear"},
+    "Battle.dc.html": {"x": 0, "y": 1320, "w": 390, "h": 700, "title": "At battle size"},
+    "GemKnight.dc.html": {"x": 470, "y": 1320, "w": 390, "h": 844, "title": "Gem screen · Knight ★★★"},
+    "GemRanger.dc.html": {"x": 940, "y": 1320, "w": 390, "h": 844, "title": "Gem screen · Ranger ★★"}
+  },
+  "order": ["Main.dc.html", "Tinted.dc.html", "Imbued.dc.html", "Battle.dc.html", "GemKnight.dc.html", "GemRanger.dc.html"],
+  "notes": {
+    "t1": {"x": 0, "y": -300, "text": "Gems in the gear: three treatments", "kind": "title1", "maxW": 4000},
+    "t2": {"x": 0, "y": 1020, "text": "In context: battle cards and the gem screen", "kind": "title1", "maxW": 1330}
+  },
+  "designSystems": []
+}

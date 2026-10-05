@@ -1,0 +1,911 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Gem Recipe Bench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: workbench — class tree rail on the left, selected class sheet with a gem composer and recipe ledger on the right */
+:root{
+  --bg:#f2f0f6; --panel:#ffffff; --panel2:#e9e6f1; --line:#d6d1e3;
+  --fg:#1b1530; --muted:#5f5878; --accent:#a8741f; --accent-bg:#f7ead0;
+  --sel:#e4dcf7; --sel-line:#8a6fc0; --danger:#b8323f; --danger-bg:#fbe3e5;
+  --ok:#2d7a43; --ok-bg:#dff1e3; --gem-outline:#1b1530; --inherit:#ece9f3;
+  --f-display:"Pixelify Sans", "Courier New", monospace;
+  --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --venom:#9be15d; --ember:#ff5c3a; --frost:#8fe3ff; --ward:#5b8cff;
+  --edge:#f0f0f8; --vital:#ff7ab8; --swift:#c47bff; --gilt:#ffd166;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#141020; --panel:#1e182d; --panel2:#272038; --line:#3a3150;
+  --fg:#ece8f5; --muted:#a69fbd; --accent:#f2c14e; --accent-bg:#3a2f17;
+  --sel:#2f2650; --sel-line:#a98be6; --danger:#ff7b86; --danger-bg:#3d1a22;
+  --ok:#7fd494; --ok-bg:#1a3322; --gem-outline:#0a0712; --inherit:#191426; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#141020; --panel:#1e182d; --panel2:#272038; --line:#3a3150;
+  --fg:#ece8f5; --muted:#a69fbd; --accent:#f2c14e; --accent-bg:#3a2f17;
+  --sel:#2f2650; --sel-line:#a98be6; --danger:#ff7b86; --danger-bg:#3d1a22;
+  --ok:#7fd494; --ok-bg:#1a3322; --gem-outline:#0a0712; --inherit:#191426; color-scheme:dark }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--f-body);padding-inline:16px;padding-block:20px 48px}
+.wrap{max-width:2200px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;margin:0;text-wrap:balance;letter-spacing:.01em}
+h1{font-size:28px;line-height:1.1}
+h2{font-size:21px}
+h3{font-size:15px;font-family:var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.top{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+.top p{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.status{font-size:13px;color:var(--muted)}
+.status.bad{color:var(--danger)}
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:6px 12px}
+button:hover{border-color:var(--sel-line)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,.navitem:focus-visible{outline:2px solid var(--sel-line);outline-offset:2px}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--bg);font-weight:600}
+button.ghost{background:transparent;border-color:transparent;color:var(--muted);padding:4px 8px}
+button.ghost:hover{color:var(--fg);border-color:var(--line)}
+button.danger{color:var(--danger)}
+button.danger.armed{background:var(--danger);color:var(--bg);border-color:var(--danger)}
+button:disabled{opacity:.45;cursor:not-allowed}
+input,textarea,select{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%}
+textarea{resize:vertical;min-height:64px}
+label.f,div.f{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);min-width:0}
+label.f > input,label.f > textarea,label.f > select{text-transform:none;letter-spacing:0;font-weight:400;font-size:15px;color:var(--fg)}
+
+.grid{display:grid;grid-template-columns:220px minmax(0,1fr) minmax(440px,520px);grid-template-areas:"rail map sheet";gap:18px;align-items:start}
+.rail{grid-area:rail;display:flex;flex-direction:column;gap:18px;min-width:0}
+.mappane{grid-area:map;min-width:0}
+#main{grid-area:sheet;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);max-height:calc(100vh - env(safe-area-inset-top,0px) - 24px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-gutter:stable}
+body.hasclip #main{max-height:calc(100vh - env(safe-area-inset-top,0px) - 120px)}
+#main .composer{grid-template-columns:minmax(0,1fr)}
+#main .cards{grid-template-columns:minmax(0,1fr)}
+@media (max-width:1500px){
+  .grid{grid-template-columns:minmax(0,1fr) minmax(420px,480px);grid-template-areas:"map sheet" "rail sheet"}
+  .rail{flex-direction:row;flex-wrap:wrap;align-items:start}
+  .rail > .box{flex:1 1 260px}
+}
+@media (max-width:1000px){
+  .grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"map" "sheet" "rail"}
+  #main{position:static;max-height:none;overflow:visible;padding-right:0}
+  #main .cards{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.nav{display:flex;flex-direction:column;gap:2px}
+.navitem{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;border:1px solid transparent;min-width:0}
+.navitem:hover{background:var(--panel2)}
+.navitem.on{background:var(--sel);border-color:var(--sel-line)}
+.navitem .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.navitem .ct{font:12px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.navitem.hero{font-size:14px}
+.navess{display:inline-flex;align-items:center;font:11px var(--f-mono);color:var(--muted)}
+.navess .gems{gap:3px;padding:0 2px}
+.navess .gem{width:9px;height:9px;border-width:1.5px}
+.path{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:14px}
+.path:empty{display:none}
+.path .step{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;background:var(--panel2);color:var(--muted)}
+.path .step.here{background:var(--sel);color:var(--fg);font-weight:600}
+.path .plus,.path .arrow{color:var(--muted);font-family:var(--f-mono)}
+.essedit{display:flex;flex-direction:column;gap:8px}
+.esspick{display:flex;flex-wrap:wrap;gap:6px}
+.pick.mini{padding:5px 8px;gap:6px}
+.pick.mini small{margin-left:0}
+.tray.small{min-height:44px}
+.tierhead{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);padding:8px 8px 2px}
+.tierhead:first-child{padding-top:0}
+.maphead{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.graphwrap{overflow-x:auto;padding-bottom:4px}
+.graphwrap svg{display:block}
+.graphwrap .edge{fill:none;stroke:var(--line);stroke-width:1.6}
+.graphwrap .edge.on{stroke:var(--sel-line);stroke-width:2.4}
+.graphwrap .elabel rect{fill:var(--panel);stroke:var(--line)}
+.graphwrap .elabel.on rect{stroke:var(--sel-line)}
+.graphwrap .elabel text{fill:var(--muted);font:700 11px var(--f-mono)}
+.graphwrap .node{cursor:pointer}
+.graphwrap .node rect{fill:var(--panel2);stroke:var(--line);stroke-width:1.2}
+.graphwrap .node:hover rect,.graphwrap .node:focus-visible rect{stroke:var(--sel-line)}
+.graphwrap .node:focus{outline:none}
+.graphwrap .node.sel rect{fill:var(--sel);stroke:var(--sel-line);stroke-width:2}
+.graphwrap .node.dim{opacity:.45}
+.graphwrap .nn{fill:var(--fg);font:600 13px var(--f-body)}
+.graphwrap .ns{fill:var(--muted);font:11px var(--f-mono)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;width:max-content;max-width:100%}
+.seg button{border:0;border-radius:0;font-size:14px;text-transform:none;letter-spacing:0;font-weight:500;padding:7px 12px;background:var(--panel)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--sel);color:var(--fg);font-weight:700}
+.rchip{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;padding:3px 4px;border-radius:999px;background:var(--panel2);font-size:13px}
+.rchip.bad{background:var(--danger-bg)}
+.rchip .rgo{border:0;background:transparent;padding:2px 4px 2px 2px;display:inline-flex;align-items:center;gap:4px;font-weight:600;font-size:14px}
+.rchip .rnote{color:var(--muted);display:inline-flex;align-items:center}
+.rchip.bad .rnote{color:var(--danger)}
+.rchip .rx{padding:0 8px;font-size:16px;line-height:1.4}
+.dd{position:relative;width:max-content;max-width:100%}
+.dd > button{display:inline-flex;gap:8px;align-items:center}
+.ddmenu{position:absolute;left:0;top:calc(100% + 4px);z-index:4;min-width:260px;max-width:min(360px,calc(100vw - 32px));max-height:280px;overflow-y:auto;display:flex;flex-direction:column;padding:4px;background:var(--panel);border:1px solid var(--sel-line);border-radius:8px;box-shadow:0 8px 24px rgba(20,14,40,.18)}
+.ddopt{display:flex;align-items:center;gap:8px;border:0;border-radius:6px;background:transparent;padding:7px 8px;text-align:left;width:100%}
+.ddopt:hover,.ddopt:focus-visible{background:var(--sel);outline:none}
+.ddopt .ddname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ddempty{margin:0;padding:7px 8px;color:var(--muted);font-size:14px}
+.ddall{border:0;border-top:1px solid var(--line);border-radius:0 0 6px 6px;background:transparent;color:var(--accent);font-size:13px;font-weight:600;text-align:left;padding:8px;margin-top:2px}
+.ddall:hover,.ddall:focus-visible{background:var(--accent-bg);outline:none}
+.ddwarn{font-size:11px;font-weight:700;color:var(--danger)}
+.namerow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.namerow .namein{flex:1 1 220px;min-width:0;width:auto}
+.rntoggle{display:inline-flex;align-items:center;gap:7px;font-size:13px;padding:5px 10px;color:var(--muted)}
+.rntoggle .box{width:15px;height:15px;border:1.5px solid var(--muted);border-radius:3px;display:grid;place-items:center;font-size:12px;line-height:1}
+.rntoggle.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent);font-weight:600}
+.rntoggle.on .box{background:var(--accent);border-color:var(--accent)}
+.rntoggle.on .box::after{content:"✓";color:var(--bg);font-weight:700}
+.rnbadge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);background:var(--accent-bg);border-radius:999px;padding:1px 6px;flex:none}
+.rncount{font-family:var(--f-body);font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--accent)}
+.graphwrap .node.rn rect{stroke:var(--accent);stroke-dasharray:4 3;stroke-width:1.6}
+.graphwrap .nsr{fill:var(--accent);font-weight:700}
+.cp{font-size:12px;padding:2px 8px;flex:none;color:var(--muted)}
+.cp:hover{color:var(--fg)}
+.ledgerbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.clipbar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--panel);border-top:1px solid var(--sel-line);box-shadow:0 -6px 20px rgba(20,14,40,.12);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.clipin{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.cliplabel{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.clipitems{display:flex;gap:6px;flex:1 1 300px;min-width:0;overflow-x:auto;padding-block:2px}
+.clipchip{display:inline-flex;align-items:center;gap:4px;padding:2px 2px 2px 6px;border-radius:999px;background:var(--panel2);font-size:13px;white-space:nowrap;flex:none}
+.clipchip .rx{padding:0 7px;font-size:15px;line-height:1.3}
+body.hasclip{padding-bottom:110px}
+.passchain{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.passchain:empty{display:none}
+.pct{display:flex;flex-direction:column;gap:3px;padding:6px 8px;border-radius:6px;background:var(--panel2)}
+.pctl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.pc{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:baseline}
+.pc .rgo{border:0;background:transparent;padding:0;display:inline-flex;align-items:center;gap:4px;font-weight:600;font-size:13px;white-space:nowrap}
+.pc > span{overflow-wrap:anywhere}
+.snappanel{border-color:var(--accent);background:var(--accent-bg)}
+.graphwrap .edge.bad{stroke:var(--danger);stroke-dasharray:5 4}
+.route{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}
+.route .rtop{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.route select{width:auto;max-width:100%}
+.route .plus{font-family:var(--f-mono);color:var(--muted)}
+.route .rgems{display:inline-flex;gap:6px;align-items:center;flex:1;min-width:0}
+.route .slot{width:30px;height:30px;display:grid;place-items:center;border-radius:6px;border:1px solid var(--line);background:var(--panel);cursor:pointer;padding:0}
+button.fchip.go{border:1px solid var(--line);cursor:pointer;padding:3px 10px 3px 6px}
+.tagdot{font:11px var(--f-mono);color:var(--muted)}
+.rowbtns{display:flex;flex-wrap:wrap;gap:6px}
+.empty{color:var(--muted);font-size:14px}
+
+.gem{display:inline-block;width:13px;height:13px;transform:rotate(45deg);background:var(--c);border:2px solid var(--gem-outline);border-radius:2px;flex:none}
+.gem.lg{width:20px;height:20px}
+.gems{display:inline-flex;gap:6px;align-items:center;padding:0 3px}
+.code{font:700 12px var(--f-mono);letter-spacing:.06em;color:var(--muted)}
+
+.sheet{display:flex;flex-direction:column;gap:18px;min-width:0}
+.sheethead{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start}
+.kicker{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--accent)}
+.namein{font-family:var(--f-display);font-size:24px;font-weight:700;border-color:transparent;background:transparent;padding:2px 6px;margin-left:-6px}
+.namein:hover{border-color:var(--line)}
+.foot{display:flex;flex-wrap:wrap;gap:6px}
+.fchip{display:inline-flex;align-items:center;gap:7px;padding:3px 9px 3px 7px;border-radius:999px;background:var(--panel2);font-size:13px;font-variant-numeric:tabular-nums}
+.fchip b{font-family:var(--f-mono);font-size:12px}
+.fchip.zero{opacity:.45}
+
+.composer{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px}
+@media (max-width:980px){.composer{grid-template-columns:minmax(0,1fr)}}
+.picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.pick{display:flex;align-items:center;gap:8px;padding:7px 8px;justify-content:flex-start;font-size:14px}
+.pick small{margin-left:auto;font:11px var(--f-mono);color:var(--muted)}
+@media (max-width:480px){.picker{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tray{display:flex;align-items:center;gap:10px;min-height:46px;padding:8px 12px;border:1px dashed var(--line);border-radius:8px;background:var(--panel2)}
+.tray .slot{width:30px;height:30px;display:grid;place-items:center;border-radius:6px;border:1px dashed var(--line);background:var(--panel);cursor:pointer;padding:0}
+.tray .slot.filled{border-style:solid}
+.tray .hint{font-size:13px;color:var(--muted);margin-left:auto}
+.two{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}
+@media (max-width:480px){.two{grid-template-columns:minmax(0,1fr)}}
+.match{display:flex;flex-direction:column;gap:12px;font-size:14px}
+.match section{display:flex;flex-direction:column;gap:6px}
+.mitem{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;align-items:baseline;padding:6px 8px;border-radius:6px;background:var(--panel2)}
+.mitem .who{font-size:12px;color:var(--muted)}
+.mitem .d{grid-column:2;color:var(--muted);font-size:13px}
+
+.ledger{display:flex;flex-direction:column;gap:14px}
+.group{display:flex;flex-direction:column;gap:8px}
+.group > h3{display:flex;gap:10px;align-items:baseline}
+.group > h3 span{font-family:var(--f-mono);font-weight:500;letter-spacing:0;text-transform:none}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.card{display:flex;flex-direction:column;gap:5px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer;text-align:left;min-width:0}
+.card:hover{border-color:var(--sel-line)}
+.card.editing{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.card.inh{background:var(--inherit);cursor:default;border-style:dashed}
+.card.cut{opacity:.55}
+.card.cut .cname{text-decoration:line-through}
+.card .row1{display:flex;align-items:center;gap:8px;min-width:0}
+.card .cname{font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .eff{font-size:14px;overflow-wrap:anywhere}
+.card .note{font-size:13px;color:var(--muted);border-left:2px solid var(--line);padding-left:8px;white-space:pre-wrap;overflow-wrap:anywhere}
+.pill{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;border-radius:999px;flex:none}
+.pill.idea{background:var(--accent-bg);color:var(--accent)}
+.pill.keep{background:var(--ok-bg);color:var(--ok)}
+.pill.cut{background:var(--danger-bg);color:var(--danger)}
+.pill.game{background:var(--panel2);color:var(--muted)}
+.herostats{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.herostats b{color:var(--fg)}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:14px;z-index:5}
+.copybox{width:100%;min-height:160px;font:12px var(--f-mono)}
+@media (prefers-reduced-motion:no-preference){.card,.navitem,button{transition:border-color .12s,background .12s}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Gem Recipe Bench</h1>
+      <p>Map base classes and the essence routes between upgrades, pick the essences each skill needs, and keep notes. Everything saves to this page, so Claude can read it back.</p>
+    </div>
+    <div class="rowbtns">
+      <span id="saveState" class="status">Connecting…</span>
+      <button id="snapSave" type="button">Save snapshot</button>
+      <button id="snapLoad" type="button">Load snapshot</button>
+      <input id="snapFile" type="file" accept=".json,application/json" hidden>
+      <button id="copyAll" type="button">Copy all as text</button>
+    </div>
+  </header>
+  <div id="snapPanel" hidden class="box snappanel" role="region" aria-label="Load snapshot"></div>
+  <div id="copyWrap" hidden class="box"><h3>Copy this text</h3><textarea id="copyText" class="copybox" readonly></textarea></div>
+
+  <div class="grid">
+    <aside class="rail">
+      <div class="box">
+        <h3>Your classes <span id="renameCount" class="rncount"></span></h3>
+        <div id="classNav" class="nav"></div>
+        <form id="newBaseForm" class="rowbtns">
+          <input id="newBaseName" placeholder="New base class…" aria-label="New base class name" style="flex:1;min-width:0">
+          <button class="primary" type="submit">Add</button>
+        </form>
+      </div>
+      <div class="box">
+        <h3>Current game heroes</h3>
+        <div id="heroNav" class="nav"></div>
+      </div>
+    </aside>
+    <section id="mapPane" class="mappane" aria-label="Class map">
+      <div class="box"><div class="maphead"><h3>Class map</h3><span class="status">Click a class to open it. Gems are the essences a hero needs for that class. A dashed red arrow means the source uses an essence the target doesn't have at all.</span></div><div id="graph" class="graphwrap"></div></div>
+    </section>
+    <main id="main" class="sheet"></main>
+  </div>
+</div>
+<div id="clipBar" class="clipbar" hidden role="region" aria-label="Recipe clipboard">
+  <div class="clipin">
+    <span class="cliplabel">Clipboard</span>
+    <div id="clipItems" class="clipitems"></div>
+    <div class="rowbtns"><button id="clipPaste" class="primary" type="button">Paste</button><button id="clipClear" type="button">Clear</button></div>
+  </div>
+</div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+const GAME = {"essences":{"venom":{"name":"Venom","letter":"V","arch":"poison","hand":"Attacks apply +1 Poison","armor":"Attackers that hit this hero gain 1 Poison"},"ember":{"name":"Ember","letter":"E","arch":"burn","hand":"Attacks apply +1 Burn","armor":"Attackers that hit this hero gain 1 Burn"},"frost":{"name":"Frost","letter":"F","arch":"chill","hand":"Attacks apply +1 Chill","armor":"Attackers that hit this hero gain 1 Chill"},"ward":{"name":"Ward","letter":"W","arch":"shield","hand":"Gain 1 Shield with every attack","armor":"+1 Armor · start each fight with 5 Shield"},"edge":{"name":"Edge","letter":"K","arch":"crit","hand":"+15% crit chance","armor":"Spiked: attackers that hit this hero take 2 damage"},"vital":{"name":"Vital","letter":"H","arch":"heal","hand":"Each hit heals this hero 2","armor":"+12 HP · heal 1 every 2 seconds"},"swift":{"name":"Swift","letter":"S","arch":"speed","hand":"+15% attack speed","armor":"+8% dodge"},"gilt":{"name":"Gilt","letter":"G","arch":"gold","hand":"+1 gold for each enemy this hero kills","armor":"+1 gold after every won fight"}},"rares":{"bloodstone":{"name":"Bloodstone","ess":["venom","vital"],"desc":"Venom + Vital. Whenever this hero's Poison damages an enemy, heal 1","tier":1},"hearthstone":{"name":"Hearthstone","ess":["ember","ward"],"desc":"Ember + Ward. When this hero's Shield absorbs a hit, the attacker gains 1 Burn","tier":1},"rimeheart":{"name":"Rimeheart","ess":["frost","ward"],"desc":"Frost + Ward. Whenever this hero applies Chill, gain 1 Shield","tier":1},"sunstone":{"name":"Sunstone","ess":["ember","edge"],"desc":"Ember + Edge. Crits apply +2 Burn","tier":1},"quicksilver":{"name":"Quicksilver","ess":["swift","edge"],"desc":"Swift + Edge. Every 4th attack is a guaranteed crit","tier":1},"moonstone":{"name":"Moonstone","ess":["frost","vital"],"desc":"Frost + Vital. Whenever this hero applies Chill, heal the most injured ally 1","tier":1},"ambergold":{"name":"Ambergold","ess":["gilt","edge"],"desc":"Gilt + Edge. +1 gold for each enemy this hero kills","tier":1},"verdigris":{"name":"Verdigris","ess":["venom","gilt"],"desc":"Venom + Gilt. Attacks apply +1 extra Poison","tier":1},"chaosshard":{"name":"Chaos Shard","ess":["venom","ember","frost"],"desc":"Venom + Ember + Frost. Drawback: −25% max HP","tier":2},"titanseye":{"name":"Titan's Eye","ess":["ward","vital","edge"],"desc":"Ward + Vital + Edge. Drawback: −25% attack speed","tier":2},"stormheart":{"name":"Stormheart","ess":["swift","edge","ember"],"desc":"Swift + Edge + Ember. Drawback: −2 Armor and −15 HP","tier":2},"hollowpearl":{"name":"Hollow Pearl","ess":["venom","ward","swift"],"desc":"Venom + Ward + Swift. Drawback: this hero cannot be healed","tier":2},"midasheart":{"name":"Midas Heart","ess":["gilt","gilt","vital"],"desc":"Gilt ×2 + Vital. +2 gold after every won fight. Drawback: −4 ATK","tier":2}},"heroes":{"knight":{"name":"Knight","row":"front","tags":["shield","tank"],"hp":58,"atk":5,"spd":0.8,"ab":"Whenever another ally is hit, gain 2 Shield.","skills":[{"need":["ward"],"name":"Braced","desc":"+2 Armor"},{"need":["vital"],"name":"Steadfast","desc":"+15 HP"},{"need":["gilt"],"name":"Patron","desc":"Interest cap raised by 1 (3 → 4)"},{"need":["ward","ward"],"name":"Bastion","desc":"Shield gained is doubled"},{"need":["ward","venom"],"name":"Thorned Shield","desc":"When his Shield absorbs a hit, the attacker gains 2 Poison"},{"need":["ward","vital"],"name":"Iron Wall","desc":"Starts with 15 Shield and +2 Armor"},{"need":["ward","ward","ward"],"name":"Guild Aegis","desc":"Whenever he gains Shield, the most injured other ally gains half as much"},{"need":["ward","ward","frost"],"name":"Frozen Bulwark","desc":"When his Shield absorbs a hit, the attacker gains 1 Chill"},{"need":["ward","ward","ward","ward"],"name":"Unbreakable","desc":"Starts every fight with Shield equal to half his max HP"},{"need":["ward","ward","venom","vital"],"name":"Living Wall","desc":"When his Shield absorbs a hit: every ally heals 2 and the attacker gains 2 Poison"}]},"berserker":{"name":"Berserker","row":"front","tags":["tank","rage"],"hp":48,"atk":6,"spd":0.9,"ab":"Whenever damaged, gain +1 ATK for the rest of the battle.","skills":[{"need":["ember"],"name":"Hot Blood","desc":"+3 ATK"},{"need":["vital"],"name":"Thick Skin","desc":"+15 HP"},{"need":["gilt","ember"],"name":"Warlord's Spoils","desc":"+4 gold after elite and boss wins"},{"need":["ember","ember"],"name":"Wildfire Rage","desc":"Whenever rage grants ATK, every enemy gains 1 Burn"},{"need":["ember","swift"],"name":"Frenzy","desc":"Rage also grants +5% attack speed"},{"need":["ember","vital"],"name":"Bloodlust","desc":"Heal 3 whenever rage grants ATK"},{"need":["ember","ember","ember"],"name":"Rampage","desc":"Rage grants +2 ATK per hit instead of +1 (scales with ★)"},{"need":["ember","ember","ward"],"name":"Iron Fury","desc":"Whenever rage grants ATK, gain 3 Shield"},{"need":["ember","ember","ember","ember"],"name":"Inferno Rage","desc":"+20 HP; attacks apply Burn equal to the ATK he has gained this battle"},{"need":["ember","ember","vital","swift"],"name":"Blood Trance","desc":"Below half HP, each hit he takes grants double rage and heals him 5"}]},"rogue":{"name":"Rogue","row":"mid","tags":["crit","kill"],"hp":38,"atk":6,"spd":1.1,"ab":"30% crit chance (×2). On kill, attacks again immediately (and again on each further kill).","skills":[{"need":["edge"],"name":"Sharpened","desc":"+2 ATK"},{"need":["swift"],"name":"Quick Hands","desc":"+12% attack speed"},{"need":["gilt"],"name":"Pickpocket","desc":"+1 gold for each enemy he kills"},{"need":["edge","edge"],"name":"Lethal","desc":"Crits deal ×3 instead of ×2"},{"need":["edge","venom"],"name":"Assassinate","desc":"Crits apply 2 Poison"},{"need":["edge","swift"],"name":"Shadowstep","desc":"20% dodge. Slips back to the back row when he drops below 66% HP (once per fight)"},{"need":["edge","edge","frost"],"name":"Frozen Precision","desc":"Crits apply 2 Chill; +8% crit per Chill on the target"},{"need":["edge","edge","edge"],"name":"Flurry","desc":"35% chance each attack also hits another enemy for 50%"},{"need":["edge","edge","edge","edge"],"name":"Death Blossom","desc":"Each of his regular attacks that crits is followed by one extra attack (the extra attack cannot trigger this again)"},{"need":["edge","edge","venom","swift"],"name":"Venom Dance","desc":"+20% dodge; dodging gives the attacker 3 Poison; crits apply 2 Poison"}]},"shieldmaiden":{"name":"Shieldmaiden","row":"front","tags":["shield"],"hp":56,"atk":4,"spd":0.9,"ab":"Starts with 10 Shield. Attacks deal bonus damage equal to ¼ of her current Shield.","skills":[{"need":["ward"],"name":"Bulwark","desc":"+1 Armor, +10 HP"},{"need":["edge"],"name":"Precise","desc":"+15% crit chance"},{"need":["gilt","ward"],"name":"Toll Keeper","desc":"+2 gold after every won fight"},{"need":["ward","ward"],"name":"Aegis","desc":"Every 3 seconds, regain 6 Shield"},{"need":["ward","edge"],"name":"Shield Bash","desc":"Bonus damage is ½ of Shield instead of ¼"},{"need":["ward","frost"],"name":"Frost Aegis","desc":"When her Shield absorbs a hit, the attacker gains 1 Chill"},{"need":["ward","ward","ward"],"name":"Bastion","desc":"Shield gained is doubled"},{"need":["ward","ward","edge"],"name":"Bulwark Focus","desc":"+2% crit per Shield you have"},{"need":["ward","ward","ward","ward"],"name":"Aegis Eternal","desc":"Regains 6 Shield every second and starts with 20 extra Shield"},{"need":["ward","ward","edge","frost"],"name":"Glacial Bash","desc":"Attacks deal +2 per Chill on the target; her crits apply 2 Chill"}]},"ranger":{"name":"Ranger","row":"back","tags":["speed"],"hp":36,"atk":5,"spd":1.4,"ab":"Every 3rd attack deals ×2 damage and targets the back row.","skills":[{"need":["swift"],"name":"Fleet","desc":"+15% attack speed"},{"need":["edge"],"name":"Keen Eye","desc":"+15% crit chance"},{"need":["venom"],"name":"Barbed Tips","desc":"Attacks apply +1 Poison"},{"need":["swift","swift"],"name":"Volley","desc":"Her 3rd attack hits every back-row enemy"},{"need":["swift","edge"],"name":"Piercing Arrows","desc":"Attacks ignore Armor"},{"need":["swift","ember"],"name":"Fire Arrows","desc":"Her 3rd attack also applies 3 Burn"},{"need":["swift","swift","swift"],"name":"Rain of Arrows","desc":"Her big shot hits every enemy (at half its damage)"},{"need":["swift","swift","venom"],"name":"Poison Tips","desc":"Her big shot also applies 3 Poison"},{"need":["swift","swift","swift","swift"],"name":"Barrage","desc":"Every 2nd attack is her big shot, instead of every 3rd"},{"need":["swift","swift","edge","ember"],"name":"Explosive Shot","desc":"Her big shot always crits and applies 3 Burn"}]},"apothecary":{"name":"Apothecary","row":"back","tags":["poison"],"hp":30,"atk":3,"spd":1,"ab":"Attacks apply 2 Poison.","skills":[{"need":["venom"],"name":"Strong Brew","desc":"Attacks apply +1 Poison"},{"need":["vital"],"name":"Tonic","desc":"+10 HP"},{"need":["gilt","venom"],"name":"Apothecary's Trade","desc":"+3 gold after every won fight"},{"need":["venom","venom"],"name":"Toxic Cloud","desc":"Battle start: 3 Poison on every enemy"},{"need":["venom","ember"],"name":"Volatile Brew","desc":"When her Poison damages an enemy, it also gains 1 Burn"},{"need":["venom","frost"],"name":"Numbing Toxin","desc":"Poison she applies also applies 1 Chill"},{"need":["venom","venom","venom"],"name":"Plague","desc":"Poison she applies also spreads to another random enemy"},{"need":["venom","venom","vital"],"name":"Leech Culture","desc":"Whenever your Poison damages an enemy, heal the most injured ally 2"},{"need":["venom","venom","venom","venom"],"name":"Pandemic","desc":"Poison she applies is doubled"},{"need":["venom","venom","ember","frost"],"name":"Witch's Brew","desc":"Her Poison also applies 1 Burn and 1 Chill; attacks deal ×2 to enemies carrying all three"}]},"pyromancer":{"name":"Pyromancer","row":"back","tags":["burn"],"hp":28,"atk":3,"spd":0.75,"ab":"Attacks hit ALL enemies for 60% damage and apply 1 Burn to each.","skills":[{"need":["ember"],"name":"Kindle","desc":"Attacks apply +1 Burn"},{"need":["swift"],"name":"Quickfire","desc":"+15% attack speed"},{"need":["edge"],"name":"Focused Flame","desc":"+15% crit chance"},{"need":["ember","ember"],"name":"Inferno","desc":"Her Burn decays by 1 instead of halving"},{"need":["ember","swift"],"name":"Backdraft","desc":"Hits everyone for 100% instead of 60%"},{"need":["ember","frost"],"name":"Thermal Shock","desc":"Hitting a Chilled enemy deals +4 per Chill, then removes the Chill"},{"need":["ember","ember","ember"],"name":"Firestorm","desc":"Burn she applies is doubled"},{"need":["ember","ember","ward"],"name":"Heat Shield","desc":"Whenever your Burn damages an enemy, gain 2 Shield"},{"need":["ember","ember","ember","ember"],"name":"Conflagration","desc":"Whenever her Burn damages an enemy, every other enemy gains 1 Burn"},{"need":["ember","ember","swift","edge"],"name":"Blue Flame","desc":"Crits apply 3 Burn; attacks deal +1 per Burn on the target"}]},"cleric":{"name":"Cleric","row":"back","tags":["heal"],"hp":38,"atk":4,"spd":0.9,"ab":"Every 2 seconds, heal the most injured ally 7.","skills":[{"need":["vital"],"name":"Devout","desc":"+10 HP"},{"need":["swift"],"name":"Hymn","desc":"+15% attack speed"},{"need":["gilt","vital"],"name":"Tithe","desc":"Interest cap raised by 1 (3 → 4)"},{"need":["vital","vital"],"name":"Radiance","desc":"Heals every ally instead, for half"},{"need":["vital","ward"],"name":"Blessing","desc":"Her heals also grant 4 Shield"},{"need":["vital","ember"],"name":"Consecrate","desc":"Each heal also applies 2 Burn to a random enemy"},{"need":["vital","vital","vital"],"name":"Overheal","desc":"Healing beyond max HP becomes Shield"},{"need":["vital","vital","swift"],"name":"Quickening","desc":"Each time you heal an ally, they gain +3% attack speed"},{"need":["vital","vital","vital","vital"],"name":"Miracle","desc":"Heals every second instead of every 2 seconds, and her heals are 50% larger"},{"need":["vital","vital","ward","ember"],"name":"Holy Fire","desc":"Her heals also grant 6 Shield and set a random enemy ablaze with 4 Burn"}]},"monk":{"name":"Monk","row":"front","tags":["dodge"],"hp":42,"atk":5,"spd":1.2,"ab":"25% chance to dodge. Counterattacks after dodging.","skills":[{"need":["swift"],"name":"Swift Feet","desc":"+15% attack speed"},{"need":["edge"],"name":"Focus","desc":"+15% crit chance"},{"need":["gilt"],"name":"Alms","desc":"+1 gold after every won fight"},{"need":["swift","swift"],"name":"Flow","desc":"Each dodge: +10% attack speed"},{"need":["swift","edge"],"name":"Pressure Point","desc":"Counterattacks always crit"},{"need":["swift","vital"],"name":"Iron Palm","desc":"Counterattacks deal ×2"},{"need":["swift","swift","swift"],"name":"Serenity","desc":"+15% dodge; dodging grants 4 Shield. Falls back to the back row below 33% HP and steps forward again above 66%"},{"need":["swift","swift","frost"],"name":"Slippery","desc":"When you dodge, the attacker gains 2 Chill"},{"need":["swift","swift","swift","swift"],"name":"Thousand Palms","desc":"Counterattacks strike twice"},{"need":["swift","swift","swift","vital"],"name":"Inner Peace","desc":"Each dodge heals him 5. Meditates while in the back row, healing 5% of his max HP each second"}]},"sniper":{"name":"Sniper","row":"back","tags":["kill"],"hp":30,"atk":9,"spd":0.8,"ab":"Targets the lowest-HP enemy. +50% damage against the back row.","skills":[{"need":["edge"],"name":"Steady Aim","desc":"+15% crit chance"},{"need":["swift"],"name":"Quick Reload","desc":"+15% attack speed"},{"need":["gilt"],"name":"Bounty Hunter","desc":"+1 gold for each enemy he kills"},{"need":["edge","edge"],"name":"Headshot","desc":"+35% crit chance"},{"need":["edge","swift"],"name":"Armor-Piercing","desc":"Attacks ignore Armor"},{"need":["edge","venom"],"name":"Venom Bolts","desc":"Crits apply 3 Poison"},{"need":["edge","edge","edge"],"name":"Killshot","desc":"Crits deal ×3 instead of ×2"},{"need":["edge","edge","ember"],"name":"Incendiary Rounds","desc":"Crits apply 3 Burn; +2 ATK"},{"need":["edge","edge","edge","edge"],"name":"Deadeye","desc":"+25% crit; attacks against enemies below half HP always crit and deal ×2"},{"need":["edge","edge","swift","venom"],"name":"Assassin's Mark","desc":"Attacks ignore Armor, apply 2 Poison and deal +3 per Poison on the target"}]},"ashwalker":{"name":"Ashwalker","row":"front","tags":["burn","shield"],"hp":54,"atk":5,"spd":0.85,"ab":"Whenever Burn damages an enemy, gain 1 Shield.","skills":[{"need":["ember"],"name":"Smolder","desc":"+2 ATK"},{"need":["ward"],"name":"Ash Plate","desc":"+1 Armor"},{"need":["gilt","ember"],"name":"Ashes to Gold","desc":"+1 gold for each enemy he kills"},{"need":["ember","ember"],"name":"Cinder Skin","desc":"Attackers that hit him gain 2 Burn"},{"need":["ember","vital"],"name":"Pyre","desc":"When an ally dies, every enemy gains 4 Burn"},{"need":["ember","venom"],"name":"Brimstone","desc":"When Burn damages an enemy, it also gains 1 Poison"},{"need":["ember","ember","ember"],"name":"Flash Freeze","desc":"Whenever your Burn damages an enemy, it gains 1 Chill"},{"need":["ember","ember","ward"],"name":"Heat Shield","desc":"Whenever your Burn damages an enemy, gain 2 Shield"},{"need":["ember","ember","ember","ember"],"name":"Ashen Heart","desc":"Shield gained from Burn damage equals the damage dealt, instead of ★"},{"need":["ember","ember","ward","vital"],"name":"Phoenix Ash","desc":"The first time he drops below 30% HP, he heals half his max HP and every enemy gains 5 Burn"}]},"glacier":{"name":"Glacier Warden","row":"front","tags":["chill","shield","tank"],"hp":54,"atk":4,"spd":0.8,"ab":"Attackers that hit her gain 1 Chill. She takes −1 damage per Chill on her attacker (−2 at ★★★).","skills":[{"need":["frost"],"name":"Cold Blood","desc":"+10 HP"},{"need":["ward"],"name":"Rime Plate","desc":"+1 Armor"},{"need":["edge"],"name":"Cold Edge","desc":"+15% crit chance"},{"need":["frost","frost"],"name":"Winter's Grip","desc":"All heroes deal +15% to Chilled enemies"},{"need":["frost","edge"],"name":"Shatter","desc":"Her attacks on 5-Chill targets deal +12"},{"need":["frost","ward"],"name":"Frozen Armor","desc":"Whenever an enemy gains Chill, she gains 2 Shield"},{"need":["frost","frost","frost"],"name":"Permafrost","desc":"Attackers that hit her gain 2 Chill instead of 1"},{"need":["frost","frost","ward"],"name":"Rime","desc":"When you apply Chill, gain 2 Shield"},{"need":["frost","frost","frost","frost"],"name":"Absolute Zero","desc":"Enemies at 5 Chill take +50% damage from every hero"},{"need":["frost","frost","ward","edge"],"name":"Glacier's Edge","desc":"+8% crit and +2 damage per Chill on her target"}]},"duelist":{"name":"Duelist","row":"mid","tags":["crit"],"hp":40,"atk":6,"spd":1.1,"ab":"Every 3rd attack is a guaranteed crit. Her crits reduce the target's ATK by 2.","skills":[{"need":["edge"],"name":"En Garde","desc":"+15% crit chance"},{"need":["swift"],"name":"Footwork","desc":"+15% attack speed"},{"need":["ember"],"name":"Hot Temper","desc":"+2 ATK"},{"need":["edge","edge"],"name":"Flourish","desc":"Each crit: +5% attack speed"},{"need":["edge","swift"],"name":"Riposte","desc":"20% dodge; counterattacks after dodging. Vanguard: steps up to the front row the moment it empties"},{"need":["edge","ember"],"name":"Searing Blade","desc":"Crits apply 3 Burn"},{"need":["edge","edge","edge"],"name":"Perfect Form","desc":"Every 2nd attack is a guaranteed crit (instead of every 3rd)"},{"need":["edge","edge","frost"],"name":"Chilling Crits","desc":"Crits apply 2 Chill"},{"need":["edge","edge","edge","edge"],"name":"Coup de Grâce","desc":"+20% crit, +3 ATK, +15 HP; crits deal ×3 and shred 3 extra ATK from the target"},{"need":["edge","edge","swift","frost"],"name":"Dancing Blade","desc":"+20% dodge; dodging gives the attacker 2 Chill"}]},"bloodmage":{"name":"Blood Mage","row":"back","tags":["heal"],"hp":34,"atk":5,"spd":0.9,"ab":"Heals the most injured ally for 50% of the attack damage she deals.","skills":[{"need":["vital"],"name":"Vigor","desc":"+10 HP"},{"need":["venom"],"name":"Hemotoxin","desc":"Attacks apply +1 Poison"},{"need":["edge"],"name":"Keen Sight","desc":"+15% crit chance"},{"need":["vital","vital"],"name":"Sanguine Bond","desc":"All heroes heal 20% of their attack damage"},{"need":["vital","edge"],"name":"Hemorrhage","desc":"+1 damage per 10% HP the target is missing"},{"need":["vital","ward"],"name":"Transfusion","desc":"Her healing becomes Shield when the ally is at full HP"},{"need":["vital","vital","vital"],"name":"Crimson Tide","desc":"Her healing ratio is doubled"},{"need":["vital","vital","venom"],"name":"Blessed Blight","desc":"Whenever you heal an ally, a random enemy gains 1 Poison"},{"need":["vital","vital","vital","vital"],"name":"Life Tide","desc":"Her healing reaches every ally instead of only the most injured; +4 ATK"},{"need":["vital","vital","venom","edge"],"name":"Bloodletting","desc":"Crits apply 3 Poison; her Poison damage heals the most injured ally for half of it"}]},"plaguedoctor":{"name":"Plague Doctor","row":"back","tags":["poison","heal"],"hp":34,"atk":3,"spd":0.9,"ab":"Attacks apply 2 Poison. Whenever Poison damages an enemy, heal the most injured ally 1.","skills":[{"need":["venom"],"name":"Miasmic","desc":"Attacks apply +1 Poison"},{"need":["vital"],"name":"Bedside Manner","desc":"+10 HP"},{"need":["gilt"],"name":"House Call","desc":"+1 gold after every won fight"},{"need":["venom","venom"],"name":"Epidemic","desc":"When a poisoned enemy dies, its Poison jumps to another enemy"},{"need":["venom","vital"],"name":"Remedy","desc":"Heals from Poison are tripled"},{"need":["venom","ward"],"name":"Miasma","desc":"When Poison damages an enemy, every hero gains 1 Shield"},{"need":["venom","venom","venom"],"name":"Contagion","desc":"Poison he applies also spreads to another random enemy"},{"need":["venom","venom","ember"],"name":"Alchemist's Flask","desc":"Poison and Burn he applies deal +50% on targets that have both"},{"need":["venom","venom","venom","venom"],"name":"Black Death","desc":"When a poisoned enemy dies, every enemy gains its Poison"},{"need":["venom","venom","vital","ward"],"name":"Quarantine","desc":"Whenever his Poison damages an enemy, the most injured ally heals 2 and gains 2 Shield"}]},"bard":{"name":"Bard","row":"back","tags":["speed"],"hp":32,"atk":2,"spd":1,"ab":"Other allies attack 12% faster and have +1 ATK.","skills":[{"need":["swift"],"name":"Tempo","desc":"+15% attack speed"},{"need":["vital"],"name":"Encore","desc":"+10 HP"},{"need":["gilt"],"name":"Busking","desc":"+2 gold after every won fight"},{"need":["swift","swift"],"name":"Anthem","desc":"Other allies also +2 ATK"},{"need":["swift","frost"],"name":"Lullaby","desc":"Enemies start with 3 Chill"},{"need":["swift","edge"],"name":"War Song","desc":"Other allies +15% crit chance"},{"need":["swift","swift","swift"],"name":"Crescendo","desc":"Other allies attack another 25% faster"},{"need":["swift","swift","vital"],"name":"Ballad","desc":"Every 2 seconds, every ally heals 3"},{"need":["swift","swift","swift","swift"],"name":"Symphony","desc":"Other allies start with +30% speed, +4 ATK and +20% crit"},{"need":["swift","swift","frost","ember"],"name":"Dirge","desc":"Enemies start the fight with 4 Chill, 4 Burn and −2 ATK"}]},"frostmage":{"name":"Frost Mage","row":"back","tags":["chill"],"hp":34,"atk":5,"spd":0.9,"ab":"Attacks apply Chill (−10% speed each, max 5) and deal +1 damage per Chill on the target.","skills":[{"need":["frost"],"name":"Cold Focus","desc":"+2 ATK"},{"need":["edge"],"name":"Sharp Ice","desc":"+15% crit chance"},{"need":["ward"],"name":"Ice Armor","desc":"+1 Armor, +5 HP"},{"need":["frost","frost"],"name":"Blizzard","desc":"Hits all enemies for 50%, chilling each"},{"need":["frost","edge"],"name":"Brittle","desc":"+10% crit chance per Chill on the target"},{"need":["frost","ember"],"name":"Thermal Clash","desc":"Hitting a Chilled enemy applies Burn equal to its Chill"},{"need":["frost","frost","frost"],"name":"Deep Freeze","desc":"Attacks on a 5-Chill target deal ×2"},{"need":["frost","frost","ward"],"name":"Rime","desc":"When you apply Chill, gain 2 Shield"},{"need":["frost","frost","frost","frost"],"name":"Shatterpoint","desc":"Hitting a 5-Chill enemy deals +15 and shatters the Chill"},{"need":["frost","frost","edge","ember"],"name":"Frostfire","desc":"Crits apply 3 Burn; attacks deal +1 per Burn on the target"}]},"reaper":{"name":"Reaper","row":"front","tags":["kill"],"hp":46,"atk":8,"spd":0.9,"ab":"Attacks execute enemies below 20% HP. Every kill permanently adds +3 max HP (up to +60) and heals 5.","skills":[{"need":["edge"],"name":"Whetted Scythe","desc":"+2 ATK"},{"need":["vital"],"name":"Grave Vigor","desc":"+10 HP"},{"need":["gilt","edge"],"name":"Death Tax","desc":"+1 gold for each enemy he kills"},{"need":["edge","edge"],"name":"Dread","desc":"Execute threshold +15%"},{"need":["edge","ember"],"name":"Soul Fire","desc":"Executes set every enemy ablaze: 4 Burn"},{"need":["edge","swift"],"name":"Harvest","desc":"His kills grant all allies +2 ATK"},{"need":["edge","edge","edge"],"name":"Reap","desc":"On kill, heal the most injured ally 6"},{"need":["edge","edge","ward"],"name":"Trophy","desc":"On kill, every hero gains 3 Shield"},{"need":["edge","edge","edge","edge"],"name":"Grim Harvest","desc":"Execute threshold +30%, +3 ATK; his kills heal every ally 5"},{"need":["edge","edge","ember","venom"],"name":"Plague Reaper","desc":"Attacks apply 2 Poison and 2 Burn; on kill, every enemy gains 4 of each; +2 ATK"}]}}};
+const EMBEDDED = {"format": "gem-recipe-bench", "version": 1, "exportedAt": "2026-10-05T01:05:23Z", "classes": {"c_muucqat9mbn7": {"ess": ["venom", "frost", "edge", "swift"], "from": ["c_muuberm8ge8h", "c_muuaifyzo8vc"], "name": "Nightblade", "notes": "", "order": 1791150447933, "passive": "Can't be targeted for the first 3 seconds of each fight. Attacks during that time crit and apply 2 Poison and 2 Chill.", "updated": 1791155000000}, "c_muu8sumchvtt": {"ess": ["venom"], "from": ["c_muu7pm5ad90i", "c_muu893hhv45u"], "name": "Poisoner", "notes": "", "order": 1791143848452, "passive": "Attacks apply 1 Poison.", "updated": 1791155000000}, "c_muu8s3phmca2": {"ess": ["swift", "swift"], "from": ["c_muu8rt2490lr"], "name": "Windrunner", "notes": "", "order": 1791143813573, "passive": "When an ally in the same row crits she immediately attacks their target", "rename": false, "updated": 1791161279254}, "c_muu8hkj0igmk": {"ess": ["edge", "gilt"], "from": ["c_muu89hhv5yf5", "c_muu8kfxb9l85"], "name": "Mercenary", "notes": "", "order": 1791143322156, "passive": "+2 ATK for each enemy he has killed this fight. +1 gold per kill.", "updated": 1791161274052}, "c_muu8cz7uo8uh": {"ess": ["gilt", "gilt", "gilt"], "from": ["c_muu8a0kltcn4"], "name": "Guildmaster", "notes": "", "order": 1791143107914, "passive": "+3 gold after every won fight. Your guild has an additional hero slot", "updated": 1791155698896}, "c_muu9coiwf8yb": {"ess": ["vital", "vital"], "from": ["c_muu8t3slx20j"], "name": "Blood mage", "notes": "", "order": 1791144773672, "passive": "Every 2 seconds, spends 3 of her own HP to heal the most injured ally 7.", "rename": false, "updated": 1791161198922}, "c_muuayv3nak54": {"ess": ["edge", "edge", "edge"], "from": ["c_muu8kqk3v3ck"], "name": "Blademaster", "notes": "", "order": 1791147488243, "passive": "Crits deal ×3 damage. On a kill, attacks again at once.", "rename": false, "updated": 1791155000000}, "c_muu9qxrkyxif": {"ess": ["vital", "vital", "vital"], "from": ["c_muu9coiwf8yb"], "name": "Vampire", "notes": "", "order": 1791145438832, "passive": "Heals for half the damage it deals.", "rename": false, "updated": 1791155000000}, "c_muu8fq9g7iy1": {"ess": ["ember", "ember", "ward", "ward"], "from": ["c_muu8dwwwleo2", "c_muu81a83luco"], "name": "Lava strider", "notes": "Very good at playing the floor is lava", "order": 1791143236276, "passive": "Whenever Burn damages an enemy, gains 1 Shield. Enemies that hit it gain 1 Burn.", "rename": false, "updated": 1791155000000}, "c_muu80wgi8uoq": {"ess": ["ember"], "from": ["c_muu7pm5ad90i"], "name": "Fire mage", "notes": "", "order": 1791142544466, "passive": "Attacks apply 1 Burn.", "updated": 1791155000000}, "c_muu9hfleces9": {"ess": ["venom", "venom", "gilt", "gilt"], "from": ["c_muu93w65k55t", "c_muu8a0kltcn4", "c_muubfqfprgsy"], "name": "Alchemist", "notes": "", "order": 1791144995378, "passive": "Enemies killed while Poisoned drop +2 gold. Poison it applies also removes 1 Armor.", "updated": 1791155000000}, "c_muu9rlact8dy": {"ess": ["ward", "ward", "vital", "vital"], "from": ["c_muu9resprp7i", "c_muu9ue1x7wfi"], "name": "Paladin", "notes": "", "order": 1791145469316, "passive": "Every 3 seconds, gives the most injured ally 6 Shield. Heals 5 when its own Shield breaks.", "updated": 1791155000000}, "c_muub3d9lyt44": {"ess": ["ward", "vital", "swift", "gilt"], "from": ["c_muu91gvq8418", "c_muu9resprp7i", "c_muubf8nae0xm"], "name": "Herald", "notes": "Her friends call her enabler", "order": 1791147698409, "passive": "Allies start each fight with 5 Shield. The first ally to fall below half HP is healed to full (once per fight).", "rename": false, "updated": 1791155000000}, "c_muu7r2uqpswr": {"ess": ["frost", "frost", "frost"], "from": ["c_muu7q2c8r12v"], "name": "Cryomancer", "notes": "In college he went by frosty the snow mage", "order": 1791142086194, "passive": "Attacks apply 1 Chill to all enemies. Frozen enemies take double damage from it.", "rename": false, "updated": 1791155000000}, "c_muu7sibtrs2m": {"ess": ["venom", "ember", "frost", "vital"], "from": ["c_muu81a83luco", "c_muua27gbu9q4", "c_muu9fbav9cav"], "name": "Prismatic magus", "notes": "", "order": 1791142152905, "passive": "Attacks apply 1 Poison, 1 Burn and 1 Chill.", "updated": 1791155000000}, "c_muuck8ca1kex": {"ess": ["venom", "frost", "ward", "swift"], "from": ["c_muu98ulvacc4", "c_muu8s3phmca2", "c_muu7q2c8r12v"], "name": "Frost Stalker", "notes": "She is always cold for some reason", "order": 1791150164794, "passive": "Targets the enemy back row. Attacks apply 1 Poison and 1 Chill.", "rename": false, "updated": 1791155000000}, "c_muu98ulvacc4": {"ess": ["frost", "ward"], "from": ["c_muu8dtb3foya", "c_muu7pu09ggnx"], "name": "Glacier Warden", "notes": "", "order": 1791144594931, "passive": "Attackers that hit it gain 1 Chill. Takes 1 less damage for each Chill on the attacker.", "updated": 1791155000000}, "c_muu8rt2490lr": {"ess": ["swift"], "from": ["c_muu893hhv45u"], "name": "Acrobat", "notes": "", "order": 1791143799772, "passive": "When in the front row get 10% dodge. When in the back row get 15% attack speed.\n", "updated": 1791157876366}, "c_muu8omul8tqu": {"ess": ["edge", "edge", "swift", "swift"], "from": ["c_muu8kqk3v3ck", "c_muu8s3phmca2"], "name": "Blade dancer", "notes": "", "order": 1791143651757, "passive": "Each dodge gives +5% attack speed for the rest of the fight (up to +50%).", "rename": false, "updated": 1791157394061}, "c_muu8kfxb9l85": {"ess": ["edge"], "from": ["c_muu893hhv45u", "c_muu88mtm5j3i"], "name": "Swordsman", "notes": "", "order": 1791143456159, "passive": "+10% crit chance.", "updated": 1791155000000}, "c_muu81homh3tq": {"ess": ["ember", "ember", "ember"], "from": ["c_muu81a83luco"], "name": "Pyromancer", "notes": "", "order": 1791142571974, "passive": "Attacks hit all enemies for 60% damage and apply Burn to each.", "updated": 1791155000000}, "c_muuaifyzo8vc": {"ess": ["frost", "edge"], "from": ["c_muu7pu09ggnx", "c_muu8kfxb9l85"], "name": "Frostblade", "notes": "", "order": 1791146722139, "passive": "Crits against Chilled enemies apply 2 extra Chill.", "updated": 1791155000000}, "c_muubf8nae0xm": {"ess": ["vital", "swift"], "from": ["c_muu8rt2490lr", "c_muu8t3slx20j"], "name": "Monk", "notes": "", "order": 1791148252294, "passive": "Counterattacks after dodging.", "updated": 1791155000000}, "c_muu8t3slx20j": {"ess": ["vital"], "from": ["c_muu88mtm5j3i", "c_muu7pm5ad90i"], "name": "Healer", "notes": "", "order": 1791143860341, "passive": "Every 3 seconds, heals the most injured ally 4.", "rename": false, "updated": 1791155000000}, "c_muu95oxqva1i": {"ess": ["venom", "venom", "venom"], "from": ["c_muu93w65k55t"], "name": "Venomancer", "notes": "", "order": 1791144447614, "passive": "At the start of the fight apply 20 poison to the lowest HP enemy", "rename": false, "updated": 1791160745551}, "c_muucnefb450t": {"ess": ["ember", "ember", "swift", "swift"], "from": ["c_muu8trhnchpq", "c_muu81a83luco", "c_muu8s3phmca2"], "name": "Flame dancer", "notes": "", "order": 1791150312647, "passive": "Each dodge leaves 2 Burn on the attacker.", "updated": 1791155000000}, "c_muucnsji9spe": {"ess": ["venom", "ember", "edge", "swift"], "from": ["c_muu8trhnchpq", "c_muuberm8ge8h", "c_muu93w65k55t"], "name": "Firebomber", "notes": "", "order": 1791150330942, "passive": "Every 4th attack throws a bomb that gives every enemy 2 Poison and 2 Burn.", "rename": false, "updated": 1791155000000}, "c_muubahl3ny7g": {"ess": ["venom", "ward", "vital", "gilt"], "from": ["c_muu9fbav9cav", "c_muubfqfprgsy", "c_muu9resprp7i", "c_muu9coiwf8yb"], "name": "Witch Doctor", "notes": "", "order": 1791148030599, "passive": "Every 3 seconds, hexes a random enemy: 2 Poison and −20% damage for 3 seconds.", "rename": false, "updated": 1791155000000}, "c_muub6hrov7i3": {"ess": ["swift", "swift", "gilt", "gilt"], "from": ["c_muu91gvq8418", "c_muu8a0kltcn4"], "name": "Silver tongue", "notes": "", "order": 1791147844212, "passive": "Market items cost 1 less gold. At the start of each fight, the enemy with the highest ATK loses 20% attack speed for 5 seconds.", "updated": 1791155630957}, "c_muu89hhv5yf5": {"ess": ["gilt"], "from": ["c_muu893hhv45u", "c_muu88mtm5j3i"], "name": "Thief", "notes": "", "order": 1791142944979, "passive": "+1 gold for each enemy this hero kills.", "updated": 1791160753681}, "c_muu8m2w3w2sq": {"ess": ["frost", "edge", "vital", "gilt"], "from": ["c_muu8hkj0igmk", "c_muuaifyzo8vc", "c_muu9coiwf8yb"], "name": "Reaper", "notes": "", "order": 1791143532579, "passive": "Every 3rd crit and on kill gains +3 max HP (up to +60) for this fight and heals 5.", "rename": false, "updated": 1791160945301}, "c_muu8a0kltcn4": {"ess": ["gilt", "gilt"], "from": ["c_muu89hhv5yf5"], "name": "Merchant", "notes": "Buffs people", "order": 1791142969701, "passive": "+1 gold after every won fight. Allies gain +1 ATK for every 10 gold you hold (up to +3).", "updated": 1791155000000}, "c_muuccpsasvwl": {"ess": ["frost", "frost", "ward", "ward"], "from": ["c_muu98ulvacc4", "c_muu7q2c8r12v", "c_muu9ue1x7wfi"], "name": "Icemaiden", "notes": "", "order": 1791149814154, "passive": "Allies start each fight with 5 Shield. When an ally's Shield breaks, the attacker gains 2 Chill.", "rename": false, "updated": 1791155000000}, "c_muu9v1dnhifa": {"ess": ["ward", "ward", "ward"], "from": ["c_muu9ue1x7wfi"], "name": "Bulwark", "notes": "", "order": 1791145630139, "passive": "Starts each fight with Shield equal to half its max HP. Gains 1 Shield whenever another ally is hit.", "updated": 1791155000000}, "c_muu8lrrukarl": {"ess": ["ward", "ward", "edge", "edge"], "from": ["c_muu8kqk3v3ck", "c_muu9ue1x7wfi"], "name": "Champion", "notes": "", "order": 1791143518170, "passive": "While it has Shield, enemies must attack it. Crits give it 3 Shield.", "updated": 1791155000000}, "c_muu893hhv45u": {"ess": [], "from": [], "name": "Rogue", "notes": "", "order": 1791142926821, "passive": "1 gold at end of round", "updated": 1791161425385}, "c_muu7pm5ad90i": {"ess": [], "from": [], "name": "Mage", "notes": "", "order": 1791142017886, "passive": "Whenever you apply a status apply 1 more", "updated": 1791154740876}, "c_muu81a83luco": {"ess": ["ember", "ember"], "from": ["c_muu80wgi8uoq"], "name": "Flamecaller", "notes": "", "order": 1791142562307, "passive": "Burn this hero applies loses a quarter of its stacks each tick instead of half.", "updated": 1791155000000}, "c_muu93w65k55t": {"ess": ["venom", "venom"], "from": ["c_muu8sumchvtt"], "name": "Plaguecaller", "notes": "", "order": 1791144363677, "passive": "When a Poisoned enemy dies, its Poison spreads to a random enemy.", "updated": 1791155000000}, "c_muua27gbu9q4": {"ess": ["ember", "frost"], "from": ["c_muu7pu09ggnx", "c_muu80wgi8uoq"], "name": "Elementalist", "notes": "", "order": 1791145964603, "passive": "Attacks alternate between Burn and Chill. Enemies with both take +20% damage.", "updated": 1791155000000}, "c_muucdoklpfu4": {"ess": ["venom", "ember", "frost", "edge"], "from": ["c_muua27gbu9q4", "c_muuaifyzo8vc", "c_muuberm8ge8h"], "name": "Spellblade", "nameIdeas": "", "notes": "", "order": 1791149859237, "passive": "Crits apply 2 of a random status: Poison, Burn or Chill.", "rename": false, "updated": 1791155000000}, "c_muub1s5b46u4": {"ess": ["edge", "edge", "gilt", "gilt"], "from": ["c_muu8kqk3v3ck", "c_muu8hkj0igmk", "c_muu8a0kltcn4"], "name": "Bounty hunter", "notes": "", "order": 1791147624383, "passive": "Targets the highest-HP enemy. Killing an elite or boss pays +5 gold.", "updated": 1791155545040}, "c_muuberm8ge8h": {"ess": ["venom", "edge"], "from": ["c_muu8sumchvtt", "c_muu8kfxb9l85"], "name": "Cutthroat", "notes": "", "order": 1791148230224, "passive": "His first attack each fight is a guaranteed crit. Crits against Poisoned enemies apply 2 Poison.", "updated": 1791161232511}, "c_muu9phmxqag5": {"ess": ["venom", "vital", "swift", "gilt"], "from": ["c_muu9fbav9cav", "c_muu91gvq8418", "c_muubfqfprgsy", "c_muubf8nae0xm"], "name": "Necrodancer", "notes": "", "order": 1791145371273, "passive": "At the start of a fight summon Wilfred to fight with you", "rename": false, "updated": 1791158069745}, "c_muu9resprp7i": {"ess": ["ward", "vital"], "from": ["c_muu8t3slx20j", "c_muu8dtb3foya"], "name": "Cleric", "notes": "", "order": 1791145460905, "passive": "Every 2 seconds, heals the most injured ally 5. Healing beyond full HP becomes Shield.", "updated": 1791155000000}, "c_muu9o6j6xwfi": {"ess": ["venom", "ember", "frost", "ward"], "from": ["c_muu98ulvacc4", "c_muu8dwwwleo2", "c_muua27gbu9q4"], "name": "Runeguard", "notes": "", "order": 1791145310226, "passive": "When its Shield absorbs a hit, the attacker gains 1 Poison, 1 Burn and 1 Chill.", "rename": false, "updated": 1791155000000}, "c_muu8iedpyjas": {"ess": ["venom", "edge", "swift", "gilt"], "from": ["c_muu8hkj0igmk", "c_muu91gvq8418", "c_muubfqfprgsy", "c_muuberm8ge8h"], "name": "Assassin", "notes": "", "order": 1791143360845, "passive": "Targets the lowest-HP enemy. Instantly kills enemies below 15% HP.", "updated": 1791155000000}, "c_muu8trhnchpq": {"ess": ["ember", "swift"], "from": ["c_muu8rt2490lr", "c_muu80wgi8uoq"], "name": "Berserker", "notes": "", "order": 1791143891051, "passive": "Each hit gives +5% attack speed for the rest of the fight (up to +50%). At the cap, attacks also apply 1 Burn.", "rename": false, "updated": 1791155000000}, "c_muu9ue1x7wfi": {"ess": ["ward", "ward"], "from": ["c_muu8dtb3foya"], "name": "Shieldmaiden", "notes": "", "order": 1791145599909, "passive": "Attacks deal bonus damage equal to a quarter of her Shield.", "updated": 1791161171210}, "c_muu9oupl17gi": {"ess": ["venom", "venom", "vital", "vital"], "from": ["c_muu9coiwf8yb", "c_muu9fbav9cav", "c_muu93w65k55t"], "name": "Necromancer", "notes": "", "order": 1791145341561, "passive": "The first two enemies that die each fight rise as skeletons that fight for you.", "rename": false, "updated": 1791155935765}, "c_muub9dnnh0qc": {"ess": ["edge", "vital", "swift", "gilt"], "from": ["c_muu8hkj0igmk", "c_muubf8nae0xm"], "name": "Heretic", "notes": "", "order": 1791147978851, "passive": "Ignores enemy Shield and Armor. Crits heal it 4.", "rename": false, "updated": 1791155000000}, "c_muu88mtm5j3i": {"ess": [], "from": [], "name": "Warrior", "notes": "", "order": 1791142905226, "passive": "Gain 1 shield every 2 seconds, +1 Armor", "updated": 1791154758181}, "c_muu7pu09ggnx": {"ess": ["frost"], "from": ["c_muu7pm5ad90i"], "name": "Frost mage", "notes": "", "order": 1791142028073, "passive": "Attacks apply 1 Chill.", "updated": 1791155000000}, "c_muucd48tezf2": {"ess": ["ember", "frost", "ward", "swift"], "from": ["c_muu8dwwwleo2", "c_muu8trhnchpq", "c_muua27gbu9q4", "c_muu98ulvacc4"], "name": "Storm dancer", "notes": "", "order": 1791149832894, "passive": "Every 4th attack hits all enemies and applies 1 Burn and 1 Chill to each.", "updated": 1791155000000}, "c_muu9fbav9cav": {"ess": ["venom", "vital"], "from": ["c_muu8t3slx20j", "c_muu8sumchvtt"], "name": "Plague doctor", "notes": "", "order": 1791144896503, "passive": "Whenever Poison he applied deals damage, heals the most injured ally 1.", "updated": 1791161204798}, "c_muu8kqk3v3ck": {"ess": ["edge", "edge"], "from": ["c_muu8kfxb9l85"], "name": "Duelist", "notes": "", "order": 1791143469939, "passive": "Challenges the enemy opposite him to a duel. Characters in a duel can only target each other and no-one else can target them.", "rename": false, "updated": 1791161286970}, "c_muu8emlv6f5o": {"ess": ["ember", "ward", "vital", "swift"], "from": ["c_muu8dwwwleo2", "c_muu8trhnchpq", "c_muu9resprp7i", "c_muubf8nae0xm"], "name": "Phoenix", "notes": "", "order": 1791143184883, "passive": "Once per fight, when it would die, it revives at half HP and gives every enemy 3 Burn.", "updated": 1791155000000}, "c_muubfqfprgsy": {"ess": ["venom", "gilt"], "from": ["c_muu8sumchvtt", "c_muu89hhv5yf5"], "name": "Apothecary", "notes": "", "order": 1791148275349, "passive": "Enemies killed while Poisoned drop +1 gold.", "updated": 1791155000000}, "c_muu8dtb3foya": {"ess": ["ward"], "from": ["c_muu88mtm5j3i"], "name": "Sentinel", "notes": "", "order": 1791143146911, "passive": "Starts each fight with 8 Shield.", "updated": 1791155000000}, "c_muu91gvq8418": {"ess": ["swift", "gilt"], "from": ["c_muu89hhv5yf5", "c_muu8rt2490lr"], "name": "Bard", "notes": "", "order": 1791144250550, "passive": "Allies gain +10% attack speed. +1 gold after every won fight.", "updated": 1791155000000}, "c_muuczwluamkn": {"ess": ["frost", "frost", "edge", "edge"], "from": ["c_muuaifyzo8vc", "c_muu7q2c8r12v"], "name": "Bladestorm", "nameIdeas": "", "notes": "", "order": 1791150896082, "passive": "Crits also hit every other enemy in the target's row.", "rename": false, "updated": 1791155000000}, "c_muu8v6mqq9lr": {"ess": ["swift", "swift", "swift"], "from": ["c_muu8s3phmca2"], "name": "Shadow Archer", "notes": "", "order": 1791143957330, "passive": "Attacks always target the enemy with the highest ATK. Every 4rd ATK blinds the enemy causing them to skip their next attack", "rename": false, "updated": 1791157345422}, "c_muu7q2c8r12v": {"ess": ["frost", "frost"], "from": ["c_muu7pu09ggnx"], "name": "Rimecaller", "notes": "", "order": 1791142038872, "passive": "Enemies that reach 5 Chill are Frozen and skip their next attack.", "rename": false, "updated": 1791155000000}, "c_muu8dwwwleo2": {"ess": ["ember", "ward"], "from": ["c_muu8dtb3foya", "c_muu80wgi8uoq"], "name": "Hearthguard", "notes": "", "order": 1791143151584, "passive": "When his Shield absorbs a hit, the attacker gains 1 Burn. When he applies burn gain 1 shield.", "rename": false, "updated": 1791161136108}}, "recipes": {"r_cl1a109749e48": {"classId": "c_muu8hkj0igmk", "created": 1791160000072, "effect": "+1 gold after a won fight if he got a kill.", "name": "Hazard Pay", "need": ["edge", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000072}, "r_cl1a109749e8d": {"classId": "c_muuccpsasvwl", "created": 1791160000141, "effect": "Allies with Shield are immune to Chill and Burn.", "name": "Ice Queen", "need": ["frost", "frost", "ward", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000141}, "r_cl1a109749e27": {"classId": "c_muua27gbu9q4", "created": 1791160000039, "effect": "Every 3rd attack applies both Burn and Chill.", "name": "Quick Casting", "need": ["ember", "frost", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000039}, "r_cl1a109749ec6": {"classId": "c_muuck8ca1kex", "created": 1791160000198, "effect": "Back-row enemies take +20% damage from all heroes.", "name": "Hunter's Mark", "need": ["venom", "frost", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000198}, "r_cl1a109749e05": {"classId": "c_muu7pu09ggnx", "created": 1791160000005, "effect": "Deals +1 damage per Chill stack on the target.", "name": "Deep Freeze", "need": ["frost", "frost"], "notes": "Claude draft", "status": "idea", "updated": 1791160000005}, "r_cl1a109749e42": {"classId": "c_muu9coiwf8yb", "created": 1791160000066, "effect": "Each heal applies 1 Poison to a random enemy.", "name": "Blood Poison", "need": ["venom", "vital", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000066}, "r_cl1a109749e5c": {"classId": "c_muu9fbav9cav", "created": 1791160000092, "effect": "Every 4 seconds, applies 1 Poison to every enemy.", "name": "Miasma", "need": ["venom", "venom", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000092}, "r_cl1a109749e9c": {"classId": "c_muub9dnnh0qc", "created": 1791160000156, "effect": "Enemies it crits can't gain Shield for 3 seconds.", "name": "Blasphemy", "need": ["edge", "swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000156}, "r_cl1a109749e75": {"classId": "c_muucnefb450t", "created": 1791160000117, "effect": "Every 4th dodge gives every enemy 2 Burn.", "name": "Inferno Waltz", "need": ["ember", "ember", "swift", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000117}, "r_cl1a109749e3f": {"classId": "c_muu8a0kltcn4", "created": 1791160000063, "effect": "Heroes in the market cost 1 less gold.", "name": "Haggle", "need": ["swift", "gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000063}, "r_cl1a109749e87": {"classId": "c_muuczwluamkn", "created": 1791160000135, "effect": "Crit cleave hits also apply 1 Chill.", "name": "Frost Edge", "need": ["frost", "frost", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000135}, "r_cl1a109749e79": {"classId": "c_muu8fq9g7iy1", "created": 1791160000121, "effect": "Enemies in the front row take 1 damage per second.", "name": "The Floor Is Lava", "need": ["ember", "ember", "ward", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000121}, "r_cl1a109749ee4": {"classId": "c_muu9rlact8dy", "created": 1791160000228, "effect": "Gives Shield every 2 seconds instead of 3.", "name": "Divine Bulwark", "need": ["ward", "ward", "vital", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000228}, "r_cl1a109749edd": {"classId": "c_muubahl3ny7g", "created": 1791160000221, "effect": "Each hex also jumps to a second enemy.", "name": "Big Juju", "need": ["venom", "ward", "vital", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000221}, "r_cl1a109749e9e": {"classId": "c_muub9dnnh0qc", "created": 1791160000158, "effect": "Each hit permanently removes 2 Shield or 1 Armor from the target.", "name": "Apostate", "need": ["edge", "vital", "swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000158}, "r_cl1a109749e18": {"classId": "c_muu8sumchvtt", "created": 1791160000024, "effect": "Its first attack each fight applies 4 Poison.", "name": "Toxic Coating", "need": ["venom"], "notes": "Claude draft", "status": "idea", "updated": 1791160000024}, "r_cl1a109749ec1": {"classId": "c_muucnsji9spe", "created": 1791160000193, "effect": "The first bomb each fight applies triple statuses.", "name": "The Big One", "need": ["venom", "ember", "edge", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000193}, "r_cl1a109749e31": {"classId": "c_muu7q2c8r12v", "created": 1791160000049, "effect": "Frozen enemies can't be healed or gain Shield.", "name": "Ice Prison", "need": ["frost", "frost", "frost"], "notes": "Claude draft", "status": "idea", "updated": 1791160000049}, "r_cl1a109749e78": {"classId": "c_muu8fq9g7iy1", "created": 1791160000120, "effect": "When its Shield breaks, every enemy gains 2 Burn.", "name": "Cooling Crust", "need": ["ember", "ward", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000120}, "r_cl1a109749e22": {"classId": "c_muu81a83luco", "created": 1791160000034, "effect": "Crits on Burning enemies deal +1 damage per Burn stack.", "name": "Searing Crits", "need": ["ember", "ember", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000034}, "r_cl1a109749ee6": {"classId": "c_muu8lrrukarl", "created": 1791160000230, "effect": "Enemies forced to attack it deal 15% less damage.", "name": "Challenge", "need": ["ward", "ward", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000230}, "r_cl1a109749e90": {"classId": "c_muu8m2w3w2sq", "created": 1791160000144, "effect": "+1 gold for every 3rd crit (up to 3 per fight).", "name": "Grim Toll", "need": ["edge", "vital", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000144}, "r_cl1a109749e62": {"classId": "c_muuberm8ge8h", "created": 1791160000098, "effect": "After a kill, can't be targeted for 2 seconds.", "name": "Vanish", "need": ["venom", "edge", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000098}, "r_cl1a109749e84": {"classId": "c_muu7r2uqpswr", "created": 1791160000132, "effect": "Every 5th attack gives every enemy 2 Chill.", "name": "Blizzard", "need": ["frost", "frost", "frost", "frost"], "notes": "Claude draft", "status": "idea", "updated": 1791160000132}, "r_cl1a109749e9d": {"classId": "c_muub9dnnh0qc", "created": 1791160000157, "effect": "+1 gold each time a crit heals it (up to 3 per fight).", "name": "False Prophet", "need": ["vital", "swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000157}, "r_cl1a109749e5a": {"classId": "c_muubfqfprgsy", "created": 1791160000090, "effect": "+1 gold after a won fight for each enemy that died Poisoned (up to +3).", "name": "Snake Oil", "need": ["venom", "gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000090}, "r_cl1a109749e9b": {"classId": "c_muub9dnnh0qc", "created": 1791160000155, "effect": "Crits heal it 8 instead of 4.", "name": "Zealot", "need": ["edge", "vital", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000155}, "r_cl1a109749ee1": {"classId": "c_muub3d9lyt44", "created": 1791160000225, "effect": "The full heal can trigger twice per fight.", "name": "Last Stand", "need": ["ward", "vital", "swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000225}, "r_cl1a109749e36": {"classId": "c_muuaifyzo8vc", "created": 1791160000054, "effect": "Crits also give 1 Chill to the enemy behind the target.", "name": "Ice Shards", "need": ["frost", "edge", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000054}, "r_cl1a109749e53": {"classId": "c_muu91gvq8418", "created": 1791160000083, "effect": "Allies gain +5% crit chance.", "name": "Battle Hymn", "need": ["edge", "swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000083}, "r_cl1a109749ecf": {"classId": "c_muu9hfleces9", "created": 1791160000207, "effect": "Interest cap +1.", "name": "Philosopher's Stone", "need": ["venom", "gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000207}, "r_cl1a109749e93": {"classId": "c_muu8cz7uo8uh", "created": 1791160000147, "effect": "+1 gold after each won fight for every 2 heroes in your guild.", "name": "Guild Dues", "need": ["gilt", "gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000147}, "r_cl1a109749e4d": {"classId": "c_muu8kqk3v3ck", "created": 1791160000077, "effect": "When his duel opponent attacks him, 25% chance to strike back at once.", "name": "Riposte", "need": ["edge", "edge", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000077}, "r_muugaeoldxdt": {"classId": "c_muu9phmxqag5", "created": 1791156424917, "effect": "Wilfred heals for 50% of attack damage done by Necrodancer", "name": "[placeholder]", "need": ["vital", "vital", "vital"], "notes": "If Wilfred is dead this doesn't revive her", "status": "idea", "updated": 1791156494041}, "r_cl1a109749eb5": {"classId": "c_muu7sibtrs2m", "created": 1791160000181, "effect": "Every 4th attack applies 3 of each status.", "name": "Rainbow", "need": ["venom", "ember", "frost", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000181}, "r_cl1a109749ebf": {"classId": "c_muucnsji9spe", "created": 1791160000191, "effect": "Throws a bomb every 3rd attack instead of every 4th.", "name": "Short Fuse", "need": ["ember", "edge", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000191}, "r_cl1a109749ea2": {"classId": "c_muuayv3nak54", "created": 1791160000162, "effect": "+10% crit chance per kill this fight (up to +30%).", "name": "Perfect Edge", "need": ["edge", "edge", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000162}, "r_cl1a109749e7d": {"classId": "c_muucd48tezf2", "created": 1791160000125, "effect": "Storm attacks apply 2 Chill instead of 1.", "name": "Squall", "need": ["frost", "ward", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000125}, "r_cl1a109749e17": {"classId": "c_muu8rt2490lr", "created": 1791160000023, "effect": "+1 gold after a won fight if it was never hit.", "name": "Show-off", "need": ["swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000023}, "r_cl1a109749e0d": {"classId": "c_muu8t3slx20j", "created": 1791160000013, "effect": "Allies it heals also regenerate 1 HP per second for 3 seconds.", "name": "Renew", "need": ["vital", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000013}, "r_cl1a109749ed5": {"classId": "c_muu9oupl17gi", "created": 1791160000213, "effect": "Skeletons attack 20% faster.", "name": "Restless Dead", "need": ["venom", "venom", "vital", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000213}, "r_cl1a109749e26": {"classId": "c_muua27gbu9q4", "created": 1791160000038, "effect": "Its pattern becomes Chill, Chill, Burn.", "name": "Ice Focus", "need": ["ember", "frost", "frost"], "notes": "Claude draft", "status": "idea", "updated": 1791160000038}, "r_cl1a109749e5e": {"classId": "c_muu9fbav9cav", "created": 1791160000094, "effect": "Immune to Poison. Allies in his row take 1 less Poison damage per tick.", "name": "Plague Mask", "need": ["venom", "ward", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000094}, "r_cl1a109749eb3": {"classId": "c_muu7sibtrs2m", "created": 1791160000179, "effect": "Each status it applies heals the most injured ally 1.", "name": "Prism Heal", "need": ["ember", "frost", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000179}, "r_cl1a109749e6e": {"classId": "c_muu9ue1x7wfi", "created": 1791160000110, "effect": "When an ally falls below half HP, gives them 8 Shield (once per ally).", "name": "Shield Maiden's Vow", "need": ["ward", "ward", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000110}, "r_cl1a109749eb6": {"classId": "c_muucdoklpfu4", "created": 1791160000182, "effect": "+5% crit chance for each different status on the target.", "name": "Enchanted Blade", "need": ["venom", "ember", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000182}, "r_cl1a109749e12": {"classId": "c_muu8kfxb9l85", "created": 1791160000018, "effect": "20% chance to block a front-row attack entirely.", "name": "Parry", "need": ["ward", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000018}, "r_muuhbz6iksar": {"classId": "c_muu9phmxqag5", "created": 1791158177754, "effect": "Wilfred gains Necrodancer's essence passives", "name": "Perfect partners", "need": ["venom", "vital", "swift", "gilt"], "notes": "", "status": "idea", "updated": 1791158177754}, "r_cl1a109749eae": {"classId": "c_muu8v6mqq9lr", "created": 1791160000174, "effect": "Every 5th attack hits every enemy.", "name": "Volley", "need": ["swift", "swift", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000174}, "r_cl1a109749e43": {"classId": "c_muu9coiwf8yb", "created": 1791160000067, "effect": "Her attacks make the target bleed: 1 damage per second for 3 seconds (stacks).", "name": "Hemorrhage", "need": ["edge", "vital", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000067}, "r_cl1a109749e94": {"classId": "c_muu8cz7uo8uh", "created": 1791160000148, "effect": "Interest cap +2.", "name": "Grand Treasury", "need": ["gilt", "gilt", "gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000148}, "r_cl1a109749e50": {"classId": "c_muu91gvq8418", "created": 1791160000080, "effect": "Allies attack 25% faster for the first 3 seconds of each fight.", "name": "Overture", "need": ["swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000080}, "r_cl1a109749e4e": {"classId": "c_muu8kqk3v3ck", "created": 1791160000078, "effect": "+20% dodge against his duel opponent.", "name": "Footwork", "need": ["edge", "edge", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000078}, "r_cl1a109749ec5": {"classId": "c_muucqat9mbn7", "created": 1791160000197, "effect": "Crits during stealth Freeze the target.", "name": "Midnight", "need": ["venom", "frost", "edge", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000197}, "r_cl1a109749ec0": {"classId": "c_muucnsji9spe", "created": 1791160000192, "effect": "Bombed enemies attack 20% slower for 3 seconds.", "name": "Sticky Bomb", "need": ["venom", "ember", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000192}, "r_cl1a109749ecd": {"classId": "c_muu8iedpyjas", "created": 1791160000205, "effect": "After an execute, its next attack is a guaranteed crit.", "name": "Clean Kill", "need": ["venom", "edge", "swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000205}, "r_cl1a109749ea1": {"classId": "c_muub1s5b46u4", "created": 1791160000161, "effect": "+30% damage to elites and bosses.", "name": "Big Game", "need": ["edge", "edge", "gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000161}, "r_cl1a109749ed2": {"classId": "c_muu9oupl17gi", "created": 1791160000210, "effect": "Skeletons start with 5 Shield.", "name": "Bone Armor", "need": ["venom", "venom", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000210}, "r_cl1a109749eab": {"classId": "c_muub6hrov7i3", "created": 1791160000171, "effect": "A random non-boss enemy sits out the first 3 seconds of each fight.", "name": "Bribe", "need": ["swift", "gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000171}, "r_cl1a109749e40": {"classId": "c_muu9coiwf8yb", "created": 1791160000064, "effect": "Each heal also heals her 2.", "name": "Blood Bond", "need": ["vital", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000064}, "r_cl1a109749eb8": {"classId": "c_muucdoklpfu4", "created": 1791160000184, "effect": "Crits apply 3 statuses instead of 2.", "name": "Runic Edge", "need": ["venom", "frost", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000184}, "r_cl1a109749e2e": {"classId": "c_muu8dwwwleo2", "created": 1791160000046, "effect": "Shield he gains is +1 for each Burning enemy (up to +3).", "name": "Bonfire Guard", "need": ["ember", "ward", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000046}, "r_cl1a109749e8c": {"classId": "c_muuccpsasvwl", "created": 1791160000140, "effect": "Allies start each fight with 8 Shield instead of 5.", "name": "Snow Wall", "need": ["frost", "ward", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000140}, "r_cl1a109749e6c": {"classId": "c_muu9ue1x7wfi", "created": 1791160000108, "effect": "Gains 2 Shield each time she attacks.", "name": "Hold the Line", "need": ["ward", "ward", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000108}, "r_cl1a109749e83": {"classId": "c_muu7r2uqpswr", "created": 1791160000131, "effect": "Enemies at 5 Chill take 2 damage per second.", "name": "Absolute Zero", "need": ["frost", "frost", "frost"], "notes": "Claude draft", "status": "idea", "updated": 1791160000131}, "r_cl1a109749e60": {"classId": "c_muuberm8ge8h", "created": 1791160000096, "effect": "Crits make the target attack 20% slower for 3 seconds.", "name": "Hamstring", "need": ["venom", "edge", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000096}, "r_cl1a109749e3e": {"classId": "c_muu8a0kltcn4", "created": 1791160000062, "effect": "Allies start each fight with 1 Shield per 5 gold you hold (up to 5).", "name": "Hired Guards", "need": ["ward", "gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000062}, "r_cl1a109749e29": {"classId": "c_muu8trhnchpq", "created": 1791160000041, "effect": "At max stacks, attacks apply 2 Burn instead of 1.", "name": "Rampage", "need": ["ember", "ember", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000041}, "r_cl1a109749e28": {"classId": "c_muu8trhnchpq", "created": 1791160000040, "effect": "Being hit also counts as a hit for its attack-speed stacks.", "name": "Bloodrush", "need": ["ember", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000040}, "r_cl1a109749e8a": {"classId": "c_muuczwluamkn", "created": 1791160000138, "effect": "Every 4th attack is a guaranteed crit.", "name": "Spinning Blades", "need": ["frost", "edge", "edge", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000138}, "r_cl1a109749e13": {"classId": "c_muu8kfxb9l85", "created": 1791160000019, "effect": "Every 4th attack strikes twice.", "name": "Flurry", "need": ["edge", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000019}, "r_cl1a109749eda": {"classId": "c_muubahl3ny7g", "created": 1791160000218, "effect": "Allies hit by a hexed enemy gain 2 Shield.", "name": "Voodoo Ward", "need": ["venom", "ward", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000218}, "r_cl1a109749e1c": {"classId": "c_muu8dtb3foya", "created": 1791160000028, "effect": "The first hit it takes each fight deals no damage.", "name": "Brace", "need": ["ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000028}, "r_cl1a109749e14": {"classId": "c_muu8rt2490lr", "created": 1791160000020, "effect": "After dodging, its next attack deals +50% damage.", "name": "Tumble", "need": ["swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000020}, "r_cl1a109749e5d": {"classId": "c_muu9fbav9cav", "created": 1791160000093, "effect": "His heal from Poison ticks is 2 instead of 1.", "name": "Leech", "need": ["venom", "vital", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000093}, "r_cl1a109749e32": {"classId": "c_muu7q2c8r12v", "created": 1791160000050, "effect": "Hitting a Frozen enemy deals double damage and ends the Freeze.", "name": "Shatter", "need": ["frost", "frost", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000050}, "r_cl1a109749e55": {"classId": "c_muu8s3phmca2", "created": 1791160000085, "effect": "Her follow-up attacks deal +50% damage.", "name": "Gale Force", "need": ["swift", "swift", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000085}, "r_muuitzxipabq": {"classId": "c_muu8s3phmca2", "created": 1791160698150, "effect": "Attacks ignore Armor", "name": "Piercing hits", "need": ["edge", "swift"], "notes": "", "status": "idea", "updated": 1791160698150}, "r_cl1a109749e86": {"classId": "c_muu7r2uqpswr", "created": 1791160000134, "effect": "Killing a Frozen enemy gives every enemy 2 Chill.", "name": "Shatterpoint", "need": ["frost", "frost", "frost", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000134}, "r_cl1a109749e38": {"classId": "c_muu98ulvacc4", "created": 1791160000056, "effect": "Starts each fight with 2 Shield per enemy.", "name": "Hoarfrost", "need": ["frost", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000056}, "r_cl1a109749e7c": {"classId": "c_muucd48tezf2", "created": 1791160000124, "effect": "Gains 3 Shield whenever its storm attack triggers.", "name": "Eye of the Storm", "need": ["ember", "frost", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000124}, "r_cl1a109749e69": {"classId": "c_muu9resprp7i", "created": 1791160000105, "effect": "Every 3rd heal heals twice as much.", "name": "Greater Heal", "need": ["ward", "vital", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000105}, "r_cl1a109749e65": {"classId": "c_muu93w65k55t", "created": 1791160000101, "effect": "Enemies with 5+ Poison also gain 1 Burn whenever their Poison ticks.", "name": "Fever", "need": ["venom", "venom", "ember"], "notes": "Claude draft", "status": "idea", "updated": 1791160000101}, "r_cl1a109749e63": {"classId": "c_muu93w65k55t", "created": 1791160000099, "effect": "Every 5th attack copies the target's Poison onto a neighbouring enemy.", "name": "Contagion", "need": ["venom", "venom"], "notes": "Claude draft", "status": "idea", "updated": 1791160000099}, "r_cl1a109749e4b": {"classId": "c_muu8hkj0igmk", "created": 1791160000075, "effect": "Gains 5 Shield after each kill.", "name": "Bodyguard", "need": ["ward", "edge", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000075}, "r_cl1a109749eb7": {"classId": "c_muucdoklpfu4", "created": 1791160000183, "effect": "Crits on enemies with both Burn and Chill deal double damage.", "name": "Elemental Strike", "need": ["ember", "frost", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000183}, "r_cl1a109749e8e": {"classId": "c_muuccpsasvwl", "created": 1791160000142, "effect": "Every 4 seconds, gives the most injured ally 4 Shield.", "name": "Winter's Grace", "need": ["frost", "frost", "ward", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000142}, "r_cl1a109749e6d": {"classId": "c_muu9ue1x7wfi", "created": 1791160000109, "effect": "When her Shield absorbs a hit, the attacker takes 2 damage.", "name": "Spiked Shield", "need": ["ward", "ward", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000109}, "r_cl1a109749e77": {"classId": "c_muu8fq9g7iy1", "created": 1791160000119, "effect": "Enemies that hit it gain 2 Burn instead of 1.", "name": "Magma Skin", "need": ["ember", "ember", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000119}, "r_cl1a109749ebb": {"classId": "c_muu9o6j6xwfi", "created": 1791160000187, "effect": "Allies in its row take 20% less damage from statuses.", "name": "Warding Runes", "need": ["ember", "frost", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000187}, "r_cl1a109749ec2": {"classId": "c_muucqat9mbn7", "created": 1791160000194, "effect": "Stealth attacks apply 4 Poison instead of 2.", "name": "Night Venom", "need": ["venom", "frost", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000194}, "r_cl1a109749e34": {"classId": "c_muuaifyzo8vc", "created": 1791160000052, "effect": "+10% crit chance against Chilled enemies.", "name": "Frostbite Edge", "need": ["frost", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000052}, "r_cl1a109749eed": {"classId": "c_muu9v1dnhifa", "created": 1791160000237, "effect": "When its Shield absorbs a hit, the attacker takes 3 damage.", "name": "Spiked Wall", "need": ["ward", "ward", "ward", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000237}, "r_cl1a109749e67": {"classId": "c_muu9resprp7i", "created": 1791160000103, "effect": "Allies below a quarter HP take 30% less damage.", "name": "Sanctuary", "need": ["ward", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000103}, "r_cl1a109749eb9": {"classId": "c_muucdoklpfu4", "created": 1791160000185, "effect": "Every 3rd attack is a guaranteed crit.", "name": "Arcane Edge", "need": ["venom", "ember", "frost", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000185}, "r_cl1a109749e97": {"classId": "c_muu9qxrkyxif", "created": 1791160000151, "effect": "Each lifesteal heal gives +2% attack speed (up to +30%).", "name": "Blood Frenzy", "need": ["vital", "vital", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000151}, "r_cl1a109749e2d": {"classId": "c_muu8dwwwleo2", "created": 1791160000045, "effect": "At the start of each fight, gives every enemy 1 Burn for every 4 Shield he has.", "name": "Blazing Shield", "need": ["ember", "ember", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000045}, "r_cl1a109749e35": {"classId": "c_muuaifyzo8vc", "created": 1791160000053, "effect": "Crits remove all Chill from the target and deal +2 damage per stack removed.", "name": "Brittle", "need": ["frost", "frost", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000053}, "r_cl1a109749e15": {"classId": "c_muu8rt2490lr", "created": 1791160000021, "effect": "The first time it drops below half HP, gains 50% dodge for 3 seconds.", "name": "Second Wind", "need": ["swift", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000021}, "r_cl1a109749e16": {"classId": "c_muu8rt2490lr", "created": 1791160000022, "effect": "In the back row, every 3rd attack targets the enemy back row.", "name": "Knife Throw", "need": ["edge", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000022}, "r_cl1a109749edb": {"classId": "c_muubahl3ny7g", "created": 1791160000219, "effect": "+1 gold when a hexed enemy dies.", "name": "Juju Coin", "need": ["venom", "vital", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000219}, "r_cl1a109749ece": {"classId": "c_muu9hfleces9", "created": 1791160000206, "effect": "Every 5th Poison tick on an enemy turns 1 Poison into 1 gold (up to 3 per fight).", "name": "Transmute", "need": ["venom", "venom", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000206}, "r_cl1a109749e7a": {"classId": "c_muu8fq9g7iy1", "created": 1791160000122, "effect": "While it has 10+ Shield, it's immune to Chill and Poison.", "name": "Obsidian", "need": ["ember", "frost", "ward", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000122}, "r_cl1a109749e7b": {"classId": "c_muucd48tezf2", "created": 1791160000123, "effect": "The storm attack comes every 3rd attack instead of every 4th.", "name": "Lightning Step", "need": ["ember", "frost", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000123}, "r_cl1a109749e1a": {"classId": "c_muu8sumchvtt", "created": 1791160000026, "effect": "Crits deal +1 damage per Poison stack on the target (up to +5).", "name": "Venom Strike", "need": ["venom", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000026}, "r_cl1a109749e57": {"classId": "c_muubfqfprgsy", "created": 1791160000087, "effect": "When an enemy dies while Poisoned, every ally heals 2.", "name": "Tonic", "need": ["venom", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000087}, "r_cl1a109749ea8": {"classId": "c_muu8omul8tqu", "created": 1791160000168, "effect": "At max attack speed, crits hit every enemy in the target's row.", "name": "Storm of Steel", "need": ["edge", "edge", "swift", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000168}, "r_cl1a109749ee9": {"classId": "c_muu8lrrukarl", "created": 1791160000233, "effect": "Once per fight, below a quarter HP, regains 15 Shield.", "name": "Last Breath", "need": ["ward", "ward", "edge", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000233}, "r_cl1a109749e71": {"classId": "c_muu81homh3tq", "created": 1791160000113, "effect": "Crits make the target's Burn deal all its remaining damage at once.", "name": "Combustion", "need": ["ember", "ember", "ember", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000113}, "r_cl1a109749ea0": {"classId": "c_muub1s5b46u4", "created": 1791160000160, "effect": "Killing its target pays +2 gold.", "name": "Wanted Poster", "need": ["edge", "gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000160}, "r_cl1a109749ed9": {"classId": "c_muu95oxqva1i", "created": 1791160000217, "effect": "Enemies with 10+ Poison attack 25% slower.", "name": "Neurotoxin", "need": ["venom", "venom", "venom", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000217}, "r_cl1a109749e81": {"classId": "c_muu8emlv6f5o", "created": 1791160000129, "effect": "Revives at full HP instead of half.", "name": "Rebirth", "need": ["ward", "vital", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000129}, "r_cl1a109749ee5": {"classId": "c_muu9rlact8dy", "created": 1791160000229, "effect": "Its crits heal every ally 2.", "name": "Righteous Strike", "need": ["ward", "ward", "edge", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000229}, "r_cl1a109749e39": {"classId": "c_muu98ulvacc4", "created": 1791160000057, "effect": "Attackers that hit it gain 2 Chill instead of 1.", "name": "Glacier", "need": ["frost", "frost", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000057}, "r_cl1a109749ed7": {"classId": "c_muu95oxqva1i", "created": 1791160000215, "effect": "Poison it applies never wears off.", "name": "Plague Lord", "need": ["venom", "venom", "venom", "venom"], "notes": "Claude draft", "status": "idea", "updated": 1791160000215}, "r_cl1a109749e3d": {"classId": "c_muu8a0kltcn4", "created": 1791160000061, "effect": "Interest cap +1.", "name": "Investment", "need": ["gilt", "gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000061}, "r_cl1a109749ec8": {"classId": "c_muuck8ca1kex", "created": 1791160000200, "effect": "Poison on Chilled enemies deals 50% more damage.", "name": "Frostbite Venom", "need": ["venom", "frost", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000200}, "r_cl1a109749e5b": {"classId": "c_muu9fbav9cav", "created": 1791160000091, "effect": "Poisoned enemies receive 50% less healing.", "name": "Quarantine", "need": ["venom", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000091}, "r_cl1a109749e0e": {"classId": "c_muu8t3slx20j", "created": 1791160000014, "effect": "Each heal also removes 1 Poison or Burn from the ally.", "name": "Bandage", "need": ["ward", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000014}, "r_cl1a109749e30": {"classId": "c_muu7q2c8r12v", "created": 1791160000048, "effect": "Frozen enemies stay Frozen for 2 attacks instead of 1.", "name": "Permafrost", "need": ["frost", "frost"], "notes": "Claude draft", "status": "idea", "updated": 1791160000048}, "r_cl1a109749e72": {"classId": "c_muu81homh3tq", "created": 1791160000114, "effect": "While any enemy is Burning, every ally regenerates 1 HP every 2 seconds.", "name": "Warmth", "need": ["ember", "ember", "ember", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000114}, "r_cl1a109749e51": {"classId": "c_muu91gvq8418", "created": 1791160000081, "effect": "Her attack-speed aura is +15% instead of +10%.", "name": "Allegro", "need": ["swift", "swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000081}, "r_cl1a109749e64": {"classId": "c_muu93w65k55t", "created": 1791160000100, "effect": "Poison that spreads keeps its full strength.", "name": "Pandemic", "need": ["venom", "venom", "venom"], "notes": "Claude draft", "status": "idea", "updated": 1791160000100}, "r_cl1a109749eeb": {"classId": "c_muu9v1dnhifa", "created": 1791160000235, "effect": "Can't be crit.", "name": "Immovable", "need": ["ward", "ward", "ward", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000235}, "r_cl1a109749ea7": {"classId": "c_muu8omul8tqu", "created": 1791160000167, "effect": "After a dodge, its next attack strikes twice.", "name": "Blade Waltz", "need": ["edge", "swift", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000167}, "r_cl1a109749ee8": {"classId": "c_muu8lrrukarl", "created": 1791160000232, "effect": "+1 Armor for every 10 Shield it has (up to +3).", "name": "Indomitable", "need": ["ward", "ward", "edge", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000232}, "r_cl1a109749e6b": {"classId": "c_muu9ue1x7wfi", "created": 1791160000107, "effect": "Every 4th attack adds half her Shield as damage instead of a quarter.", "name": "Shield Slam", "need": ["ward", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000107}, "r_cl1a109749ee3": {"classId": "c_muu9rlact8dy", "created": 1791160000227, "effect": "Once per fight, fully heals the ally with the lowest HP.", "name": "Lay on Hands", "need": ["ward", "vital", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000227}, "r_cl1a109749e06": {"classId": "c_muu7pu09ggnx", "created": 1791160000006, "effect": "Gains 1 Shield whenever it applies Chill.", "name": "Frost Armor", "need": ["frost", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000006}, "r_cl1a109749ead": {"classId": "c_muub6hrov7i3", "created": 1791160000173, "effect": "The slowed enemy attacks its own allies for 2 seconds.", "name": "Charm", "need": ["vital", "swift", "swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000173}, "r_cl1a109749e33": {"classId": "c_muu7q2c8r12v", "created": 1791160000051, "effect": "Enemies Freeze at 4 Chill instead of 5.", "name": "Flash Freeze", "need": ["frost", "frost", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000051}, "r_cl1a109749e19": {"classId": "c_muu8sumchvtt", "created": 1791160000025, "effect": "Poison it applies loses 1 stack every 2 ticks instead of every tick.", "name": "Lingering Venom", "need": ["venom", "venom"], "notes": "Claude draft", "status": "idea", "updated": 1791160000025}, "r_muufsia4wpev": {"classId": "c_muub1s5b46u4", "created": 1791155589772, "effect": "Hits do bonus damage equal to 5% max HP of the target", "name": "Giants bane", "need": ["edge", "edge", "edge", "edge"], "notes": "", "status": "idea", "updated": 1791155589772}, "r_cl1a109749e1e": {"classId": "c_muu8dtb3foya", "created": 1791160000030, "effect": "While Shielded, regenerates 1 HP per second.", "name": "Steadfast", "need": ["ward", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000030}, "r_cl1a109749eb0": {"classId": "c_muu8v6mqq9lr", "created": 1791160000176, "effect": "Blinded enemies also gain 3 Poison.", "name": "Poison Arrows", "need": ["venom", "swift", "swift", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000176}, "r_cl1a109749e74": {"classId": "c_muucnefb450t", "created": 1791160000116, "effect": "+10% dodge while any enemy is Burning.", "name": "Smoke Veil", "need": ["ember", "swift", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000116}, "r_cl1a109749eec": {"classId": "c_muu9v1dnhifa", "created": 1791160000236, "effect": "Each second while Shielded, heals the most injured ally 1.", "name": "Bastion of Life", "need": ["ward", "ward", "ward", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000236}, "r_cl1a109749edc": {"classId": "c_muubahl3ny7g", "created": 1791160000220, "effect": "Hexes last 5 seconds instead of 3.", "name": "Fetish", "need": ["ward", "vital", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000220}, "r_cl1a109749e2b": {"classId": "c_muu8trhnchpq", "created": 1791160000043, "effect": "+15% crit chance at max stacks.", "name": "Reckless", "need": ["ember", "edge", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000043}, "r_cl1a109749e91": {"classId": "c_muu8m2w3w2sq", "created": 1791160000145, "effect": "Each kill gives every enemy 2 Chill.", "name": "Cold Reckoning", "need": ["frost", "edge", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000145}, "r_cl1a109749e25": {"classId": "c_muua27gbu9q4", "created": 1791160000037, "effect": "Its pattern becomes Burn, Burn, Chill.", "name": "Fire Focus", "need": ["ember", "ember", "frost"], "notes": "Claude draft", "status": "idea", "updated": 1791160000037}, "r_cl1a109749e1b": {"classId": "c_muu8sumchvtt", "created": 1791160000027, "effect": "Poisoned enemies attack 10% slower.", "name": "Sluggish Toxin", "need": ["venom", "frost"], "notes": "Claude draft", "status": "idea", "updated": 1791160000027}, "r_cl1a109749ec7": {"classId": "c_muuck8ca1kex", "created": 1791160000199, "effect": "Every 3 seconds, gains 1 Shield per Chilled enemy.", "name": "Cold Hide", "need": ["frost", "ward", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000199}, "r_cl1a109749eea": {"classId": "c_muu9v1dnhifa", "created": 1791160000234, "effect": "Allies in its row gain +1 Armor.", "name": "Fortress", "need": ["ward", "ward", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000234}, "r_muug3j6xu55s": {"classId": "c_muu9phmxqag5", "created": 1791156104169, "effect": "When Wilfred reaches 25% HP she moves to the back row. When she reaches 75% HP she moves to the front row.", "name": "Quickstep", "need": ["venom", "vital", "swift", "swift"], "notes": "", "status": "idea", "updated": 1791156294016}, "r_cl1a109749ec3": {"classId": "c_muucqat9mbn7", "created": 1791160000195, "effect": "After each kill, can't be targeted for 2 seconds.", "name": "Shadow Step", "need": ["frost", "edge", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000195}, "r_cl1a109749e8f": {"classId": "c_muu8m2w3w2sq", "created": 1791160000143, "effect": "Each kill heals every ally 3.", "name": "Soul Harvest", "need": ["frost", "edge", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000143}, "r_cl1a109749ebc": {"classId": "c_muu9o6j6xwfi", "created": 1791160000188, "effect": "Enemies with Poison, Burn and Chill attack 25% slower.", "name": "Rune of Binding", "need": ["venom", "frost", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000188}, "r_cl1a109749e23": {"classId": "c_muu81a83luco", "created": 1791160000035, "effect": "Each tick of its Burn heals the most injured ally 1.", "name": "Cauterize", "need": ["ember", "ember", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000035}, "r_cl1a109749eba": {"classId": "c_muu9o6j6xwfi", "created": 1791160000186, "effect": "Gains 1 Shield whenever an enemy's status ticks (up to 2 per second).", "name": "Runic Shell", "need": ["venom", "ember", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000186}, "r_cl1a109749e59": {"classId": "c_muubfqfprgsy", "created": 1791160000089, "effect": "Every 4 seconds, removes 2 Poison or Burn from the most afflicted ally.", "name": "Remedy", "need": ["venom", "vital", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000089}, "r_cl1a109749e1f": {"classId": "c_muu8dtb3foya", "created": 1791160000031, "effect": "When its Shield breaks, deals double its ATK to the attacker.", "name": "Shield Bash", "need": ["ward", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000031}, "r_cl1a109749ed6": {"classId": "c_muu95oxqva1i", "created": 1791160000214, "effect": "Every 4 seconds, applies 2 Poison to every enemy.", "name": "Toxic Cloud", "need": ["venom", "venom", "venom"], "notes": "Claude draft", "status": "idea", "updated": 1791160000214}, "r_cl1a109749e45": {"classId": "c_muubf8nae0xm", "created": 1791160000069, "effect": "After 3 seconds without being attacked, regenerates 3 HP per second.", "name": "Meditation", "need": ["vital", "vital", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000069}, "r_cl1a109749e3a": {"classId": "c_muu98ulvacc4", "created": 1791160000058, "effect": "When its Shield breaks, every enemy gains 2 Chill.", "name": "Ice Wall", "need": ["frost", "ward", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000058}, "r_cl1a109749e10": {"classId": "c_muu8kfxb9l85", "created": 1791160000016, "effect": "Its first attack each fight deals double damage.", "name": "Opening Strike", "need": ["edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000016}, "r_cl1a109749ea6": {"classId": "c_muu8omul8tqu", "created": 1791160000166, "effect": "Crits give +5% dodge for the rest of the fight (up to +25%).", "name": "Dancing Edge", "need": ["edge", "edge", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000166}, "r_cl1a109749e6a": {"classId": "c_muu9resprp7i", "created": 1791160000106, "effect": "Heals every 1.5 seconds instead of 2.", "name": "Swift Prayer", "need": ["ward", "vital", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000106}, "r_cl1a109749ecc": {"classId": "c_muu8iedpyjas", "created": 1791160000204, "effect": "Its target takes +1 damage per Poison stack from every source.", "name": "Death Mark", "need": ["venom", "edge", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000204}, "r_cl1a109749e70": {"classId": "c_muu81homh3tq", "created": 1791160000112, "effect": "Every 5th attack applies 3 Burn to every enemy.", "name": "Firestorm", "need": ["ember", "ember", "ember", "ember"], "notes": "Claude draft", "status": "idea", "updated": 1791160000112}, "r_cl1a109749e68": {"classId": "c_muu9resprp7i", "created": 1791160000104, "effect": "Shield from her overhealing is doubled.", "name": "Aegis", "need": ["ward", "ward", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000104}, "r_cl1a109749eaf": {"classId": "c_muu8v6mqq9lr", "created": 1791160000175, "effect": "Blinds every 3rd attack instead of every 4th.", "name": "Rapid Fire", "need": ["swift", "swift", "swift", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000175}, "r_cl1a109749e2c": {"classId": "c_muu8dwwwleo2", "created": 1791160000044, "effect": "Allies in his row are immune to Chill.", "name": "Warm Hearth", "need": ["ember", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000044}, "r_cl1a109749e98": {"classId": "c_muu9qxrkyxif", "created": 1791160000152, "effect": "Lifesteal is 75% of damage dealt instead of half.", "name": "Crimson Night", "need": ["vital", "vital", "vital", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000152}, "r_cl1a109749e7e": {"classId": "c_muucd48tezf2", "created": 1791160000126, "effect": "Storm attacks hit twice.", "name": "Tempest", "need": ["ember", "frost", "ward", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000126}, "r_cl1a109749e5f": {"classId": "c_muuberm8ge8h", "created": 1791160000095, "effect": "+1 damage per Poison stack on the target (up to +5).", "name": "Exploit", "need": ["venom", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000095}, "r_muugetcu8xql": {"classId": "c_muu9phmxqag5", "created": 1791156630558, "effect": "Wilfred gets +1 ATK and +1 HP for every 2 gold in the bank at the start of the fight", "name": "[placeholder]", "need": ["vital", "vital", "gilt", "gilt"], "notes": "", "status": "idea", "updated": 1791156630558}, "r_cl1a109749e8b": {"classId": "c_muuccpsasvwl", "created": 1791160000139, "effect": "When her own Shield breaks, the attacker is Frozen.", "name": "Frozen Bastion", "need": ["frost", "frost", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000139}, "r_cl1a109749e54": {"classId": "c_muu8s3phmca2", "created": 1791160000084, "effect": "Allies in her row gain +10% attack speed.", "name": "Tailwind", "need": ["swift", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000084}, "r_cl1a109749ebd": {"classId": "c_muu9o6j6xwfi", "created": 1791160000189, "effect": "When its Shield breaks, every enemy gains 2 Poison, 2 Burn and 2 Chill.", "name": "Glyph Wall", "need": ["venom", "ember", "frost", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000189}, "r_cl1a109749ee0": {"classId": "c_muub3d9lyt44", "created": 1791160000224, "effect": "Front-row allies gain +1 Armor.", "name": "Standard Bearer", "need": ["ward", "swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000224}, "r_cl1a109749ede": {"classId": "c_muub3d9lyt44", "created": 1791160000222, "effect": "When an ally drops below half HP, every ally gains +20% attack speed for 3 seconds.", "name": "Rally", "need": ["ward", "vital", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000222}, "r_cl1a109749e1d": {"classId": "c_muu8dtb3foya", "created": 1791160000029, "effect": "Allies in its row start each fight with 4 Shield.", "name": "Shield Wall", "need": ["ward", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000029}, "r_cl1a109749e92": {"classId": "c_muu8m2w3w2sq", "created": 1791160000146, "effect": "Once per fight, a lethal hit leaves it at 1 HP instead.", "name": "Death's Door", "need": ["frost", "edge", "vital", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000146}, "r_cl1a109749ed3": {"classId": "c_muu9oupl17gi", "created": 1791160000211, "effect": "Skeletons have +50% ATK.", "name": "Unholy Strength", "need": ["venom", "vital", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000211}, "r_cl1a109749e0b": {"classId": "c_muu89hhv5yf5", "created": 1791160000011, "effect": "Its first attack each fight blinds the target, which skips its next attack.", "name": "Dirty Tricks", "need": ["venom", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000011}, "r_cl1a109749eac": {"classId": "c_muub6hrov7i3", "created": 1791160000172, "effect": "The first market reroll each visit is free.", "name": "Silver Lining", "need": ["swift", "swift", "gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000172}, "r_cl1a109749e73": {"classId": "c_muucnefb450t", "created": 1791160000115, "effect": "After each dodge, its next attack applies 3 Burn.", "name": "Fire Step", "need": ["ember", "ember", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000115}, "r_cl1a109749e11": {"classId": "c_muu8kfxb9l85", "created": 1791160000017, "effect": "Crits ignore Armor.", "name": "Precision", "need": ["edge", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000017}, "r_cl1a109749ed8": {"classId": "c_muu95oxqva1i", "created": 1791160000216, "effect": "Heals 1 per second for each Poisoned enemy (up to 3).", "name": "Venom Siphon", "need": ["venom", "venom", "venom", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000216}, "r_cl1a109749e76": {"classId": "c_muucnefb450t", "created": 1791160000118, "effect": "Heals 2 whenever a dodge leaves Burn on the attacker.", "name": "Dance of Embers", "need": ["ember", "vital", "swift", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000118}, "r_cl1a109749e56": {"classId": "c_muu8s3phmca2", "created": 1791160000086, "effect": "Her follow-up attacks apply 1 Chill.", "name": "Cutting Wind", "need": ["frost", "swift", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000086}, "r_cl1a109749e00": {"classId": "c_muu80wgi8uoq", "created": 1791160000000, "effect": "The first Burn this hero applies each fight is 3 stacks.", "name": "Kindling", "need": ["ember"], "notes": "Claude draft", "status": "idea", "updated": 1791160000000}, "r_cl1a109749e09": {"classId": "c_muu89hhv5yf5", "created": 1791160000009, "effect": "+30% damage against enemies that aren't targeting it.", "name": "Backstab", "need": ["edge", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000009}, "r_cl1a109749e47": {"classId": "c_muubf8nae0xm", "created": 1791160000071, "effect": "Counterattacks are guaranteed crits.", "name": "Pressure Point", "need": ["edge", "vital", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000071}, "r_cl1a109749ea3": {"classId": "c_muuayv3nak54", "created": 1791160000163, "effect": "Each attack in a kill chain deals +25% more than the last.", "name": "Thousand Cuts", "need": ["edge", "edge", "edge", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000163}, "r_cl1a109749e3b": {"classId": "c_muu98ulvacc4", "created": 1791160000059, "effect": "When hit, heals 1 for each Chill on the attacker.", "name": "Cold Comfort", "need": ["frost", "ward", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000059}, "r_cl1a109749e07": {"classId": "c_muu7pu09ggnx", "created": 1791160000007, "effect": "Chilled enemies deal 10% less damage.", "name": "Numbing Cold", "need": ["frost", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000007}, "r_cl1a109749e89": {"classId": "c_muuczwluamkn", "created": 1791160000137, "effect": "Crits on Frozen enemies hit every enemy.", "name": "Eye of the Blizzard", "need": ["frost", "frost", "edge", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000137}, "r_cl1a109749e88": {"classId": "c_muuczwluamkn", "created": 1791160000136, "effect": "+10% crit chance for each other enemy in the target's row.", "name": "Whirlwind", "need": ["frost", "edge", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000136}, "r_cl1a109749ea4": {"classId": "c_muuayv3nak54", "created": 1791160000164, "effect": "Its first attack each fight is a guaranteed ×4 crit.", "name": "Iaido", "need": ["edge", "edge", "edge", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000164}, "r_cl1a109749ed4": {"classId": "c_muu9oupl17gi", "created": 1791160000212, "effect": "Raises the first three enemies that die instead of two.", "name": "Army of the Dead", "need": ["venom", "venom", "vital", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000212}, "r_cl1a109749ed1": {"classId": "c_muu9hfleces9", "created": 1791160000209, "effect": "Enemies that die while Poisoned explode, giving their neighbours 3 Poison.", "name": "Volatile Mixture", "need": ["venom", "venom", "ember", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000209}, "r_cl1a109749ec4": {"classId": "c_muucqat9mbn7", "created": 1791160000196, "effect": "Stealth lasts 5 seconds instead of 3.", "name": "Ambush", "need": ["venom", "edge", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000196}, "r_cl1a109749e85": {"classId": "c_muu7r2uqpswr", "created": 1791160000133, "effect": "Gains 1 Shield per Frozen enemy each second.", "name": "Ice Armor", "need": ["frost", "frost", "frost", "ward"], "notes": "Claude draft", "status": "idea", "updated": 1791160000133}, "r_cl1a109749e04": {"classId": "c_muu7pu09ggnx", "created": 1791160000004, "effect": "Its first attack each fight gives every enemy 1 Chill.", "name": "Cold Snap", "need": ["frost"], "notes": "Claude draft", "status": "idea", "updated": 1791160000004}, "r_cl1a109749ee2": {"classId": "c_muu9rlact8dy", "created": 1791160000226, "effect": "Shield it gives heals the ally 2 when it breaks.", "name": "Holy Shield", "need": ["ward", "ward", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000226}, "r_cl1a109749e61": {"classId": "c_muuberm8ge8h", "created": 1791160000097, "effect": "Crits deal bonus damage equal to the target's Poison.", "name": "Toxic Blade", "need": ["venom", "venom", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000097}, "r_cl1a109749ed0": {"classId": "c_muu9hfleces9", "created": 1791160000208, "effect": "Every 5 seconds, gives the most injured ally a potion that heals 6.", "name": "Golden Elixir", "need": ["venom", "venom", "gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000208}, "r_cl1a109749e4c": {"classId": "c_muu8kqk3v3ck", "created": 1791160000076, "effect": "Deals +25% damage to his duel opponent.", "name": "En Garde", "need": ["edge", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000076}, "r_cl1a109749ea5": {"classId": "c_muuayv3nak54", "created": 1791160000165, "effect": "25% chance to block a front-row attack entirely.", "name": "Masterful Parry", "need": ["ward", "edge", "edge", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000165}, "r_cl1a109749e46": {"classId": "c_muubf8nae0xm", "created": 1791160000070, "effect": "Each counterattack gives +10% attack speed for 3 seconds.", "name": "Flowing Strikes", "need": ["vital", "swift", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000070}, "r_cl1a109749ee7": {"classId": "c_muu8lrrukarl", "created": 1791160000231, "effect": "When hit while Shielded, 25% chance to strike back at once.", "name": "Counter Guard", "need": ["ward", "edge", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000231}, "r_cl1a109749e95": {"classId": "c_muu8cz7uo8uh", "created": 1791160000149, "effect": "Allies start each fight with 1 Armor.", "name": "Guild Armory", "need": ["ward", "gilt", "gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000149}, "r_cl1a109749e2f": {"classId": "c_muu8dwwwleo2", "created": 1791160000047, "effect": "Every 4 seconds, heals the most injured ally 1 per Burning enemy.", "name": "Hearth's Embrace", "need": ["ember", "ward", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000047}, "r_cl1a109749e08": {"classId": "c_muu89hhv5yf5", "created": 1791160000008, "effect": "The first hit on each enemy steals 1 gold (up to 3 per fight).", "name": "Pickpocket", "need": ["gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000008}, "r_cl1a109749eb1": {"classId": "c_muu8v6mqq9lr", "created": 1791160000177, "effect": "Attacks on blinded enemies are guaranteed crits.", "name": "Headshot", "need": ["edge", "swift", "swift", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000177}, "r_cl1a109749e9f": {"classId": "c_muub1s5b46u4", "created": 1791160000159, "effect": "The first enemy it targets takes +25% damage from all heroes.", "name": "Mark", "need": ["edge", "edge", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000159}, "r_cl1a109749e41": {"classId": "c_muu9coiwf8yb", "created": 1791160000065, "effect": "Each heal also deals half its amount as damage to a random enemy.", "name": "Crimson Tide", "need": ["vital", "vital", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000065}, "r_cl1a109749ea9": {"classId": "c_muu8omul8tqu", "created": 1791160000169, "effect": "Heals 2 on each dodge.", "name": "Graceful", "need": ["edge", "vital", "swift", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000169}, "r_cl1a109749e49": {"classId": "c_muu8hkj0igmk", "created": 1791160000073, "effect": "+4 ATK against elites and bosses.", "name": "Contract Killer", "need": ["edge", "edge", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000073}, "r_cl1a109749e4a": {"classId": "c_muu8hkj0igmk", "created": 1791160000074, "effect": "Starts each fight with +1 ATK per 5 gold you hold (up to +4).", "name": "Paid in Advance", "need": ["edge", "gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000074}, "r_cl1a109749e02": {"classId": "c_muu80wgi8uoq", "created": 1791160000002, "effect": "Applying Burn to a Chilled enemy removes its Chill and deals 4 damage.", "name": "Steam Burst", "need": ["ember", "frost"], "notes": "Claude draft", "status": "idea", "updated": 1791160000002}, "r_cl1a109749eb2": {"classId": "c_muu7sibtrs2m", "created": 1791160000178, "effect": "Enemies with Poison, Burn and Chill take +25% damage.", "name": "Spectrum", "need": ["venom", "ember", "frost"], "notes": "Claude draft", "status": "idea", "updated": 1791160000178}, "r_cl1a109749eb4": {"classId": "c_muu7sibtrs2m", "created": 1791160000180, "effect": "When an enemy dies, its statuses move to a random enemy.", "name": "Refraction", "need": ["venom", "frost", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000180}, "r_cl1a109749e21": {"classId": "c_muu81a83luco", "created": 1791160000033, "effect": "Every 5th attack applies 2 Burn to every enemy.", "name": "Inferno", "need": ["ember", "ember", "ember"], "notes": "Claude draft", "status": "idea", "updated": 1791160000033}, "r_cl1a109749e24": {"classId": "c_muua27gbu9q4", "created": 1791160000036, "effect": "When an enemy has 3+ Burn and 3+ Chill, both are consumed to deal 10 damage.", "name": "Thermal Shock", "need": ["ember", "frost"], "notes": "Claude draft", "status": "idea", "updated": 1791160000036}, "r_cl1a109749e0f": {"classId": "c_muu8t3slx20j", "created": 1791160000015, "effect": "Heals every 2 seconds instead of 3.", "name": "Quick Hands", "need": ["vital", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000015}, "r_cl1a109749e0a": {"classId": "c_muu89hhv5yf5", "created": 1791160000010, "effect": "After a kill, gains 30% dodge for 3 seconds.", "name": "Getaway", "need": ["swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000010}, "r_cl1a109749e3c": {"classId": "c_muu8a0kltcn4", "created": 1791160000060, "effect": "The first market reroll each visit costs 1 less.", "name": "Bulk Discount", "need": ["gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000060}, "r_cl1a109749e01": {"classId": "c_muu80wgi8uoq", "created": 1791160000001, "effect": "Attacks against Burning enemies deal +1 damage per Burn stack (up to +5).", "name": "Fan the Flames", "need": ["ember", "ember"], "notes": "Claude draft", "status": "idea", "updated": 1791160000001}, "r_cl1a109749ebe": {"classId": "c_muucnsji9spe", "created": 1791160000190, "effect": "Bombs can crit.", "name": "Shrapnel", "need": ["venom", "ember", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000190}, "r_cl1a109749eca": {"classId": "c_muu8iedpyjas", "created": 1791160000202, "effect": "Executes enemies below 20% HP instead of 15%.", "name": "Shadow Strike", "need": ["venom", "edge", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000202}, "r_cl1a109749e2a": {"classId": "c_muu8trhnchpq", "created": 1791160000042, "effect": "Below half HP, heals 2 on each hit.", "name": "Battle Trance", "need": ["ember", "vital", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000042}, "r_cl1a109749e52": {"classId": "c_muu91gvq8418", "created": 1791160000082, "effect": "Every 4 seconds, heals every ally 2.", "name": "Soothing Song", "need": ["vital", "swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000082}, "r_cl1a109749e6f": {"classId": "c_muu81homh3tq", "created": 1791160000111, "effect": "Its hit-all attacks deal 75% damage instead of 60%.", "name": "Heat Wave", "need": ["ember", "ember", "ember"], "notes": "Claude draft", "status": "idea", "updated": 1791160000111}, "r_cl1a109749e96": {"classId": "c_muu8cz7uo8uh", "created": 1791160000150, "effect": "The market offers 1 extra hero.", "name": "Recruiter", "need": ["swift", "gilt", "gilt", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000150}, "r_cl1a109749e66": {"classId": "c_muu93w65k55t", "created": 1791160000102, "effect": "Enemies with 5+ Poison attack 15% slower.", "name": "Creeping Sickness", "need": ["venom", "venom", "frost"], "notes": "Claude draft", "status": "idea", "updated": 1791160000102}, "r_cl1a109749e82": {"classId": "c_muu8emlv6f5o", "created": 1791160000130, "effect": "Can revive twice per fight.", "name": "Eternal Flame", "need": ["ember", "ward", "vital", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000130}, "r_cl1a109749e9a": {"classId": "c_muu9qxrkyxif", "created": 1791160000154, "effect": "Once per fight, below a quarter HP, gains 50% dodge for 4 seconds.", "name": "Bat Form", "need": ["vital", "vital", "vital", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000154}, "r_cl1a109749e58": {"classId": "c_muubfqfprgsy", "created": 1791160000088, "effect": "Every 4th attack applies double Poison.", "name": "Concentrate", "need": ["venom", "venom", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000088}, "r_cl1a109749e37": {"classId": "c_muuaifyzo8vc", "created": 1791160000055, "effect": "+5% attack speed for each Chilled enemy (up to +25%).", "name": "Glacial Rush", "need": ["frost", "edge", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000055}, "r_cl1a109749e99": {"classId": "c_muu9qxrkyxif", "created": 1791160000153, "effect": "Heals 1 extra per Poison stack on its target (up to 5).", "name": "Vampiric Bite", "need": ["venom", "vital", "vital", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000153}, "r_cl1a109749e44": {"classId": "c_muubf8nae0xm", "created": 1791160000068, "effect": "Heals 3 after each dodge.", "name": "Inner Calm", "need": ["vital", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000068}, "r_cl1a109749e0c": {"classId": "c_muu8t3slx20j", "created": 1791160000012, "effect": "Heals 50% more on allies below a quarter HP.", "name": "Triage", "need": ["vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000012}, "r_cl1a109749e4f": {"classId": "c_muu8kqk3v3ck", "created": 1791160000079, "effect": "When he wins a duel, heals 30% of his max HP and challenges the next enemy.", "name": "Victor's Rest", "need": ["edge", "edge", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000079}, "r_cl1a109749e20": {"classId": "c_muu81a83luco", "created": 1791160000032, "effect": "When a Burning enemy dies, half its Burn spreads to a random enemy.", "name": "Wildfire", "need": ["ember", "ember"], "notes": "Claude draft", "status": "idea", "updated": 1791160000032}, "r_cl1a109749eaa": {"classId": "c_muub6hrov7i3", "created": 1791160000170, "effect": "The slowed enemy also deals 20% less damage.", "name": "Sweet Talk", "need": ["swift", "swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000170}, "r_cl1a109749e80": {"classId": "c_muu8emlv6f5o", "created": 1791160000128, "effect": "Heals 1 whenever Burn damages an enemy.", "name": "Cinder Wings", "need": ["ember", "vital", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000128}, "r_cl1a109749e7f": {"classId": "c_muu8emlv6f5o", "created": 1791160000127, "effect": "After reviving, gains +50% attack speed.", "name": "Rising Flame", "need": ["ember", "ward", "vital"], "notes": "Claude draft", "status": "idea", "updated": 1791160000127}, "r_cl1a109749edf": {"classId": "c_muub3d9lyt44", "created": 1791160000223, "effect": "+1 gold after each won fight where no ally died.", "name": "Fanfare", "need": ["vital", "swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000223}, "r_cl1a109749e03": {"classId": "c_muu80wgi8uoq", "created": 1791160000003, "effect": "Crits double the target's Burn.", "name": "Flashpoint", "need": ["ember", "edge"], "notes": "Claude draft", "status": "idea", "updated": 1791160000003}, "r_cl1a109749ecb": {"classId": "c_muu8iedpyjas", "created": 1791160000203, "effect": "Each execute pays +1 gold.", "name": "Contract", "need": ["edge", "swift", "gilt"], "notes": "Claude draft", "status": "idea", "updated": 1791160000203}, "r_cl1a109749ec9": {"classId": "c_muuck8ca1kex", "created": 1791160000201, "effect": "Front-row enemies can't target her.", "name": "Stalk", "need": ["venom", "frost", "ward", "swift"], "notes": "Claude draft", "status": "idea", "updated": 1791160000201}}}; // a saved snapshot shipped inside standalone copies of this page
+const ESS = Object.keys(GAME.essences);           // canonical order
+const L = id => GAME.essences[id].letter;
+const codeOf = need => need.map(L).join('');
+const sortNeed = need => need.slice().sort((a,b)=>ESS.indexOf(a)-ESS.indexOf(b));
+const keyOf = need => codeOf(sortNeed(need));
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const gemHtml = (id,lg) => `<span class="gem${lg?' lg':''}" style="--c:var(--${id})" title="${esc(GAME.essences[id].name)}"></span>`;
+const gemsHtml = need => `<span class="gems">${sortNeed(need).map(g=>gemHtml(g)).join('')}</span>`;
+const $ = id => document.getElementById(id);
+
+// ---------- state ----------
+const S = { classes:{}, recipes:{}, sel:null, db:null, live:false,
+  comp:{ tray:[], name:'', effect:'', notes:'', status:'idea', editing:null } };
+let renderedSel = undefined;
+
+// ---------- persistence ----------
+const queues = {};
+function enqueue(path, fn){ const p=(queues[path]||Promise.resolve()).then(fn).catch(e=>{ setSave('Couldn’t save: '+(e&&e.message||e.code||e),true); throw e; }); queues[path]=p.catch(()=>{}); return p; }
+const timers = {};
+function setSave(t,bad){ const el=$('saveState'); el.textContent=t; el.classList.toggle('bad',!!bad); }
+function saveOffline(){ if(S.db||!S.offline) return; try{ localStorage.setItem('grb_offline',JSON.stringify(makeSnapshot())); setSave('Saved in this browser'); }catch(e){ setSave('Couldn’t save in this browser',true); } }
+function writeDoc(col,id,data){
+  if(col==='classes') S.classes[id]=data; else S.recipes[id]=data;
+  if(!S.db){ saveOffline(); return Promise.resolve(); }
+  setSave('Saving…');
+  return enqueue(col+'/'+id, ()=>S.db.collection(col).doc(id).set(data)).then(()=>setSave('Saved'));
+}
+function patchDoc(col,id,patch,debounce){
+  const store = col==='classes'?S.classes:S.recipes;
+  store[id] = Object.assign({}, store[id], patch, {updated:Date.now()});
+  if(!S.db){ saveOffline(); return; }
+  const k=col+'/'+id; clearTimeout(timers[k]);
+  const go=()=>{ delete timers[k]; setSave('Saving…'); enqueue(k,()=>S.db.collection(col).doc(id).set(store[id])).then(()=>setSave('Saved')); };
+  if(debounce){ setSave('Editing…'); timers[k]=setTimeout(go,700); } else go();
+}
+function delDoc(col,id){
+  if(col==='classes') delete S.classes[id]; else delete S.recipes[id];
+  if(!S.db){ saveOffline(); return; }
+  enqueue(col+'/'+id, ()=>S.db.collection(col).doc(id).delete()).then(()=>setSave('Saved'));
+}
+const newId = p => p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+// ---------- derived ----------
+// c.ess = the essences a hero needs to be this class (absolute, same on every route).
+// c.from = the classes it can be upgraded from. Empty = tier-1 base class.
+// Older saves used {parent} or {routes:[{from,ess}]}; normalize() converts both.
+function normalize(c){
+  if(!c) return c;
+  if(Array.isArray(c.from)) return c;
+  const n={...c}; let ess=Array.isArray(c.ess)?c.ess:[];
+  if(Array.isArray(c.routes)){ n.from=c.routes.map(r=>r.from); if(!ess.length&&c.routes[0]&&Array.isArray(c.routes[0].ess)) ess=c.routes[0].ess; }
+  else n.from=c.parent?[c.parent]:[];
+  n.ess=ess; delete n.parent; delete n.routes; return n;
+}
+const byOrder = (a,b)=>(a.order||0)-(b.order||0);
+const classList = () => Object.entries(S.classes).map(([id,c])=>({id,...c})).sort(byOrder);
+const routesOf = id => ((S.classes[id]&&S.classes[id].from)||[]).filter(f=>S.classes[f]).map(f=>({from:f}));
+// a route is consistent when the source's essences are all part of this class's essences
+// a route is fine when every kind of essence the source uses also appears in the target (counts don't matter:
+// FF → VEFH is fine; FW → VEFH is not, because the target has no Ward)
+const routeOk = (from,id) => { const t=new Set(essOf(S.classes[id])); return essOf(S.classes[from]).every(e=>t.has(e)); };
+const extraEss = (from,id) => { const c={}; essOf(S.classes[from]).forEach(x=>c[x]=(c[x]||0)+1); return essOf(S.classes[id]).filter(x=>!(c[x]-->0)); };
+const isBase = id => routesOf(id).length===0;
+const essOf = c => Array.isArray(c&&c.ess)?c.ess:[];
+const childrenOf = id => classList().filter(c=>routesOf(c.id).some(r=>r.from===id));
+function ancestorsAll(id){ const seen=new Set(); const st=[id]; while(st.length){ const x=st.pop(); routesOf(x).forEach(r=>{ if(r.from!==id&&!seen.has(r.from)){ seen.add(r.from); st.push(r.from); } }); } return [...seen]; }
+function descendantsAll(id){ const seen=new Set(); const st=[id]; while(st.length){ const x=st.pop(); childrenOf(x).forEach(c=>{ if(c.id!==id&&!seen.has(c.id)){ seen.add(c.id); st.push(c.id); } }); } return [...seen]; }
+function tiers(){ // tier = longest route chain from a base class, +1
+  const memo={}, busy={};
+  const t=id=>{ if(memo[id]) return memo[id]; if(busy[id]) return 1; busy[id]=1; const rs=routesOf(id); memo[id]=rs.length?1+Math.max(...rs.map(r=>t(r.from))):1; busy[id]=0; return memo[id]; };
+  const out={}; Object.keys(S.classes).forEach(id=>out[id]=t(id)); return out;
+}
+const byTier = () => { const T=tiers(); return classList().map(c=>({...c,tier:T[c.id]})).sort((a,b)=>a.tier-b.tier||byOrder(a,b)); };
+const recipesOf = cid => Object.entries(S.recipes).filter(([,r])=>r.classId===cid).map(([id,r])=>({id,...r}))
+  .sort((a,b)=>a.need.length-b.need.length || keyOf(a.need).localeCompare(keyOf(b.need)) || (a.name||'').localeCompare(b.name||''));
+function allSkills(){ // every recipe, yours and the current game's, for matching
+  const out=[];
+  for(const [id,r] of Object.entries(S.recipes)){ const c=S.classes[r.classId]; out.push({src:'mine',id,cid:r.classId,who:c?c.name:'?',need:r.need,name:r.name,desc:r.effect,status:r.status}); }
+  for(const [hid,h] of Object.entries(GAME.heroes)) h.skills.forEach(s=>out.push({src:'game',who:h.name,hid,need:s.need,name:s.name,desc:s.desc}));
+  return out;
+}
+function isSubset(a,b){ const c={}; b.forEach(x=>c[x]=(c[x]||0)+1); return a.every(x=>c[x]-->0); }
+const nameOf = id => (S.classes[id]&&S.classes[id].name)||'Untitled';
+
+// ---------- render: rail ----------
+function renderNav(){
+  const nav=$('classNav'); const list=byTier();
+  if(!list.length){ nav.innerHTML='<p class="empty">No classes yet. Add a base class below, or start one from a current hero.</p>'; }
+  else { let h='', cur=0;
+    list.forEach(c=>{ if(c.tier!==cur){ cur=c.tier; h+=`<div class="tierhead">Tier ${cur}</div>`; }
+      const rs=routesOf(c.id);
+      const side = essOf(c).length?`<span class="navess">${gemsHtml(essOf(c))}</span>`:'';
+      h+=`<div class="navitem${S.sel&&S.sel.t==='class'&&S.sel.id===c.id?' on':''}" tabindex="0" data-cls="${c.id}"><span class="nm">${esc(c.name||'Untitled')}</span>${c.rename?'<span class="rnbadge" title="Needs a new name">rename</span>':''}${side}<span class="ct">${recipesOf(c.id).length}</span></div>`; });
+    nav.innerHTML=h; }
+  const nr=classList().filter(c=>c.rename).length; $('renameCount').textContent=nr?`· ${nr} to rename`:'';
+  $('heroNav').innerHTML = Object.entries(GAME.heroes).map(([hid,h])=>
+    `<div class="navitem hero${S.sel&&S.sel.t==='hero'&&S.sel.id===hid?' on':''}" tabindex="0" data-hero="${hid}"><span class="nm">${esc(h.name)}</span><span class="tagdot">${esc(h.tags.join(' · '))}</span></div>`).join('');
+}
+
+// ---------- class map (graph) ----------
+// ---------- class map layout ----------
+// Layered graph layout (Sugiyama-style).
+// nodes: [{id, tier, order}], edges: [{from, to}] with tier(from) < tier(to).
+// Returns {layers:[[key…]], y:{key:center}, chains:{edgeKey:[key…]}, height}.
+// Long edges get one dummy per skipped tier so they bend around boxes instead of through them.
+function layoutGraph(nodes, edges, opt){
+  const H=opt.H, RG=opt.RG, DH=opt.DH||10;
+  const tierOf={}; nodes.forEach(n=>tierOf[n.id]=n.tier);
+  const maxT=Math.max(1,...nodes.map(n=>n.tier));
+  const layers=[]; for(let t=0;t<=maxT;t++) layers.push([]);
+  const isDummy={}, up={}, down={}, chains={};
+  const link=(a,b)=>{ (down[a]=down[a]||[]).push(b); (up[b]=up[b]||[]).push(a); };
+  nodes.slice().sort((a,b)=>a.order-b.order).forEach(n=>layers[n.tier].push(n.id));
+  edges.forEach((e,k)=>{ const t1=tierOf[e.from], t2=tierOf[e.to]; if(t1==null||t2==null||t2<=t1) return;
+    let prev=e.from; const chain=[e.from];
+    for(let t=t1+1;t<t2;t++){ const d=`~${k}_${t}`; isDummy[d]=1; layers[t].push(d); link(prev,d); chain.push(d); prev=d; }
+    link(prev,e.to); chain.push(e.to); chains[e.from+'>'+e.to]=chain; });
+  const idx={}; const reindex=()=>layers.forEach(L=>L.forEach((v,i)=>idx[v]=i));
+  // crossings between consecutive layers
+  function crossings(){ let c=0;
+    for(let t=1;t<layers.length;t++){ const es=[]; layers[t-1].forEach(a=>(down[a]||[]).forEach(b=>es.push([idx[a],idx[b]])));
+      es.sort((p,q)=>p[0]-q[0]||p[1]-q[1]);
+      for(let i=0;i<es.length;i++) for(let j=i+1;j<es.length;j++) if(es[i][0]<es[j][0]&&es[i][1]>es[j][1]) c++; }
+    return c; }
+  const bary=(v,nb)=>{ const ns=nb[v]||[]; if(!ns.length) return null; return ns.reduce((s,u)=>s+idx[u],0)/ns.length; };
+  function sweep(t,nb){ const L=layers[t]; const b={}; L.forEach(v=>b[v]=bary(v,nb));
+    // nodes with no neighbours on that side keep their slot
+    const fixed=L.map(v=>b[v]==null), movable=L.filter(v=>b[v]!=null).sort((p,q)=>b[p]-b[q]||idx[p]-idx[q]);
+    let m=0; layers[t]=L.map((v,i)=>fixed[i]?v:movable[m++]); }
+  function transpose(){ let improved=true, guard=0;
+    while(improved&&guard++<8){ improved=false;
+      for(let t=0;t<layers.length;t++){ const L=layers[t];
+        for(let i=0;i<L.length-1;i++){ const before=crossings(); [L[i],L[i+1]]=[L[i+1],L[i]]; reindex();
+          if(crossings()<before) improved=true; else { [L[i],L[i+1]]=[L[i+1],L[i]]; reindex(); } } } } }
+  reindex(); let best=layers.map(L=>L.slice()), bestC=crossings();
+  for(let it=0;it<16;it++){
+    if(it%2===0){ for(let t=1;t<layers.length;t++){ sweep(t,up); reindex(); } }
+    else { for(let t=layers.length-2;t>=0;t--){ sweep(t,down); reindex(); } }
+    const c=crossings(); if(c<bestC){ bestC=c; best=layers.map(L=>L.slice()); }
+  }
+  for(let t=0;t<layers.length;t++) layers[t]=best[t]; reindex();
+  if(nodes.length<=120) transpose();
+  // vertical positions: pull each item toward its neighbours, keep order and spacing
+  const hOf=v=>isDummy[v]?DH:H, gapOf=(a,b)=>(hOf(a)+hOf(b))/2+(isDummy[a]||isDummy[b]?6:RG);
+  const y={}; layers.forEach(L=>{ let cur=0; L.forEach((v,i)=>{ if(i) cur+=gapOf(L[i-1],v); y[v]=cur; }); });
+  function place(L,nb){ if(!L.length) return;
+    const want=L.map(v=>{ const ns=nb[v]||[]; return ns.length?ns.reduce((s,u)=>s+y[u],0)/ns.length:y[v]; });
+    // forward pass then backward pass keep the order with minimum gaps (simple 1D compaction)
+    const pos=want.slice();
+    for(let i=1;i<L.length;i++) pos[i]=Math.max(pos[i],pos[i-1]+gapOf(L[i-1],L[i]));
+    for(let i=L.length-2;i>=0;i--) pos[i]=Math.min(pos[i],pos[i+1]-gapOf(L[i],L[i+1]));
+    // backward pass can push above the forward minimum; balance by shifting the block toward the wanted mean
+    const shift=(want.reduce((a,b)=>a+b,0)-pos.reduce((a,b)=>a+b,0))/L.length;
+    L.forEach((v,i)=>y[v]=pos[i]+shift); }
+  const both={}; Object.keys(idx).forEach(v=>both[v]=[...(up[v]||[]),...(down[v]||[])]);
+  for(let it=0;it<6;it++){ for(let t=1;t<layers.length;t++) place(layers[t],up); for(let t=layers.length-2;t>=0;t--) place(layers[t],down); }
+  for(let t=0;t<layers.length;t++) place(layers[t],both);
+  let minY=Infinity,maxY=-Infinity; Object.keys(y).forEach(v=>{ minY=Math.min(minY,y[v]-hOf(v)/2); maxY=Math.max(maxY,y[v]+hOf(v)/2); });
+  Object.keys(y).forEach(v=>y[v]-=minY);
+  return {layers,y,chains,isDummy,height:maxY-minY,crossings:crossings()};
+}
+
+let mapCache={sig:null,ly:null};
+function mapLayout(list,H,RG){
+  const nodes=list.map(c=>({id:c.id,tier:c.tier,order:c.order||0}));
+  const edges=[]; list.forEach(c=>routesOf(c.id).forEach(r=>edges.push({from:r.from,to:c.id})));
+  const sig=JSON.stringify([nodes.map(n=>n.id+':'+n.tier),edges.map(e=>e.from+'>'+e.to)]);
+  if(mapCache.sig===sig) return mapCache.ly;
+  // a few deterministic restarts; keep the one with the fewest crossing arrows
+  let seed=11; const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  const ess=id=>keyOf(essOf(S.classes[id]));
+  const starts=[n=>n.order, n=>ess(n.id), ()=>rnd(), ()=>rnd(), ()=>rnd(), ()=>rnd(), ()=>rnd(), ()=>rnd()];
+  let best=null;
+  for(const f of starts){ const ns=nodes.map(n=>({...n})); const k=new Map(ns.map(n=>[n,f(n)]));
+    ns.slice().sort((a,b)=>{ const x=k.get(a),y=k.get(b); return x<y?-1:x>y?1:0; }).forEach((n,i)=>n.order=i);
+    const ly=layoutGraph(ns,edges,{H,RG}); if(!best||ly.crossings<best.crossings) best=ly; }
+  mapCache={sig,ly:best}; return best;
+}
+function renderPassChain(id){
+  const box=$('passChain'); if(!box) return;
+  const T=tiers(); const anc=ancestorsAll(id);
+  if(!anc.length){ box.innerHTML=''; return; }
+  const byT={}; anc.forEach(a=>(byT[T[a]]=byT[T[a]]||[]).push(a));
+  const rows=Object.keys(byT).map(Number).sort((a,b)=>a-b).map(t=>{
+    const list=byT[t].sort((a,b)=>byOrder(S.classes[a],S.classes[b]));
+    const items=list.map(a=>`<div class="pc"><button type="button" class="rgo" data-go="${a}">${gemsHtml(essOf(S.classes[a]))}${esc(nameOf(a))}</button><span>${S.classes[a].passive?esc(S.classes[a].passive):'<em class="status">no passive yet</em>'}</span></div>`).join('');
+    return `<div class="pct"><span class="pctl">Tier ${t}${list.length>1?' · one of':''}</span>${items}</div>`; }).join('');
+  box.innerHTML=`<span class="status">Kept from earlier tiers (depends on the route the hero took):</span>${rows}`;
+  box.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>select('class',b.dataset.go));
+}
+function renderGraph(){
+  const box=$('graph'); if(!box) return;
+  const list=byTier();
+  if(!list.length){ box.innerHTML='<p class="empty">Your classes will appear here as a map, with arrows for each upgrade route.</p>'; return; }
+  const W=164,H=42,CG=72,RG=10,P=12;
+  const maxT=Math.max(...list.map(c=>c.tier));
+  const LY=mapLayout(list,H,RG);
+  const colX=t=>P+(t-1)*(W+CG);
+  const pos={}; list.forEach(c=>pos[c.id]={x:colX(c.tier),y:P+LY.y[c.id]-H/2});
+  const vw=P*2+maxT*W+(maxT-1)*CG, vh=Math.ceil(P*2+LY.height);
+  const sel=S.sel&&S.sel.t==='class'?S.sel.id:null;
+  const up=new Set(sel?[sel,...ancestorsAll(sel)]:[]), down=new Set(sel?[sel,...descendantsAll(sel)]:[]);
+  const lit=new Set([...up,...down]);
+  const svgGem=(e,cx,cy)=>`<rect x="${cx-4.5}" y="${cy-4.5}" width="9" height="9" rx="1" transform="rotate(45 ${cx} ${cy})" style="fill:var(--${e});stroke:var(--gem-outline);stroke-width:1.5"></rect>`;
+  const seg=(a,b)=>{ if(Math.abs(a.y-b.y)<0.5) return ` L${b.x} ${b.y}`; const dx=Math.max(24,(b.x-a.x)/2); return ` C${a.x+dx} ${a.y},${b.x-dx} ${b.y},${b.x} ${b.y}`; };
+  let edgesOn='', edgesOff='', labels='';
+  list.forEach(c=>{ const to=pos[c.id];
+    // incoming routes ordered by where they arrive from, so they fan in without crossing
+    const ins=routesOf(c.id).map(r=>{ const ch=LY.chains[r.from+'>'+c.id]||[r.from,c.id]; const prev=ch[ch.length-2]; return {r,ch,py:LY.y[prev]}; }).sort((a,b)=>a.py-b.py);
+    ins.forEach(({r,ch},k)=>{ if(!pos[r.from]) return;
+      const off=ins.length>1?(k-(ins.length-1)/2)*Math.min(9,(H-14)/(ins.length-1)):0;
+      const pts=[{x:pos[r.from].x+W,y:P+LY.y[r.from]}];
+      ch.slice(1,-1).forEach(d=>{ const t=+d.split('_').pop(); const yy=P+LY.y[d]; pts.push({x:colX(t),y:yy},{x:colX(t)+W,y:yy}); });
+      pts.push({x:to.x,y:P+LY.y[c.id]+off});
+      let dPath=`M${pts[0].x} ${pts[0].y}`; for(let i=1;i<pts.length;i++) dPath+=seg(pts[i-1],pts[i]);
+      const e=pts[pts.length-1];
+      const on=!!sel&&((up.has(c.id)&&up.has(r.from))||(down.has(c.id)&&down.has(r.from)));
+      const bad=!routeOk(r.from,c.id)?' bad':'';
+      const svg=`<path d="${dPath}" class="edge${on?' on':''}${bad}"></path><path d="M${e.x-6} ${e.y-4} L${e.x} ${e.y} L${e.x-6} ${e.y+4}" class="edge head${on?' on':''}${bad}"></path>`;
+      if(on) edgesOn+=svg; else edgesOff+=svg;
+    }); });
+  const edges=edgesOff+edgesOn; // highlighted routes drawn last so they sit on top
+  const nodes=list.map(c=>{ const p=pos[c.id]; const n=(c.name||'Untitled'); const nm=n.length>19?n.slice(0,18)+'…':n;
+    const rc=recipesOf(c.id).length; const ae=sortNeed(essOf(c)).reverse();
+    return `<g class="node${c.id===sel?' sel':''}${sel&&!lit.has(c.id)?' dim':''}${c.rename?' rn':''}" data-cls="${c.id}" tabindex="0" role="button" aria-label="${esc(n)}${c.rename?' (needs rename)':''}">
+      <rect x="${p.x}" y="${p.y}" width="${W}" height="${H}" rx="8"></rect>
+      <text x="${p.x+10}" y="${p.y+17}" class="nn">${esc(nm)}</text>
+      <text x="${p.x+10}" y="${p.y+32}" class="ns">${c.rename?'<tspan class="nsr">✎ rename</tspan>':`${rc} recipe${rc===1?'':'s'}`}</text>
+      ${ae.map((e,i)=>svgGem(e,p.x+W-13-i*14,p.y+29)).join('')}
+    </g>`; }).join('');
+  box.innerHTML=`<svg viewBox="0 0 ${vw} ${vh}" width="100%" style="max-width:${Math.round(vw*1.3)}px;height:auto" role="img" aria-label="Class upgrade map">${edges}${labels}${nodes}</svg>`;
+}
+
+// ---------- render: main ----------
+function renderMain(force){
+  const key = S.sel ? S.sel.t+':'+S.sel.id : 'none';
+  if(force || key!==renderedSel){ renderedSel=key; buildMain(); } else refreshMain();
+  renderGraph();
+}
+function buildMain(){
+  const m=$('main');
+  if(!S.sel){ m.innerHTML=`<div class="box"><h2>Pick a class</h2><p class="empty">Choose a class on the map or the left, add a new base class, or open one of the current game's heroes and turn it into a starting point.</p></div>`; return; }
+  if(S.sel.t==='hero') return buildHero();
+  const c=S.classes[S.sel.id]; if(!c){ S.sel=null; return buildMain(); }
+  m.innerHTML=`
+  <div class="box">
+    <div class="sheethead">
+      <div style="min-width:0">
+        <div id="kicker" class="kicker"></div>
+        <div class="namerow"><input id="clsName" class="namein" aria-label="Class name" value="${esc(c.name)}"><button id="rnToggle" type="button" class="rntoggle" aria-pressed="false"><span class="box" aria-hidden="true"></span>Needs rename</button></div>
+        <label id="rnIdeasWrap" class="f" hidden>Name ideas<input id="rnIdeas" placeholder="Other names to consider"></label>
+      </div>
+      <div class="rowbtns">
+        <button id="addSpec" type="button">+ Upgrade</button>
+        <button id="delCls" class="danger" type="button">Delete</button>
+      </div>
+    </div>
+    <div class="essedit">
+      <label class="f" for="clsPassive">Passive</label>
+      <textarea id="clsPassive" rows="2" placeholder="What this class adds. Heroes keep the passives of every earlier class they passed through.">${esc(c.passive||'')}</textarea>
+      <div id="passChain" class="passchain"></div>
+    </div>
+    <div class="essedit">
+      <h3 id="essTitle">Essences needed</h3>
+      <div class="esspick">${ESS.map(e=>`<button type="button" class="pick mini" data-cess="${e}" title="Add ${esc(GAME.essences[e].name)}">${gemHtml(e)}<small>${L(e)}</small></button>`).join('')}</div>
+      <div id="clsEss" class="tray small"></div>
+    </div>
+    <div class="essedit">
+      <h3>Can be reached from</h3>
+      <div id="routes" class="foot"></div>
+      <div id="routeAddWrap" class="dd"><button id="routeBtn" type="button" aria-haspopup="listbox" aria-expanded="false">Add a route from… <span aria-hidden="true">▾</span></button><div id="routeMenu" class="ddmenu" role="listbox" aria-label="Classes this one can be reached from" hidden></div></div>
+    </div>
+    <div class="essedit">
+      <h3>Can upgrade to</h3>
+      <div id="leads" class="foot"></div>
+      <div id="leadAddWrap" class="dd"><button id="leadBtn" type="button" aria-haspopup="listbox" aria-expanded="false">Add an upgrade to… <span aria-hidden="true">▾</span></button><div id="leadMenu" class="ddmenu" role="listbox" aria-label="Classes this one can upgrade to" hidden></div></div>
+    </div>
+    <label class="f">Class notes<textarea id="clsNotes" rows="3" placeholder="Role, row, base ability, what this upgrade changes…">${esc(c.notes)}</textarea></label>
+    <div><h3 style="margin-bottom:6px">Essences used by skills <span id="footNote" class="status" style="text-transform:none;letter-spacing:0;font-weight:400"></span></h3><div id="foot" class="foot"></div></div>
+  </div>
+  <div class="box">
+    <h2 id="compTitle">New recipe</h2>
+    <div class="composer">
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+        <div class="picker">${ESS.map(e=>`<button type="button" class="pick" data-add="${e}">${gemHtml(e)}${esc(GAME.essences[e].name)}<small>${L(e)}</small></button>`).join('')}</div>
+        <div id="tray" class="tray"></div>
+        <div class="two">
+          <label class="f">Skill name<input id="cName" placeholder="e.g. Frozen Bulwark"></label>
+          <div class="f" role="group" aria-label="Status">Status<div id="cStatus" class="seg"><button type="button" data-st="idea">Idea</button><button type="button" data-st="keep">Keep</button><button type="button" data-st="cut">Cut</button></div></div>
+        </div>
+        <label class="f">Effect<textarea id="cEffect" rows="2" placeholder="What it does in battle"></textarea></label>
+        <label class="f">Notes<textarea id="cNotes" rows="2" placeholder="Why, balance worries, synergies…"></textarea></label>
+        <div class="rowbtns">
+          <button id="cSave" class="primary" type="button">Add recipe</button>
+          <button id="cClear" type="button">Clear</button>
+          <button id="cDel" class="danger" type="button" hidden>Delete recipe</button>
+        </div>
+      </div>
+      <div id="matches" class="match"></div>
+    </div>
+  </div>
+  <div id="ledger" class="ledger"></div>`;
+  wireClass(c);
+  syncComposerInputs(); refreshMain();
+}
+function refreshMain(){
+  if(!S.sel){ renderGraph(); return; }
+  if(S.sel.t==='hero') return;
+  const id=S.sel.id; const c=S.classes[id]; if(!c){ S.sel=null; renderedSel=undefined; return renderMain(); }
+  renderGraph();
+  const nm=$('clsName'); if(nm && document.activeElement!==nm && nm.value!==c.name) nm.value=c.name||'';
+  const rt=$('rnToggle'); rt.setAttribute('aria-pressed',!!c.rename); rt.classList.toggle('on',!!c.rename); $('rnIdeasWrap').hidden=!c.rename;
+  const ri=$('rnIdeas'); if(document.activeElement!==ri && ri.value!==(c.nameIdeas||'')) ri.value=c.nameIdeas||'';
+  const nt=$('clsNotes'); if(nt && document.activeElement!==nt && nt.value!==(c.notes||'')) nt.value=c.notes||'';
+  const pv=$('clsPassive'); if(pv && document.activeElement!==pv && pv.value!==(c.passive||'')) pv.value=c.passive||'';
+  renderPassChain(id);
+  const T=tiers(); const rs=routesOf(id); const base=!rs.length;
+  $('kicker').textContent = `Tier ${T[id]} · ${base?'base class':rs.length>1?`upgrade · ${rs.length} routes`:'upgrade of '+nameOf(rs[0].from)}`;
+  // essences (absolute)
+  const ce=essOf(c); const ct=$('clsEss');
+  $('essTitle').textContent = base?'Essences needed (base class)':'Essences needed for this class';
+  ct.innerHTML = (ce.length?ce.map((g,i)=>`<button type="button" class="slot filled" data-crm="${i}" aria-label="Remove ${esc(GAME.essences[g].name)}">${gemHtml(g,true)}</button>`).join(''):'')
+    + `<span class="hint">${ce.length?`<span class="code">${keyOf(ce)}</span> · tap a gem to remove`:'Pick up to 4 essences. They’re the same whichever route a hero takes.'}</span>`;
+  ct.querySelectorAll('[data-crm]').forEach(b=>b.onclick=()=>{ const n=ce.slice(); n.splice(+b.dataset.crm,1); patchDoc('classes',id,{ess:n}); renderNav(); refreshMain(); });
+  document.querySelectorAll('[data-cess]').forEach(b=>b.disabled=ce.length>=4);
+  // routes in
+  const from=(c.from||[]);
+  $('routes').innerHTML = rs.length ? rs.map(r=>{ const ok=routeOk(r.from,id), ex=extraEss(r.from,id);
+    return `<span class="rchip${ok?'':' bad'}"><button type="button" class="rgo" data-go="${r.from}">${gemsHtml(essOf(S.classes[r.from]))}${esc(nameOf(r.from))}</button><span class="rnote">${ok?(ex.length?`then +${gemsHtml(ex)}`:'no new essences'):'uses an essence this class doesn’t have at all'}</span><button type="button" class="ghost danger rx" data-rdel="${r.from}" aria-label="Remove route from ${esc(nameOf(r.from))}">×</button></span>`; }).join('')
+    : `<p class="empty" style="margin:0">Nothing, so this is a base class.</p>`;
+  const banned=new Set([id,...descendantsAll(id),...from]);
+  const avail=byTier().filter(x=>!banned.has(x.id));
+  fillDD('route',{items:avail,want:T[id]-1,ok:o=>routeOk(o.id,id),
+    label:(w,all)=>w>=1&&!all?`Add a route from tier ${w}… `:'Add a route from… ',
+    empty:w=>w>=1?`No other tier ${w} classes.`:'This is a tier 1 class, so there’s no tier below.',
+    pick:x=>patchDoc('classes',id,{from:[...from,x]})});
+  $('routes').querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>select('class',b.dataset.go));
+  $('routes').querySelectorAll('[data-rdel]').forEach(b=>b.onclick=()=>{ patchDoc('classes',id,{from:from.filter(f=>f!==b.dataset.rdel)}); renderNav(); refreshMain(); });
+  // can upgrade to
+  const kids=childrenOf(id);
+  $('leads').innerHTML = kids.length ? kids.map(k=>{ const ok=routeOk(id,k.id), ex=extraEss(id,k.id);
+    return `<span class="rchip${ok?'':' bad'}"><button type="button" class="rgo" data-go="${k.id}">${gemsHtml(essOf(k))}${esc(k.name||'Untitled')}</button><span class="rnote">${ok?(ex.length?`adds +${gemsHtml(ex)}`:'no new essences'):'uses an essence this class doesn’t have at all'}</span><button type="button" class="ghost danger rx" data-ldel="${k.id}" aria-label="Remove upgrade to ${esc(k.name||'Untitled')}">×</button></span>`; }).join('')
+    : `<p class="empty" style="margin:0">Nothing yet. Add an upgrade below, or use “+ Upgrade” to make a new class.</p>`;
+  $('leads').querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>select('class',b.dataset.go));
+  $('leads').querySelectorAll('[data-ldel]').forEach(b=>b.onclick=()=>{ const k=b.dataset.ldel; patchDoc('classes',k,{from:(S.classes[k].from||[]).filter(f=>f!==id)}); renderNav(); refreshMain(); });
+  const bannedUp=new Set([id,...ancestorsAll(id),...kids.map(k=>k.id)]);
+  fillDD('lead',{items:byTier().filter(x=>!bannedUp.has(x.id)),want:T[id]+1,ok:o=>routeOk(id,o.id),
+    label:(w,all)=>!all?`Add an upgrade to tier ${w}… `:'Add an upgrade to… ',
+    empty:w=>`No other tier ${w} classes.`,
+    pick:x=>patchDoc('classes',x,{from:[...(S.classes[x].from||[]),id]})});
+  const anc=ancestorsAll(id).sort((a,b)=>T[a]-T[b]||byOrder(S.classes[a],S.classes[b]));
+  const own=recipesOf(id); const inh=anc.flatMap(a=>recipesOf(a).map(r=>({...r,from:nameOf(a)})));
+  $('footNote').textContent = anc.length?`(including ${anc.length} earlier class${anc.length>1?'es':''} on any route)`:'';
+  // footprint
+  const cnt={}; ESS.forEach(e=>cnt[e]=0);
+  [...own,...inh].filter(r=>r.status!=='cut').forEach(r=>new Set(r.need).forEach(e=>cnt[e]++));
+  $('foot').innerHTML=ESS.map(e=>`<span class="fchip${cnt[e]?'':' zero'}">${gemHtml(e)}${esc(GAME.essences[e].name)} <b>${cnt[e]}</b></span>`).join('');
+  // ledger
+  const groups=[1,2,3,4].map(n=>({n,own:own.filter(r=>r.need.length===n),inh:inh.filter(r=>r.need.length===n)}));
+  const card=(r,inherited)=>`<div class="card${inherited?' inh':''}${r.status==='cut'?' cut':''}${S.comp.editing===r.id?' editing':''}" ${inherited?'':`data-edit="${r.id}" tabindex="0"`}>
+      <div class="row1">${gemsHtml(r.need)}<span class="code">${keyOf(r.need)}</span><span class="cname">${esc(r.name||'Unnamed')}</span><span class="pill ${r.status||'idea'}">${esc(r.status||'idea')}</span><button type="button" class="cp" data-copy="${r.id}" aria-label="Copy ${esc(r.name||'recipe')}">Copy</button></div>
+      ${r.effect?`<div class="eff">${esc(r.effect)}</div>`:''}
+      ${r.notes?`<div class="note">${esc(r.notes)}</div>`:''}
+      ${inherited?`<div class="code" style="font-weight:500">from ${esc(r.from)}</div>`:''}
+    </div>`;
+  const total=own.length+inh.length;
+  $('ledger').innerHTML = (total?`<div class="ledgerbar"><h2>Recipes</h2><div class="rowbtns">${own.length?`<button type="button" data-copyall="own">Copy this class’s ${own.length}</button>`:''}${inh.length?`<button type="button" data-copyall="all">Copy all ${total} incl. inherited</button>`:''}</div></div>`:'') + (total ? groups.filter(g=>g.own.length||g.inh.length).map(g=>`
+    <div class="group"><h3>${g.n}-gem recipes <span>${g.own.length+g.inh.length}</span></h3>
+    <div class="cards">${g.inh.map(r=>card(r,true)).join('')}${g.own.map(r=>card(r,false)).join('')}</div></div>`).join('')
+    : `<div class="box"><p class="empty">No recipes yet. Pick 1–4 essences above, name the skill and add it. Recipes count essences, not sockets, so order doesn’t matter.</p></div>`);
+  $('ledger').querySelectorAll('[data-edit]').forEach(el=>{ const go=()=>editRecipe(el.dataset.edit); el.onclick=go; el.onkeydown=e=>{ if(e.key==='Enter'&&e.target===el) go(); }; });
+  $('ledger').querySelectorAll('[data-copy]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); const x=S.recipes[b.dataset.copy]; if(x) clipAdd([x],nameOf(x.classId)); });
+  $('ledger').querySelectorAll('[data-copyall]').forEach(b=>b.onclick=()=>clipAdd(b.dataset.copyall==='own'?own:[...inh,...own],nameOf(id)));
+  renderTray(); renderMatches();
+}
+function syncComposerInputs(){
+  const C=S.comp; if(!$('cName')) return;
+  $('cName').value=C.name; $('cEffect').value=C.effect; $('cNotes').value=C.notes; syncStatus();
+  $('compTitle').textContent=C.editing?'Edit recipe':'New recipe';
+  $('cSave').textContent=C.editing?'Save changes':'Add recipe';
+  $('cDel').hidden=!C.editing; $('cDel').classList.remove('armed'); $('cDel').textContent='Delete recipe';
+}
+function renderTray(){
+  const t=$('tray'); if(!t) return; const tr=S.comp.tray;
+  let h=''; for(let i=0;i<4;i++){ const g=tr[i]; h+= g?`<button type="button" class="slot filled" data-rm="${i}" aria-label="Remove ${esc(GAME.essences[g].name)}">${gemHtml(g,true)}</button>`:`<span class="slot" aria-hidden="true"></span>`; }
+  h+=`<span class="hint">${tr.length?`<span class="code">${keyOf(tr)}</span> · tap a gem to remove`:'Pick up to 4 essences'}</span>`;
+  t.innerHTML=h;
+  t.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ tr.splice(+b.dataset.rm,1); renderTray(); renderMatches(); });
+  document.querySelectorAll('[data-add]').forEach(b=>b.disabled=tr.length>=4);
+}
+function renderMatches(){
+  const box=$('matches'); if(!box) return; const tr=S.comp.tray;
+  if(!tr.length){ box.innerHTML=`<section><h3>Recipe check</h3><p class="empty">Pick essences to see what already uses this recipe, what’s one gem away, and which rare gems supply it.</p></section>`; return; }
+  const k=keyOf(tr); const all=allSkills().filter(s=>!(s.src==='mine'&&s.id===S.comp.editing));
+  const same=all.filter(s=>keyOf(s.need)===k);
+  const near=all.filter(s=>s.need.length===tr.length+1 && isSubset(tr,s.need));
+  const rares=Object.values(GAME.rares).filter(r=>isSubset(r.ess,tr));
+  const item=s=>`<div class="mitem">${gemsHtml(s.need)}<div><b>${esc(s.name||'Unnamed')}</b> <span class="who">${s.src==='game'?'game · ':''}${esc(s.who)}</span></div>${s.desc?`<div class="d">${esc(s.desc)}</div>`:''}</div>`;
+  const sec=(title,list,emptyText,max)=>`<section><h3>${title} <span class="code">${list.length}</span></h3>${list.length?list.slice(0,max).map(item).join('')+(list.length>max?`<p class="empty">+${list.length-max} more</p>`:''):`<p class="empty">${emptyText}</p>`}</section>`;
+  box.innerHTML = sec('Same recipe',same,'Nobody uses '+k+' yet.',8)
+    + (tr.length<4 ? sec('One gem away',near,'Nothing builds on this yet.',6) : '')
+    + `<section><h3>Rare gems that supply it <span class="code">${rares.length}</span></h3>${rares.length?rares.map(r=>`<div class="mitem">${gemsHtml(r.ess)}<div><b>${esc(r.name)}</b></div><div class="d">${esc(r.desc)}</div></div>`).join(''):'<p class="empty">No single rare gem covers these essences.</p>'}</section>`;
+}
+
+// ---------- class wiring ----------
+function wireClass(c){
+  const id=S.sel.id;
+  $('clsName').oninput=e=>{ patchDoc('classes',id,{name:e.target.value},true); renderNav(); renderGraph(); };
+  $('clsNotes').oninput=e=>patchDoc('classes',id,{notes:e.target.value},true);
+  $('clsPassive').oninput=e=>{ patchDoc('classes',id,{passive:e.target.value},true); };
+  $('rnToggle').onclick=()=>{ patchDoc('classes',id,{rename:!S.classes[id].rename}); renderNav(); refreshMain(); };
+  $('rnIdeas').oninput=e=>patchDoc('classes',id,{nameIdeas:e.target.value},true);
+  S.dd={route:{open:false,all:false},lead:{open:false,all:false}};
+  wireDD('route'); wireDD('lead');
+  $('addSpec').onclick=()=>{ const nid=newId('c_'); writeDoc('classes',nid,{name:'New upgrade',from:[id],ess:essOf(S.classes[id]).slice(),notes:'',order:Date.now(),updated:Date.now()}); select('class',nid); setTimeout(()=>{ const n=$('clsName'); if(n){ n.focus(); n.select(); } },0); };
+  const del=$('delCls');
+  del.onclick=()=>{
+    const kids=childrenOf(id); const nRec=recipesOf(id).length;
+    if(!del.classList.contains('armed')){ del.classList.add('armed'); del.textContent=`Delete with ${nRec} recipe${nRec===1?'':'s'}?${kids.length?` ${kids.length} class${kids.length>1?'es':''} lose a route`:''}`; return; }
+    recipesOf(id).forEach(r=>delDoc('recipes',r.id));
+    kids.forEach(k=>patchDoc('classes',k.id,{from:(S.classes[k.id].from||[]).filter(f=>f!==id)}));
+    const back=routesOf(id)[0];
+    delDoc('classes',id);
+    S.sel=back&&S.classes[back.from]?{t:'class',id:back.from}:null; resetComposer(); renderNav(); renderMain(true); toast('Class deleted');
+  };
+  document.querySelectorAll('[data-cess]').forEach(b=>b.onclick=()=>{ const ce=essOf(S.classes[id]); if(ce.length<4){ patchDoc('classes',id,{ess:sortNeed([...ce,b.dataset.cess])}); renderNav(); refreshMain(); } });
+  document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{ if(S.comp.tray.length<4){ S.comp.tray.push(b.dataset.add); renderTray(); renderMatches(); } });
+  $('cName').oninput=e=>S.comp.name=e.target.value;
+  $('cEffect').oninput=e=>S.comp.effect=e.target.value;
+  $('cNotes').oninput=e=>S.comp.notes=e.target.value;
+  $('cStatus').querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{ S.comp.status=b.dataset.st; syncStatus(); });
+  $('cClear').onclick=()=>{ resetComposer(); syncComposerInputs(); refreshMain(); };
+  $('cSave').onclick=saveRecipe;
+  const cd=$('cDel'); cd.onclick=()=>{
+    if(!cd.classList.contains('armed')){ cd.classList.add('armed'); cd.textContent='Confirm delete'; return; }
+    delDoc('recipes',S.comp.editing); resetComposer(); syncComposerInputs(); refreshMain(); renderNav(); toast('Recipe deleted');
+  };
+}
+// ---------- custom drop-downs (native <select> misbehaves in the artifact viewer) ----------
+S.dd={route:{open:false,all:false},lead:{open:false,all:false}};
+function setDD(k,open,focusFirst){ S.dd[k].open=open; const m=$(k+'Menu'), b=$(k+'Btn'); if(!m||!b) return; m.hidden=!open; b.setAttribute('aria-expanded',open); if(open&&focusFirst){ const f=m.querySelector('.ddopt'); if(f) f.focus(); } }
+function wireDD(k){
+  $(k+'Btn').onclick=()=>{ Object.keys(S.dd).forEach(o=>{ if(o!==k&&S.dd[o].open) setDD(o,false); }); setDD(k,!S.dd[k].open,true); };
+  $(k+'Btn').onkeydown=e=>{ if(e.key==='ArrowDown'){ e.preventDefault(); setDD(k,true,true); } };
+  $(k+'Menu').onkeydown=e=>{ const opts=[...$(k+'Menu').querySelectorAll('.ddopt,.ddall')]; const i=opts.indexOf(document.activeElement);
+    if(e.key==='ArrowDown'){ e.preventDefault(); (opts[i+1]||opts[0]).focus(); }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); (opts[i-1]||opts[opts.length-1]).focus(); }
+    else if(e.key==='Escape'){ e.preventDefault(); setDD(k,false); $(k+'Btn').focus(); } };
+}
+// items: candidate classes (with .tier); want: the tier to show by default
+function fillDD(k,{items,want,ok,label,empty,pick}){
+  const st=S.dd[k], wrap=$(k+'AddWrap'), menu=$(k+'Menu'), btn=$(k+'Btn');
+  wrap.hidden=!items.length; if(!items.length) st.open=false;
+  const near=items.filter(o=>o.tier===want), shown=st.all?items:near, more=items.length-near.length;
+  const opt=o=>`<button type="button" role="option" class="ddopt" data-pick="${o.id}"><span class="ddname">${esc(o.name||'Untitled')}</span>${gemsHtml(essOf(o))}<span class="code" style="font-weight:500">T${o.tier}</span>${ok(o)?'':'<span class="ddwarn">needs extra</span>'}</button>`;
+  menu.innerHTML=(shown.length?shown.map(opt).join(''):`<p class="ddempty">${empty(want)}</p>`)
+    +(more?`<button type="button" class="ddall" data-ddall="1">${st.all?`Only show tier ${want} classes`:`Show all tiers (${more} more)`}</button>`:'');
+  btn.firstChild.textContent=label(want,st.all);
+  setDD(k,!!st.open,false);
+  const da=menu.querySelector('[data-ddall]'); if(da) da.onclick=()=>{ st.all=!st.all; refreshMain(); const f=$(k+'Menu').querySelector('.ddopt')||$(k+'Menu').querySelector('[data-ddall]'); if(f) f.focus(); };
+  menu.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{ st.open=false; pick(b.dataset.pick); renderNav(); refreshMain(); const bb=$(k+'Btn'); if(bb&&!$(k+'AddWrap').hidden) bb.focus(); });
+}
+document.addEventListener('click',e=>{ if(!e.target.isConnected) return; Object.keys(S.dd).forEach(k=>{ if(S.dd[k].open&&!e.target.closest('#'+k+'AddWrap')) setDD(k,false); }); });
+document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; Object.keys(S.dd).forEach(k=>{ if(S.dd[k].open){ setDD(k,false); const b=$(k+'Btn'); if(b) b.focus(); } }); });
+function syncStatus(){ document.querySelectorAll('#cStatus [data-st]').forEach(b=>{ const on=b.dataset.st===S.comp.status; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); }); }
+function resetComposer(){ S.comp={tray:[],name:'',effect:'',notes:'',status:'idea',editing:null}; }
+function saveRecipe(){
+  const C=S.comp;
+  if(!C.tray.length){ toast('Pick at least one essence first'); return; }
+  const data={classId:S.sel.id,need:sortNeed(C.tray),name:C.name.trim(),effect:C.effect.trim(),notes:C.notes.trim(),status:C.status,updated:Date.now()};
+  const id=C.editing||newId('r_');
+  if(C.editing && S.recipes[id]) data.created=S.recipes[id].created||Date.now(); else data.created=Date.now();
+  writeDoc('recipes',id,data);
+  toast(C.editing?'Recipe saved':'Recipe added');
+  resetComposer(); syncComposerInputs(); refreshMain(); renderNav();
+}
+function editRecipe(id){
+  const r=S.recipes[id]; if(!r) return;
+  S.comp={tray:r.need.slice(),name:r.name||'',effect:r.effect||'',notes:r.notes||'',status:r.status||'idea',editing:id};
+  syncComposerInputs(); refreshMain();
+  $('compTitle').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+}
+
+// ---------- hero reference ----------
+function buildHero(){
+  const hid=S.sel.id, h=GAME.heroes[hid];
+  const groups=[1,2,3,4].map(n=>({n,list:h.skills.filter(s=>s.need.length===n)})).filter(g=>g.list.length);
+  $('main').innerHTML=`
+  <div class="box">
+    <div class="sheethead">
+      <div style="min-width:0"><div class="kicker">Current game · reference</div><h2>${esc(h.name)}</h2></div>
+      <div class="rowbtns"><button id="fromHero" class="primary" type="button">Start a base class from ${esc(h.name)}</button></div>
+    </div>
+    <div class="herostats"><span>Row <b>${esc(h.row)}</b></span><span>HP <b>${h.hp}</b></span><span>ATK <b>${h.atk}</b></span><span>SPD <b>${h.spd}</b></span><span>Tags <b>${esc(h.tags.join(', '))}</b></span></div>
+    <p style="margin:0">${esc(h.ab)} <span class="code">(at ★)</span></p>
+    ${Object.keys(S.classes).length?`<div class="essedit"><span class="status">Or copy these 10 skills into:</span><div id="intoCls" class="foot">${byTier().map(c=>`<button type="button" class="fchip go" data-into="${c.id}">${gemsHtml(essOf(c))}${esc(c.name||'Untitled')} <span class="code" style="font-weight:500">T${c.tier}</span></button>`).join('')}</div></div>`:''}
+  </div>
+  <div class="ledger"><div class="ledgerbar"><h2>Skills</h2><div class="rowbtns"><button type="button" id="gcopyAll">Copy all ${h.skills.length}</button></div></div>${groups.map(g=>`<div class="group"><h3>${g.n}-gem recipes <span>${g.list.length}</span></h3><div class="cards">${g.list.map(s=>`
+    <div class="card inh"><div class="row1">${gemsHtml(s.need)}<span class="code">${keyOf(s.need)}</span><span class="cname">${esc(s.name)}</span><span class="pill game">live</span><button type="button" class="cp" data-gcopy="${h.skills.indexOf(s)}" aria-label="Copy ${esc(s.name)}">Copy</button></div><div class="eff">${esc(s.desc)}</div></div>`).join('')}</div></div>`).join('')}</div>`;
+  const asRec=s=>({need:s.need,name:s.name,effect:s.desc,notes:'From the current '+h.name,status:'keep'});
+  document.querySelectorAll('[data-gcopy]').forEach(b=>b.onclick=()=>clipAdd([asRec(h.skills[+b.dataset.gcopy])],h.name));
+  $('gcopyAll').onclick=()=>clipAdd(h.skills.map(asRec),h.name);
+  const copySkills=(cid)=>{ const now=Date.now(); h.skills.forEach((s,i)=>writeDoc('recipes',newId('r_'),{classId:cid,need:sortNeed(s.need),name:s.name,effect:s.desc,notes:'Copied from current '+h.name,status:'keep',created:now+i,updated:now+i})); };
+  $('fromHero').onclick=()=>{ const cid=newId('c_'); writeDoc('classes',cid,{name:h.name+' (base)',from:[],ess:[],notes:`Started from the current ${h.name}: ${h.row} row, ${h.hp} HP / ${h.atk} ATK / ${h.spd} SPD. ${h.ab}`,order:Date.now(),updated:Date.now()}); copySkills(cid); select('class',cid); toast(h.name+' copied into a new base class'); };
+  document.querySelectorAll('[data-into]').forEach(b=>b.onclick=()=>{ const cid=b.dataset.into; copySkills(cid); toast('10 skills copied into '+nameOf(cid)); renderNav(); });
+}
+
+// ---------- selection & nav events ----------
+// ---------- recipe clipboard ----------
+S.clip=[]; try{ const v=JSON.parse(localStorage.getItem('grb_clip')||'[]'); if(Array.isArray(v)) S.clip=v.filter(x=>x&&Array.isArray(x.need)); }catch(e){}
+const clipKey=x=>keyOf(x.need)+'|'+(x.name||'').trim().toLowerCase();
+function clipSave(){ try{ localStorage.setItem('grb_clip',JSON.stringify(S.clip)); }catch(e){} }
+function clipAdd(list,from){
+  const have=new Set(S.clip.map(clipKey)); let n=0;
+  list.forEach(r=>{ const x={need:sortNeed(r.need),name:r.name||'',effect:r.effect||'',notes:r.notes||'',status:r.status||'idea',from}; if(!have.has(clipKey(x))){ S.clip.push(x); have.add(clipKey(x)); n++; } });
+  clipSave(); renderClip();
+  toast(n?`Copied ${n===1?(list[0].name||'recipe'):n+' recipes'} · ${S.clip.length} on clipboard`:'Already on the clipboard');
+}
+function clipPaste(){
+  if(!(S.sel&&S.sel.t==='class'&&S.classes[S.sel.id])) return;
+  const cid=S.sel.id; const exist=new Set(recipesOf(cid).map(clipKey)); const now=Date.now(); let n=0, skip=0;
+  S.clip.forEach((x,i)=>{ if(exist.has(clipKey(x))){ skip++; return; }
+    writeDoc('recipes',newId('r_'),{classId:cid,need:x.need.slice(),name:x.name,effect:x.effect,notes:x.notes,status:x.status,created:now+i,updated:now+i}); n++; });
+  refreshMain(); renderNav(); renderClip();
+  toast(`Pasted ${n} into ${nameOf(cid)}${skip?` · ${skip} already there`:''}`);
+}
+function renderClip(){
+  const bar=$('clipBar'); bar.hidden=!S.clip.length; document.body.classList.toggle('hasclip',!!S.clip.length);
+  if(!S.clip.length) return;
+  const onClass=S.sel&&S.sel.t==='class'&&S.classes[S.sel.id];
+  $('clipItems').innerHTML=S.clip.map((x,i)=>`<span class="clipchip" title="${esc(x.effect||'')}">${gemsHtml(x.need)}<span class="cn">${esc(x.name||'Unnamed')}</span><button type="button" class="ghost rx" data-cliprm="${i}" aria-label="Remove ${esc(x.name||'recipe')} from clipboard">×</button></span>`).join('');
+  $('clipItems').querySelectorAll('[data-cliprm]').forEach(b=>b.onclick=()=>{ S.clip.splice(+b.dataset.cliprm,1); clipSave(); renderClip(); });
+  const pb=$('clipPaste'); pb.disabled=!onClass; pb.textContent=onClass?`Paste ${S.clip.length} into ${nameOf(S.sel.id)}`:'Open a class to paste';
+}
+function select(t,id){ if(!(S.sel&&S.sel.t===t&&S.sel.id===id)) resetComposer(); S.sel={t,id}; renderNav(); renderMain(); renderClip(); }
+$('classNav').addEventListener('click',e=>{ const el=e.target.closest('[data-cls]'); if(el) select('class',el.dataset.cls); });
+$('heroNav').addEventListener('click',e=>{ const el=e.target.closest('[data-hero]'); if(el) select('hero',el.dataset.hero); });
+$('mapPane').addEventListener('click',e=>{ const el=e.target.closest('#graph [data-cls]'); if(el) select('class',el.dataset.cls); });
+[$('classNav'),$('heroNav'),$('mapPane')].forEach(n=>n.addEventListener('keydown',e=>{ if(e.key==='Enter'){ const el=e.target.closest('#classNav [data-cls],#heroNav [data-hero],#graph [data-cls]'); if(el){ e.preventDefault(); select(el.dataset.cls?'class':'hero',el.dataset.cls||el.dataset.hero); } } }));
+$('newBaseForm').onsubmit=e=>{ e.preventDefault(); const nm=$('newBaseName').value.trim(); if(!nm) return; const id=newId('c_'); writeDoc('classes',id,{name:nm,from:[],ess:[],notes:'',order:Date.now(),updated:Date.now()}); $('newBaseName').value=''; select('class',id); };
+
+// ---------- export ----------
+function exportText(){
+  const lines=['# Gem recipe bench — export','Essence letters: '+ESS.map(e=>L(e)+' = '+GAME.essences[e].name).join(', '),''];
+  const one=(c)=>{ const rs=routesOf(c.id), e=essOf(c);
+    lines.push(`## ${c.name||'Untitled'} — tier ${c.tier}${rs.length?'':', base class'} · needs ${e.length?'['+keyOf(e)+']':'(no essences set)'}${c.rename?' · NEEDS RENAME':''}`);
+    if(c.rename&&c.nameIdeas) lines.push('Name ideas: '+c.nameIdeas);
+    if(rs.length) lines.push('Reached from: '+rs.map(r=>nameOf(r.from)+(routeOk(r.from,c.id)?'':' (inconsistent: source uses an essence this class doesn’t have)')).join(', '));
+    const kids=childrenOf(c.id); if(kids.length) lines.push('Can upgrade to: '+kids.map(k=>k.name||'Untitled').join(', '));
+    if(c.passive) lines.push('Passive: '+c.passive);
+    if(c.notes) lines.push(c.notes);
+    recipesOf(c.id).forEach(r=>lines.push(`- [${keyOf(r.need)}] ${r.name||'Unnamed'} (${r.status||'idea'})${r.effect?' — '+r.effect:''}${r.notes?'\n  Notes: '+r.notes.replace(/\n/g,'\n  '):''}`)); lines.push(''); };
+  const all=byTier(); all.forEach(one);
+  if(!all.length) lines.push('(no classes yet)');
+  return lines.join('\n');
+}
+$('copyAll').onclick=async()=>{ const t=exportText(); try{ await navigator.clipboard.writeText(t); toast('Copied to clipboard'); $('copyWrap').hidden=true; }catch(e){ $('copyWrap').hidden=false; const ta=$('copyText'); ta.value=t; ta.focus(); ta.select(); toast('Select and copy the text below'); } };
+
+let toastT; function toast(t){ const el=$('toast'); el.textContent=t; el.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>el.hidden=true,1800); }
+
+// ---------- snapshots ----------
+function makeSnapshot(){ return {format:'gem-recipe-bench',version:1,exportedAt:new Date().toISOString(),classes:S.classes,recipes:S.recipes}; }
+function validSnapshot(x){ return x&&x.format==='gem-recipe-bench'&&x.classes&&typeof x.classes==='object'&&x.recipes&&typeof x.recipes==='object'; }
+const snapCounts=x=>`${Object.keys(x.classes).length} classes and ${Object.keys(x.recipes).length} skills`;
+async function saveSnapshot(){
+  const snap=makeSnapshot(); const text=JSON.stringify(snap,null,1);
+  const name='gem-recipe-bench-'+snap.exportedAt.slice(0,10)+'.json';
+  let dl=null; try{ dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null; }catch(e){ dl=null; }
+  if(dl){ try{ await dl.save({filename:name,data:text}); toast('Snapshot saved'); }catch(e){ if(e&&e.code!=='declined') toast('Couldn’t save the file ('+(e.code||'error')+')'); } return; }
+  // outside the Claude viewer (a standalone copy in a browser) a normal download works
+  try{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:'application/json'})); a.download=name; document.body.appendChild(a); a.click(); a.remove(); toast('Snapshot saved'); }
+  catch(e){ $('copyWrap').hidden=false; $('copyText').value=text; toast('Copy the snapshot text below'); }
+}
+async function applySnapshot(snap){
+  const cls=snap.classes, rec=snap.recipes;
+  if(!S.db){ S.classes={}; S.recipes={}; Object.entries(cls).forEach(([k,v])=>S.classes[k]=normalize(v)); Object.assign(S.recipes,rec);
+    S.sel=null; renderedSel=undefined; saveOffline(); renderNav(); renderMain(true); return; }
+  const jobs=[];
+  Object.keys(S.classes).filter(k=>!cls[k]).forEach(k=>jobs.push(()=>S.db.collection('classes').doc(k).delete()));
+  Object.keys(S.recipes).filter(k=>!rec[k]).forEach(k=>jobs.push(()=>S.db.collection('recipes').doc(k).delete()));
+  Object.entries(cls).forEach(([k,v])=>jobs.push(()=>S.db.collection('classes').doc(k).set(normalize(v))));
+  Object.entries(rec).forEach(([k,v])=>jobs.push(()=>S.db.collection('recipes').doc(k).set(v)));
+  let done=0; const total=jobs.length; const errs=[];
+  const worker=async()=>{ while(jobs.length){ const j=jobs.shift(); try{ await j(); }catch(e){ errs.push(e); } done++; if(done%10===0||done===total) setSave(`Loading snapshot… ${done}/${total}`); } };
+  await Promise.all(Array.from({length:6},worker));
+  S.sel=null; renderedSel=undefined; renderNav(); renderMain(true);
+  if(errs.length) setSave(`Loaded with ${errs.length} errors. Try loading again.`,true); else { setSave('Saved'); toast('Snapshot loaded'); }
+}
+function offerSnapshot(snap,source){
+  const p=$('snapPanel'); const when=snap.exportedAt?new Date(snap.exportedAt).toLocaleString():'unknown date';
+  const empty=!Object.keys(S.classes).length&&!Object.keys(S.recipes).length;
+  p.innerHTML=`<h3>${esc(source)}</h3><p style="margin:0">Snapshot from ${esc(when)} with ${snapCounts(snap)}.${empty?'':' Loading it <b>replaces everything</b> currently in this bench ('+snapCounts({classes:S.classes,recipes:S.recipes})+'). Save a snapshot first if you want to keep it.'}</p>
+    <div class="rowbtns"><button id="snapGo" class="primary" type="button">${empty?'Load it':'Replace everything'}</button><button id="snapCancel" type="button">Cancel</button></div>`;
+  p.hidden=false;
+  $('snapCancel').onclick=()=>{ p.hidden=true; };
+  $('snapGo').onclick=async()=>{ $('snapGo').disabled=true; $('snapCancel').disabled=true; await applySnapshot(snap); p.hidden=true; };
+}
+$('snapSave').onclick=saveSnapshot;
+$('snapLoad').onclick=()=>$('snapFile').click();
+$('snapFile').onchange=async e=>{ const f=e.target.files&&e.target.files[0]; e.target.value=''; if(!f) return;
+  try{ const snap=JSON.parse(await f.text()); if(!validSnapshot(snap)) throw new Error('not a bench snapshot'); offerSnapshot(snap,'Load “'+f.name+'”'); }
+  catch(err){ toast('That file isn’t a Gem Recipe Bench snapshot'); } };
+
+// ---------- boot ----------
+renderNav(); renderMain();
+$('clipPaste').onclick=clipPaste; $('clipClear').onclick=()=>{ S.clip=[]; clipSave(); renderClip(); toast('Clipboard cleared'); };
+renderClip();
+(async()=>{
+  let db=null; try{ db=window.claude&&window.claude.use?await window.claude.use('db'):null; }catch(e){ db=null; }
+  if(!db){
+    // standalone copy: keep work in this browser, starting from the included snapshot
+    S.offline=true; let saved=null; try{ saved=JSON.parse(localStorage.getItem('grb_offline')||'null'); }catch(e){}
+    const start=validSnapshot(saved)?saved:(validSnapshot(EMBEDDED)?EMBEDDED:null);
+    if(start){ Object.entries(start.classes).forEach(([k,v])=>S.classes[k]=normalize(v)); Object.assign(S.recipes,start.recipes); renderNav(); renderMain(true); }
+    setSave(start?'Offline copy · changes save in this browser':'Offline copy · nothing loaded yet',!start); return; }
+  S.db=db; setSave('Loading…');
+  let first={classes:false,recipes:false};
+  const sub=(col)=>db.collection(col).onSnapshot(snap=>{
+    const store={}; snap.docs.forEach(d=>{ if(d.exists) store[d.id]=col==='classes'?normalize(d.data()):d.data(); });
+    // keep local edits that are still waiting on a debounce
+    const live=col==='classes'?S.classes:S.recipes;
+    for(const k in timers){ const [c,id]=k.split('/'); if(c===col && timers[k] && live[id]) store[id]=live[id]; }
+    if(col==='classes') S.classes=store; else S.recipes=store;
+    const wasFirst=!(first.classes&&first.recipes); first[col]=true;
+    if(first.classes&&first.recipes){ setSave('Saved'); if(wasFirst&&validSnapshot(EMBEDDED)&&!Object.keys(S.classes).length&&!Object.keys(S.recipes).length) offerSnapshot(EMBEDDED,'This copy includes a saved snapshot'); }
+    renderNav(); renderMain();
+  }, err=>setSave('Lost connection to saved data ('+err.code+'). Reload to reconnect.',true));
+  sub('classes'); sub('recipes');
+})();
+</script>
+</body></html>

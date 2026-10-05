@@ -1,0 +1,11 @@
+# source drops (already unpacked into the repo)
+*.zip
+
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Playwright screenshots
+tests/out/
+tests/*.png

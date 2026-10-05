@@ -1,0 +1,10 @@
+const {chromium}=require('playwright');
+(async()=>{ const b=await chromium.launch(); const p=await b.newPage({viewport:{width:360,height:900},deviceScaleFactor:2});
+ await p.goto('file://'+__dirname+'/../game/guildhall.html'); await p.waitForTimeout(400);
+ await p.click('button[data-a="new"]'); await p.waitForTimeout(150);
+ let ps=await p.$$('button[data-pick]'); await ps[0].click(); await p.waitForTimeout(80); ps=await p.$$('button[data-pick]:not([disabled])'); await ps[0].click(); await p.waitForTimeout(200);
+ await p.evaluate(()=>{ run.gold=18; run.bag.push('ward'); run.shop.gems=[{id:'ward',sold:false},{id:'rimeheart',sold:false},{id:'venom',sold:true}]; run.shop.relic={id:'huntinghorn',sold:false}; renderCamp(); });
+ await p.click('.tile.gstrip[data-oi="0"]'); await p.waitForTimeout(150); const modalTxt=await p.evaluate(()=>document.querySelector('.modal, .sheet')?.innerText.slice(0,80)); console.log('tap gem opens:',JSON.stringify(modalTxt));
+ await p.keyboard.press('Escape'); await p.evaluate(()=>{document.querySelectorAll('[data-x=close]').forEach(b=>b.click())}); await p.waitForTimeout(100);
+ console.log('shop height', await p.evaluate(()=>Math.round(document.querySelector('.shop').getBoundingClientRect().height)));
+ await (await p.$('.shop')).screenshot({path:'./out/market-v33.png'}); await b.close(); })();

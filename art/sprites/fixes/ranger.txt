@@ -1,0 +1,16 @@
+................
+.....KKKKK......
+....KNNNNNK.....
+...KNNNNNNNK.i..
+...KNKSSSSNK.WI.
+...KNSSKSKNK.WI.
+....KSsSSsK..W.I
+...KKNNNNNKK.W.I
+..KSKnNNNnKSSW.I
+..KsKnNNNnKsKW.I
+..K.KnNNNnKKKW.I
+....KKTTTTK..WI.
+.....KtKKtK..WI.
+.....KtK.KtK.i..
+....KKKK.KKKK...
+................

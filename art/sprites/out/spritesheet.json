@@ -1,0 +1,458 @@
+{
+ "knight": {
+  "x": 0,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Knight",
+  "kind": "hero"
+ },
+ "berserker": {
+  "x": 16,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Berserker",
+  "kind": "hero"
+ },
+ "rogue": {
+  "x": 32,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Rogue",
+  "kind": "hero"
+ },
+ "shieldmaiden": {
+  "x": 48,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Shieldmaiden",
+  "kind": "hero"
+ },
+ "ranger": {
+  "x": 64,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Ranger",
+  "kind": "hero"
+ },
+ "apothecary": {
+  "x": 80,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Apothecary",
+  "kind": "hero"
+ },
+ "pyromancer": {
+  "x": 96,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Pyromancer",
+  "kind": "hero"
+ },
+ "cleric": {
+  "x": 112,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Cleric",
+  "kind": "hero"
+ },
+ "monk": {
+  "x": 128,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Monk",
+  "kind": "hero"
+ },
+ "sniper": {
+  "x": 144,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Sniper",
+  "kind": "hero"
+ },
+ "ashwalker": {
+  "x": 160,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Ashwalker",
+  "kind": "hero"
+ },
+ "glacier": {
+  "x": 176,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Glacier Warden",
+  "kind": "hero"
+ },
+ "duelist": {
+  "x": 192,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Duelist",
+  "kind": "hero"
+ },
+ "bloodmage": {
+  "x": 208,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Blood Mage",
+  "kind": "hero"
+ },
+ "plaguedoctor": {
+  "x": 224,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Plague Doctor",
+  "kind": "hero"
+ },
+ "bard": {
+  "x": 240,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Bard",
+  "kind": "hero"
+ },
+ "frostmage": {
+  "x": 256,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Frost Mage",
+  "kind": "hero"
+ },
+ "reaper": {
+  "x": 272,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Reaper",
+  "kind": "hero"
+ },
+ "goblin": {
+  "x": 288,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Goblin",
+  "kind": "enemy"
+ },
+ "archer": {
+  "x": 304,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Goblin Archer",
+  "kind": "enemy"
+ },
+ "spider": {
+  "x": 320,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Cave Spider",
+  "kind": "enemy"
+ },
+ "wolf": {
+  "x": 336,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Warg",
+  "kind": "enemy"
+ },
+ "shaman": {
+  "x": 352,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Shaman",
+  "kind": "enemy"
+ },
+ "orc": {
+  "x": 368,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Orc",
+  "kind": "enemy"
+ },
+ "skeleton": {
+  "x": 384,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Skeleton",
+  "kind": "enemy"
+ },
+ "imp": {
+  "x": 400,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Imp",
+  "kind": "enemy"
+ },
+ "troll": {
+  "x": 416,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Troll",
+  "kind": "enemy"
+ },
+ "wraith": {
+  "x": 432,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Wraith",
+  "kind": "enemy"
+ },
+ "bandit": {
+  "x": 448,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Bandit",
+  "kind": "enemy"
+ },
+ "cultist": {
+  "x": 464,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Cultist",
+  "kind": "enemy"
+ },
+ "ogre": {
+  "x": 480,
+  "y": 0,
+  "w": 24,
+  "h": 24,
+  "name": "Ogre",
+  "kind": "enemy"
+ },
+ "hydra": {
+  "x": 504,
+  "y": 0,
+  "w": 24,
+  "h": 24,
+  "name": "Hydra",
+  "kind": "enemy"
+ },
+ "goblinking": {
+  "x": 528,
+  "y": 0,
+  "w": 24,
+  "h": 24,
+  "name": "Goblin King",
+  "kind": "enemy"
+ },
+ "lich": {
+  "x": 552,
+  "y": 0,
+  "w": 24,
+  "h": 24,
+  "name": "Lich",
+  "kind": "enemy"
+ },
+ "rifttitan": {
+  "x": 576,
+  "y": 0,
+  "w": 24,
+  "h": 24,
+  "name": "Stone Titan",
+  "kind": "enemy"
+ },
+ "slime": {
+  "x": 600,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Slime",
+  "kind": "new"
+ },
+ "rat": {
+  "x": 616,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Giant Rat",
+  "kind": "new"
+ },
+ "bat": {
+  "x": 632,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Cave Bat",
+  "kind": "new"
+ },
+ "kobold": {
+  "x": 648,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Kobold",
+  "kind": "new"
+ },
+ "sporeling": {
+  "x": 664,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Sporeling",
+  "kind": "new"
+ },
+ "zombie": {
+  "x": 680,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Zombie",
+  "kind": "new"
+ },
+ "ghoul": {
+  "x": 696,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Ghoul",
+  "kind": "new"
+ },
+ "gargoyle": {
+  "x": 712,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Gargoyle",
+  "kind": "new"
+ },
+ "necromancer": {
+  "x": 728,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Necromancer",
+  "kind": "new"
+ },
+ "mimic": {
+  "x": 744,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Mimic",
+  "kind": "new"
+ },
+ "darkknight": {
+  "x": 760,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Dark Knight",
+  "kind": "new"
+ },
+ "fireelemental": {
+  "x": 776,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Fire Elemental",
+  "kind": "new"
+ },
+ "harpy": {
+  "x": 792,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Harpy",
+  "kind": "new"
+ },
+ "basilisk": {
+  "x": 808,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Basilisk",
+  "kind": "new"
+ },
+ "fiend": {
+  "x": 824,
+  "y": 8,
+  "w": 16,
+  "h": 16,
+  "name": "Fiend",
+  "kind": "new"
+ },
+ "minotaur": {
+  "x": 840,
+  "y": 0,
+  "w": 24,
+  "h": 24,
+  "name": "Minotaur",
+  "kind": "new"
+ },
+ "bonedragon": {
+  "x": 864,
+  "y": 0,
+  "w": 24,
+  "h": 24,
+  "name": "Bone Dragon",
+  "kind": "new"
+ },
+ "ratking": {
+  "x": 888,
+  "y": 0,
+  "w": 24,
+  "h": 24,
+  "name": "Rat King",
+  "kind": "enemy"
+ },
+ "broodmother": {
+  "x": 912,
+  "y": 0,
+  "w": 24,
+  "h": 24,
+  "name": "Broodmother",
+  "kind": "enemy"
+ },
+ "vampirelord": {
+  "x": 936,
+  "y": 0,
+  "w": 24,
+  "h": 24,
+  "name": "Vampire Lord",
+  "kind": "enemy"
+ },
+ "banshee": {
+  "x": 960,
+  "y": 0,
+  "w": 24,
+  "h": 24,
+  "name": "Banshee",
+  "kind": "enemy"
+ },
+ "pitlord": {
+  "x": 984,
+  "y": 0,
+  "w": 24,
+  "h": 24,
+  "name": "Pit Lord",
+  "kind": "enemy"
+ }
+}

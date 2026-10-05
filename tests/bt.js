@@ -1,0 +1,13 @@
+const {chromium}=require('playwright');
+(async()=>{ const b=await chromium.launch(); const p=await b.newPage({viewport:{width:360,height:780},deviceScaleFactor:2});
+ const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+ await p.goto('file://'+__dirname+'/../game/guildhall.html'); await p.waitForTimeout(400);
+ await p.click('button[data-a="new"]'); await p.waitForTimeout(150);
+ let ps=await p.$$('button[data-pick]'); await ps[0].click(); await p.waitForTimeout(80); ps=await p.$$('button[data-pick]:not([disabled])'); await ps[0].click(); await p.waitForTimeout(200);
+ await p.evaluate(()=>{ run.heroes.push({id:'apothecary',lv:1,gems:[null,null,null,null],open:[0,1],row:'back'}); run.enc=genEncounter(1,0); run.enc.list=run.enc.list.filter(e=>e.row!=='back'); });
+ await p.click('.fightbar button'); await p.waitForTimeout(300);
+ await p.evaluate(()=>{ speed=0.5; battle.units.filter(u=>u.side==='e').forEach(u=>{u.st.poison=12;u.st.burn=7;u.st.chill=5;}); renderUnits(); });
+ await p.waitForTimeout(100);
+ const h1=await p.evaluate(()=>[...document.querySelectorAll('#eside .grid4')].map(g=>Math.round(g.getBoundingClientRect().height)));
+ await p.screenshot({path:'./out/battle-v33.2.png'});
+ console.log('enemy rows heights',h1,'errors',errs); await b.close(); })();
