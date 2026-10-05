@@ -1,42 +1,213 @@
 {
  "format": "gem-recipe-bench",
  "version": 1,
- "exportedAt": "2026-10-05T01:05:20.774Z",
+ "exportedAt": "2026-10-05T18:18:51.497Z",
  "classes": {
-  "c_muu7pm5ad90i": {
-   "ess": [],
-   "from": [],
-   "name": "Mage",
-   "notes": "",
-   "order": 1791142017886,
-   "passive": "Whenever you apply a status apply 1 more",
-   "updated": 1791154740876
-  },
-  "c_muu7pu09ggnx": {
+  "c_muucqat9mbn7": {
    "ess": [
-    "frost"
+    "venom",
+    "frost",
+    "edge",
+    "swift"
+   ],
+   "from": [
+    "c_muuberm8ge8h",
+    "c_muuaifyzo8vc"
+   ],
+   "name": "Nightblade",
+   "notes": "",
+   "order": 1791150447933,
+   "passive": "Can't be targeted for the first 3 seconds of each fight. Attacks during that time crit and apply 2 Poison and 2 Chill.",
+   "updated": 1791155000000
+  },
+  "c_muu8sumchvtt": {
+   "ess": [
+    "venom"
+   ],
+   "from": [
+    "c_muu7pm5ad90i",
+    "c_muu893hhv45u"
+   ],
+   "name": "Poisoner",
+   "notes": "",
+   "order": 1791143848452,
+   "passive": "Attacks apply 1 Poison.",
+   "updated": 1791155000000
+  },
+  "c_muu8s3phmca2": {
+   "ess": [
+    "swift",
+    "swift"
+   ],
+   "from": [
+    "c_muu8rt2490lr"
+   ],
+   "name": "Windrunner",
+   "notes": "",
+   "order": 1791143813573,
+   "passive": "When an ally in the same row crits she immediately attacks their target",
+   "rename": false,
+   "updated": 1791161279254
+  },
+  "c_muu8hkj0igmk": {
+   "ess": [
+    "edge",
+    "gilt"
+   ],
+   "from": [
+    "c_muu89hhv5yf5",
+    "c_muu8kfxb9l85"
+   ],
+   "name": "Mercenary",
+   "notes": "",
+   "order": 1791143322156,
+   "passive": "+2 ATK for each enemy he has killed this fight. +1 gold per kill.",
+   "updated": 1791161274052
+  },
+  "c_muu8cz7uo8uh": {
+   "ess": [
+    "gilt",
+    "gilt",
+    "gilt"
+   ],
+   "from": [
+    "c_muu8a0kltcn4"
+   ],
+   "name": "Guildmaster",
+   "notes": "",
+   "order": 1791143107914,
+   "passive": "+3 gold after every won fight. Your guild has an additional hero slot",
+   "updated": 1791155698896
+  },
+  "c_muu9coiwf8yb": {
+   "ess": [
+    "vital",
+    "vital"
+   ],
+   "from": [
+    "c_muu8t3slx20j"
+   ],
+   "name": "Blood mage",
+   "notes": "",
+   "order": 1791144773672,
+   "passive": "Every 2 seconds, spends 3 of her own HP to heal the most injured ally 7.",
+   "rename": false,
+   "updated": 1791161198922
+  },
+  "c_muuayv3nak54": {
+   "ess": [
+    "edge",
+    "edge",
+    "edge"
+   ],
+   "from": [
+    "c_muu8kqk3v3ck"
+   ],
+   "name": "Blademaster",
+   "notes": "",
+   "order": 1791147488243,
+   "passive": "Crits deal ×3 damage. On a kill, attacks again at once.",
+   "rename": false,
+   "updated": 1791155000000
+  },
+  "c_muu9qxrkyxif": {
+   "ess": [
+    "vital",
+    "vital",
+    "vital"
+   ],
+   "from": [
+    "c_muu9coiwf8yb"
+   ],
+   "name": "Vampire",
+   "notes": "",
+   "order": 1791145438832,
+   "passive": "Heals for half the damage it deals.",
+   "rename": false,
+   "updated": 1791155000000
+  },
+  "c_muu8fq9g7iy1": {
+   "ess": [
+    "ember",
+    "ember",
+    "ward",
+    "ward"
+   ],
+   "from": [
+    "c_muu8dwwwleo2",
+    "c_muu81a83luco"
+   ],
+   "name": "Lava strider",
+   "notes": "Very good at playing the floor is lava",
+   "order": 1791143236276,
+   "passive": "Whenever Burn damages an enemy, gains 1 Shield. Enemies that hit it gain 1 Burn.",
+   "rename": false,
+   "updated": 1791155000000
+  },
+  "c_muu80wgi8uoq": {
+   "ess": [
+    "ember"
    ],
    "from": [
     "c_muu7pm5ad90i"
    ],
-   "name": "Frost mage",
+   "name": "Fire mage",
    "notes": "",
-   "order": 1791142028073,
-   "passive": "Attacks apply 1 Chill.",
+   "order": 1791142544466,
+   "passive": "Attacks apply 1 Burn.",
    "updated": 1791155000000
   },
-  "c_muu7q2c8r12v": {
+  "c_muu9hfleces9": {
    "ess": [
-    "frost",
-    "frost"
+    "venom",
+    "venom",
+    "gilt",
+    "gilt"
    ],
    "from": [
-    "c_muu7pu09ggnx"
+    "c_muu93w65k55t",
+    "c_muu8a0kltcn4",
+    "c_muubfqfprgsy"
    ],
-   "name": "Rimecaller",
+   "name": "Alchemist",
    "notes": "",
-   "order": 1791142038872,
-   "passive": "Enemies that reach 5 Chill are Frozen and skip their next attack.",
+   "order": 1791144995378,
+   "passive": "Enemies killed while Poisoned drop +2 gold. Poison it applies also removes 1 Armor.",
+   "updated": 1791155000000
+  },
+  "c_muu9rlact8dy": {
+   "ess": [
+    "ward",
+    "ward",
+    "vital",
+    "vital"
+   ],
+   "from": [
+    "c_muu9resprp7i",
+    "c_muu9ue1x7wfi"
+   ],
+   "name": "Paladin",
+   "notes": "",
+   "order": 1791145469316,
+   "passive": "Every 3 seconds, gives the most injured ally 6 Shield. Heals 5 when its own Shield breaks.",
+   "updated": 1791155000000
+  },
+  "c_muub3d9lyt44": {
+   "ess": [
+    "ward",
+    "vital",
+    "swift",
+    "gilt"
+   ],
+   "from": [
+    "c_muu91gvq8418",
+    "c_muu9resprp7i",
+    "c_muubf8nae0xm"
+   ],
+   "name": "Herald",
+   "notes": "Her friends call her enabler",
+   "order": 1791147698409,
+   "passive": "Allies start each fight with 5 Shield. The first ally to fall below half HP is healed to full (once per fight).",
    "rename": false,
    "updated": 1791155000000
   },
@@ -74,273 +245,52 @@
    "passive": "Attacks apply 1 Poison, 1 Burn and 1 Chill.",
    "updated": 1791155000000
   },
-  "c_muu80wgi8uoq": {
+  "c_muuck8ca1kex": {
    "ess": [
-    "ember"
+    "venom",
+    "frost",
+    "ward",
+    "swift"
    ],
    "from": [
-    "c_muu7pm5ad90i"
+    "c_muu98ulvacc4",
+    "c_muu8s3phmca2",
+    "c_muu7q2c8r12v"
    ],
-   "name": "Fire mage",
-   "notes": "",
-   "order": 1791142544466,
-   "passive": "Attacks apply 1 Burn.",
+   "name": "Frost Stalker",
+   "notes": "She is always cold for some reason",
+   "order": 1791150164794,
+   "passive": "Targets the enemy back row. Attacks apply 1 Poison and 1 Chill.",
+   "rename": false,
    "updated": 1791155000000
   },
-  "c_muu81a83luco": {
+  "c_muu98ulvacc4": {
    "ess": [
-    "ember",
-    "ember"
-   ],
-   "from": [
-    "c_muu80wgi8uoq"
-   ],
-   "name": "Flamecaller",
-   "notes": "",
-   "order": 1791142562307,
-   "passive": "Burn this hero applies loses a quarter of its stacks each tick instead of half.",
-   "updated": 1791155000000
-  },
-  "c_muu81homh3tq": {
-   "ess": [
-    "ember",
-    "ember",
-    "ember"
-   ],
-   "from": [
-    "c_muu81a83luco"
-   ],
-   "name": "Pyromancer",
-   "notes": "",
-   "order": 1791142571974,
-   "passive": "Attacks hit all enemies for 60% damage and apply Burn to each.",
-   "updated": 1791155000000
-  },
-  "c_muu88mtm5j3i": {
-   "ess": [],
-   "from": [],
-   "name": "Warrior",
-   "notes": "",
-   "order": 1791142905226,
-   "passive": "Gain 1 shield every 2 seconds, +1 Armor",
-   "updated": 1791154758181
-  },
-  "c_muu893hhv45u": {
-   "ess": [],
-   "from": [],
-   "name": "Rogue",
-   "notes": "",
-   "order": 1791142926821,
-   "passive": "1 gold at end of round",
-   "updated": 1791161425385
-  },
-  "c_muu89hhv5yf5": {
-   "ess": [
-    "gilt"
-   ],
-   "from": [
-    "c_muu893hhv45u",
-    "c_muu88mtm5j3i"
-   ],
-   "name": "Thief",
-   "notes": "",
-   "order": 1791142944979,
-   "passive": "+1 gold for each enemy this hero kills.",
-   "updated": 1791160753681
-  },
-  "c_muu8a0kltcn4": {
-   "ess": [
-    "gilt",
-    "gilt"
-   ],
-   "from": [
-    "c_muu89hhv5yf5"
-   ],
-   "name": "Merchant",
-   "notes": "Buffs people",
-   "order": 1791142969701,
-   "passive": "+1 gold after every won fight. Allies gain +1 ATK for every 10 gold you hold (up to +3).",
-   "updated": 1791155000000
-  },
-  "c_muu8cz7uo8uh": {
-   "ess": [
-    "gilt",
-    "gilt",
-    "gilt"
-   ],
-   "from": [
-    "c_muu8a0kltcn4"
-   ],
-   "name": "Guildmaster",
-   "notes": "",
-   "order": 1791143107914,
-   "passive": "+3 gold after every won fight. Your guild has an additional hero slot",
-   "updated": 1791155698896
-  },
-  "c_muu8dtb3foya": {
-   "ess": [
-    "ward"
-   ],
-   "from": [
-    "c_muu88mtm5j3i"
-   ],
-   "name": "Sentinel",
-   "notes": "",
-   "order": 1791143146911,
-   "passive": "Starts each fight with 8 Shield.",
-   "updated": 1791155000000
-  },
-  "c_muu8dwwwleo2": {
-   "ess": [
-    "ember",
+    "frost",
     "ward"
    ],
    "from": [
     "c_muu8dtb3foya",
-    "c_muu80wgi8uoq"
+    "c_muu7pu09ggnx"
    ],
-   "name": "Hearthguard",
+   "name": "Glacier Warden",
    "notes": "",
-   "order": 1791143151584,
-   "passive": "When his Shield absorbs a hit, the attacker gains 1 Burn. When he applies burn gain 1 shield.",
-   "rename": false,
-   "updated": 1791161136108
+   "order": 1791144594931,
+   "passive": "Attackers that hit it gain 1 Chill. Takes 1 less damage for each Chill on the attacker.",
+   "updated": 1791155000000
   },
-  "c_muu8emlv6f5o": {
+  "c_muu8rt2490lr": {
    "ess": [
-    "ember",
-    "ward",
-    "vital",
     "swift"
    ],
    "from": [
-    "c_muu8dwwwleo2",
-    "c_muu8trhnchpq",
-    "c_muu9resprp7i",
-    "c_muubf8nae0xm"
+    "c_muu893hhv45u"
    ],
-   "name": "Phoenix",
+   "name": "Acrobat",
    "notes": "",
-   "order": 1791143184883,
-   "passive": "Once per fight, when it would die, it revives at half HP and gives every enemy 3 Burn.",
-   "updated": 1791155000000
-  },
-  "c_muu8fq9g7iy1": {
-   "ess": [
-    "ember",
-    "ember",
-    "ward",
-    "ward"
-   ],
-   "from": [
-    "c_muu8dwwwleo2",
-    "c_muu81a83luco"
-   ],
-   "name": "Lava strider",
-   "notes": "Very good at playing the floor is lava",
-   "order": 1791143236276,
-   "passive": "Whenever Burn damages an enemy, gains 1 Shield. Enemies that hit it gain 1 Burn.",
-   "rename": false,
-   "updated": 1791155000000
-  },
-  "c_muu8hkj0igmk": {
-   "ess": [
-    "edge",
-    "gilt"
-   ],
-   "from": [
-    "c_muu89hhv5yf5",
-    "c_muu8kfxb9l85"
-   ],
-   "name": "Mercenary",
-   "notes": "",
-   "order": 1791143322156,
-   "passive": "+2 ATK for each enemy he has killed this fight. +1 gold per kill.",
-   "updated": 1791161274052
-  },
-  "c_muu8iedpyjas": {
-   "ess": [
-    "venom",
-    "edge",
-    "swift",
-    "gilt"
-   ],
-   "from": [
-    "c_muu8hkj0igmk",
-    "c_muu91gvq8418",
-    "c_muubfqfprgsy",
-    "c_muuberm8ge8h"
-   ],
-   "name": "Assassin",
-   "notes": "",
-   "order": 1791143360845,
-   "passive": "Targets the lowest-HP enemy. Instantly kills enemies below 15% HP.",
-   "updated": 1791155000000
-  },
-  "c_muu8kfxb9l85": {
-   "ess": [
-    "edge"
-   ],
-   "from": [
-    "c_muu893hhv45u",
-    "c_muu88mtm5j3i"
-   ],
-   "name": "Swordsman",
-   "notes": "",
-   "order": 1791143456159,
-   "passive": "+10% crit chance.",
-   "updated": 1791155000000
-  },
-  "c_muu8kqk3v3ck": {
-   "ess": [
-    "edge",
-    "edge"
-   ],
-   "from": [
-    "c_muu8kfxb9l85"
-   ],
-   "name": "Duelist",
-   "notes": "",
-   "order": 1791143469939,
-   "passive": "Challenges the enemy opposite him to a duel. Characters in a duel can only target each other and no-one else can target them.",
-   "rename": false,
-   "updated": 1791161286970
-  },
-  "c_muu8lrrukarl": {
-   "ess": [
-    "ward",
-    "ward",
-    "edge",
-    "edge"
-   ],
-   "from": [
-    "c_muu8kqk3v3ck",
-    "c_muu9ue1x7wfi"
-   ],
-   "name": "Champion",
-   "notes": "",
-   "order": 1791143518170,
-   "passive": "While it has Shield, enemies must attack it. Crits give it 3 Shield.",
-   "updated": 1791155000000
-  },
-  "c_muu8m2w3w2sq": {
-   "ess": [
-    "frost",
-    "edge",
-    "vital",
-    "gilt"
-   ],
-   "from": [
-    "c_muu8hkj0igmk",
-    "c_muuaifyzo8vc",
-    "c_muu9coiwf8yb"
-   ],
-   "name": "Reaper",
-   "notes": "",
-   "order": 1791143532579,
-   "passive": "Every 3rd crit and on kill gains +3 max HP (up to +60) for this fight and heals 5.",
-   "rename": false,
-   "updated": 1791160945301
+   "order": 1791143799772,
+   "passive": "When in the front row get 20% dodge. When in the back row get 15% attack speed.\n",
+   "updated": 1791221492028
   },
   "c_muu8omul8tqu": {
    "ess": [
@@ -360,351 +310,33 @@
    "rename": false,
    "updated": 1791157394061
   },
-  "c_muu8rt2490lr": {
+  "c_muu8kfxb9l85": {
    "ess": [
-    "swift"
+    "edge"
    ],
    "from": [
-    "c_muu893hhv45u"
+    "c_muu893hhv45u",
+    "c_muu88mtm5j3i"
    ],
-   "name": "Acrobat",
+   "name": "Swordsman",
    "notes": "",
-   "order": 1791143799772,
-   "passive": "When in the front row get 10% dodge. When in the back row get 15% attack speed.\n",
-   "updated": 1791157876366
+   "order": 1791143456159,
+   "passive": "Crits do an extra 25% damage. This increases by 25% for each serious condition on the target.",
+   "updated": 1791221463077
   },
-  "c_muu8s3phmca2": {
-   "ess": [
-    "swift",
-    "swift"
-   ],
-   "from": [
-    "c_muu8rt2490lr"
-   ],
-   "name": "Windrunner",
-   "notes": "",
-   "order": 1791143813573,
-   "passive": "When an ally in the same row crits she immediately attacks their target",
-   "rename": false,
-   "updated": 1791161279254
-  },
-  "c_muu8sumchvtt": {
-   "ess": [
-    "venom"
-   ],
-   "from": [
-    "c_muu7pm5ad90i",
-    "c_muu893hhv45u"
-   ],
-   "name": "Poisoner",
-   "notes": "",
-   "order": 1791143848452,
-   "passive": "Attacks apply 1 Poison.",
-   "updated": 1791155000000
-  },
-  "c_muu8t3slx20j": {
-   "ess": [
-    "vital"
-   ],
-   "from": [
-    "c_muu88mtm5j3i",
-    "c_muu7pm5ad90i"
-   ],
-   "name": "Healer",
-   "notes": "",
-   "order": 1791143860341,
-   "passive": "Every 3 seconds, heals the most injured ally 4.",
-   "rename": false,
-   "updated": 1791155000000
-  },
-  "c_muu8trhnchpq": {
+  "c_muu81homh3tq": {
    "ess": [
     "ember",
-    "swift"
-   ],
-   "from": [
-    "c_muu8rt2490lr",
-    "c_muu80wgi8uoq"
-   ],
-   "name": "Berserker",
-   "notes": "",
-   "order": 1791143891051,
-   "passive": "Each hit gives +5% attack speed for the rest of the fight (up to +50%). At the cap, attacks also apply 1 Burn.",
-   "rename": false,
-   "updated": 1791155000000
-  },
-  "c_muu8v6mqq9lr": {
-   "ess": [
-    "swift",
-    "swift",
-    "swift"
-   ],
-   "from": [
-    "c_muu8s3phmca2"
-   ],
-   "name": "Shadow Archer",
-   "notes": "",
-   "order": 1791143957330,
-   "passive": "Attacks always target the enemy with the highest ATK. Every 4rd ATK blinds the enemy causing them to skip their next attack",
-   "rename": false,
-   "updated": 1791157345422
-  },
-  "c_muu91gvq8418": {
-   "ess": [
-    "swift",
-    "gilt"
-   ],
-   "from": [
-    "c_muu89hhv5yf5",
-    "c_muu8rt2490lr"
-   ],
-   "name": "Bard",
-   "notes": "",
-   "order": 1791144250550,
-   "passive": "Allies gain +10% attack speed. +1 gold after every won fight.",
-   "updated": 1791155000000
-  },
-  "c_muu93w65k55t": {
-   "ess": [
-    "venom",
-    "venom"
-   ],
-   "from": [
-    "c_muu8sumchvtt"
-   ],
-   "name": "Plaguecaller",
-   "notes": "",
-   "order": 1791144363677,
-   "passive": "When a Poisoned enemy dies, its Poison spreads to a random enemy.",
-   "updated": 1791155000000
-  },
-  "c_muu95oxqva1i": {
-   "ess": [
-    "venom",
-    "venom",
-    "venom"
-   ],
-   "from": [
-    "c_muu93w65k55t"
-   ],
-   "name": "Venomancer",
-   "notes": "",
-   "order": 1791144447614,
-   "passive": "At the start of the fight apply 20 poison to the lowest HP enemy",
-   "rename": false,
-   "updated": 1791160745551
-  },
-  "c_muu98ulvacc4": {
-   "ess": [
-    "frost",
-    "ward"
-   ],
-   "from": [
-    "c_muu8dtb3foya",
-    "c_muu7pu09ggnx"
-   ],
-   "name": "Glacier Warden",
-   "notes": "",
-   "order": 1791144594931,
-   "passive": "Attackers that hit it gain 1 Chill. Takes 1 less damage for each Chill on the attacker.",
-   "updated": 1791155000000
-  },
-  "c_muu9coiwf8yb": {
-   "ess": [
-    "vital",
-    "vital"
-   ],
-   "from": [
-    "c_muu8t3slx20j"
-   ],
-   "name": "Blood mage",
-   "notes": "",
-   "order": 1791144773672,
-   "passive": "Every 2 seconds, spends 3 of her own HP to heal the most injured ally 7.",
-   "rename": false,
-   "updated": 1791161198922
-  },
-  "c_muu9fbav9cav": {
-   "ess": [
-    "venom",
-    "vital"
-   ],
-   "from": [
-    "c_muu8t3slx20j",
-    "c_muu8sumchvtt"
-   ],
-   "name": "Plague doctor",
-   "notes": "",
-   "order": 1791144896503,
-   "passive": "Whenever Poison he applied deals damage, heals the most injured ally 1.",
-   "updated": 1791161204798
-  },
-  "c_muu9hfleces9": {
-   "ess": [
-    "venom",
-    "venom",
-    "gilt",
-    "gilt"
-   ],
-   "from": [
-    "c_muu93w65k55t",
-    "c_muu8a0kltcn4",
-    "c_muubfqfprgsy"
-   ],
-   "name": "Alchemist",
-   "notes": "",
-   "order": 1791144995378,
-   "passive": "Enemies killed while Poisoned drop +2 gold. Poison it applies also removes 1 Armor.",
-   "updated": 1791155000000
-  },
-  "c_muu9o6j6xwfi": {
-   "ess": [
-    "venom",
     "ember",
-    "frost",
-    "ward"
+    "ember"
    ],
    "from": [
-    "c_muu98ulvacc4",
-    "c_muu8dwwwleo2",
-    "c_muua27gbu9q4"
+    "c_muu81a83luco"
    ],
-   "name": "Runeguard",
+   "name": "Pyromancer",
    "notes": "",
-   "order": 1791145310226,
-   "passive": "When its Shield absorbs a hit, the attacker gains 1 Poison, 1 Burn and 1 Chill.",
-   "rename": false,
-   "updated": 1791155000000
-  },
-  "c_muu9oupl17gi": {
-   "ess": [
-    "venom",
-    "venom",
-    "vital",
-    "vital"
-   ],
-   "from": [
-    "c_muu9coiwf8yb",
-    "c_muu9fbav9cav",
-    "c_muu93w65k55t"
-   ],
-   "name": "Necromancer",
-   "notes": "",
-   "order": 1791145341561,
-   "passive": "The first two enemies that die each fight rise as skeletons that fight for you.",
-   "rename": false,
-   "updated": 1791155935765
-  },
-  "c_muu9phmxqag5": {
-   "ess": [
-    "venom",
-    "vital",
-    "swift",
-    "gilt"
-   ],
-   "from": [
-    "c_muu9fbav9cav",
-    "c_muu91gvq8418",
-    "c_muubfqfprgsy",
-    "c_muubf8nae0xm"
-   ],
-   "name": "Necrodancer",
-   "notes": "",
-   "order": 1791145371273,
-   "passive": "At the start of a fight summon Wilfred to fight with you",
-   "rename": false,
-   "updated": 1791158069745
-  },
-  "c_muu9qxrkyxif": {
-   "ess": [
-    "vital",
-    "vital",
-    "vital"
-   ],
-   "from": [
-    "c_muu9coiwf8yb"
-   ],
-   "name": "Vampire",
-   "notes": "",
-   "order": 1791145438832,
-   "passive": "Heals for half the damage it deals.",
-   "rename": false,
-   "updated": 1791155000000
-  },
-  "c_muu9resprp7i": {
-   "ess": [
-    "ward",
-    "vital"
-   ],
-   "from": [
-    "c_muu8t3slx20j",
-    "c_muu8dtb3foya"
-   ],
-   "name": "Cleric",
-   "notes": "",
-   "order": 1791145460905,
-   "passive": "Every 2 seconds, heals the most injured ally 5. Healing beyond full HP becomes Shield.",
-   "updated": 1791155000000
-  },
-  "c_muu9rlact8dy": {
-   "ess": [
-    "ward",
-    "ward",
-    "vital",
-    "vital"
-   ],
-   "from": [
-    "c_muu9resprp7i",
-    "c_muu9ue1x7wfi"
-   ],
-   "name": "Paladin",
-   "notes": "",
-   "order": 1791145469316,
-   "passive": "Every 3 seconds, gives the most injured ally 6 Shield. Heals 5 when its own Shield breaks.",
-   "updated": 1791155000000
-  },
-  "c_muu9ue1x7wfi": {
-   "ess": [
-    "ward",
-    "ward"
-   ],
-   "from": [
-    "c_muu8dtb3foya"
-   ],
-   "name": "Shieldmaiden",
-   "notes": "",
-   "order": 1791145599909,
-   "passive": "Attacks deal bonus damage equal to a quarter of her Shield.",
-   "updated": 1791161171210
-  },
-  "c_muu9v1dnhifa": {
-   "ess": [
-    "ward",
-    "ward",
-    "ward"
-   ],
-   "from": [
-    "c_muu9ue1x7wfi"
-   ],
-   "name": "Bulwark",
-   "notes": "",
-   "order": 1791145630139,
-   "passive": "Starts each fight with Shield equal to half its max HP. Gains 1 Shield whenever another ally is hit.",
-   "updated": 1791155000000
-  },
-  "c_muua27gbu9q4": {
-   "ess": [
-    "ember",
-    "frost"
-   ],
-   "from": [
-    "c_muu7pu09ggnx",
-    "c_muu80wgi8uoq"
-   ],
-   "name": "Elementalist",
-   "notes": "",
-   "order": 1791145964603,
-   "passive": "Attacks alternate between Burn and Chill. Enemies with both take +20% damage.",
+   "order": 1791142571974,
+   "passive": "Attacks hit all enemies for 60% damage and apply Burn to each.",
    "updated": 1791155000000
   },
   "c_muuaifyzo8vc": {
@@ -722,129 +354,6 @@
    "passive": "Crits against Chilled enemies apply 2 extra Chill.",
    "updated": 1791155000000
   },
-  "c_muuayv3nak54": {
-   "ess": [
-    "edge",
-    "edge",
-    "edge"
-   ],
-   "from": [
-    "c_muu8kqk3v3ck"
-   ],
-   "name": "Blademaster",
-   "notes": "",
-   "order": 1791147488243,
-   "passive": "Crits deal ×3 damage. On a kill, attacks again at once.",
-   "rename": false,
-   "updated": 1791155000000
-  },
-  "c_muub1s5b46u4": {
-   "ess": [
-    "edge",
-    "edge",
-    "gilt",
-    "gilt"
-   ],
-   "from": [
-    "c_muu8kqk3v3ck",
-    "c_muu8hkj0igmk",
-    "c_muu8a0kltcn4"
-   ],
-   "name": "Bounty hunter",
-   "notes": "",
-   "order": 1791147624383,
-   "passive": "Targets the highest-HP enemy. Killing an elite or boss pays +5 gold.",
-   "updated": 1791155545040
-  },
-  "c_muub3d9lyt44": {
-   "ess": [
-    "ward",
-    "vital",
-    "swift",
-    "gilt"
-   ],
-   "from": [
-    "c_muu91gvq8418",
-    "c_muu9resprp7i",
-    "c_muubf8nae0xm"
-   ],
-   "name": "Herald",
-   "notes": "Her friends call her enabler",
-   "order": 1791147698409,
-   "passive": "Allies start each fight with 5 Shield. The first ally to fall below half HP is healed to full (once per fight).",
-   "rename": false,
-   "updated": 1791155000000
-  },
-  "c_muub6hrov7i3": {
-   "ess": [
-    "swift",
-    "swift",
-    "gilt",
-    "gilt"
-   ],
-   "from": [
-    "c_muu91gvq8418",
-    "c_muu8a0kltcn4"
-   ],
-   "name": "Silver tongue",
-   "notes": "",
-   "order": 1791147844212,
-   "passive": "Market items cost 1 less gold. At the start of each fight, the enemy with the highest ATK loses 20% attack speed for 5 seconds.",
-   "updated": 1791155630957
-  },
-  "c_muub9dnnh0qc": {
-   "ess": [
-    "edge",
-    "vital",
-    "swift",
-    "gilt"
-   ],
-   "from": [
-    "c_muu8hkj0igmk",
-    "c_muubf8nae0xm"
-   ],
-   "name": "Heretic",
-   "notes": "",
-   "order": 1791147978851,
-   "passive": "Ignores enemy Shield and Armor. Crits heal it 4.",
-   "rename": false,
-   "updated": 1791155000000
-  },
-  "c_muubahl3ny7g": {
-   "ess": [
-    "venom",
-    "ward",
-    "vital",
-    "gilt"
-   ],
-   "from": [
-    "c_muu9fbav9cav",
-    "c_muubfqfprgsy",
-    "c_muu9resprp7i",
-    "c_muu9coiwf8yb"
-   ],
-   "name": "Witch Doctor",
-   "notes": "",
-   "order": 1791148030599,
-   "passive": "Every 3 seconds, hexes a random enemy: 2 Poison and −20% damage for 3 seconds.",
-   "rename": false,
-   "updated": 1791155000000
-  },
-  "c_muuberm8ge8h": {
-   "ess": [
-    "venom",
-    "edge"
-   ],
-   "from": [
-    "c_muu8sumchvtt",
-    "c_muu8kfxb9l85"
-   ],
-   "name": "Cutthroat",
-   "notes": "",
-   "order": 1791148230224,
-   "passive": "His first attack each fight is a guaranteed crit. Crits against Poisoned enemies apply 2 Poison.",
-   "updated": 1791161232511
-  },
   "c_muubf8nae0xm": {
    "ess": [
     "vital",
@@ -860,97 +369,36 @@
    "passive": "Counterattacks after dodging.",
    "updated": 1791155000000
   },
-  "c_muubfqfprgsy": {
+  "c_muu8t3slx20j": {
+   "ess": [
+    "vital"
+   ],
+   "from": [
+    "c_muu88mtm5j3i",
+    "c_muu7pm5ad90i"
+   ],
+   "name": "Healer",
+   "notes": "",
+   "order": 1791143860341,
+   "passive": "Every 3 seconds, heal the most injured ally 4. Healing you apply to heroes below a quarter hp is increased by 50%.",
+   "rename": false,
+   "updated": 1791223967688
+  },
+  "c_muu95oxqva1i": {
    "ess": [
     "venom",
-    "gilt"
-   ],
-   "from": [
-    "c_muu8sumchvtt",
-    "c_muu89hhv5yf5"
-   ],
-   "name": "Apothecary",
-   "notes": "",
-   "order": 1791148275349,
-   "passive": "Enemies killed while Poisoned drop +1 gold.",
-   "updated": 1791155000000
-  },
-  "c_muuccpsasvwl": {
-   "ess": [
-    "frost",
-    "frost",
-    "ward",
-    "ward"
-   ],
-   "from": [
-    "c_muu98ulvacc4",
-    "c_muu7q2c8r12v",
-    "c_muu9ue1x7wfi"
-   ],
-   "name": "Icemaiden",
-   "notes": "",
-   "order": 1791149814154,
-   "passive": "Allies start each fight with 5 Shield. When an ally's Shield breaks, the attacker gains 2 Chill.",
-   "rename": false,
-   "updated": 1791155000000
-  },
-  "c_muucd48tezf2": {
-   "ess": [
-    "ember",
-    "frost",
-    "ward",
-    "swift"
-   ],
-   "from": [
-    "c_muu8dwwwleo2",
-    "c_muu8trhnchpq",
-    "c_muua27gbu9q4",
-    "c_muu98ulvacc4"
-   ],
-   "name": "Storm dancer",
-   "notes": "",
-   "order": 1791149832894,
-   "passive": "Every 4th attack hits all enemies and applies 1 Burn and 1 Chill to each.",
-   "updated": 1791155000000
-  },
-  "c_muucdoklpfu4": {
-   "ess": [
     "venom",
-    "ember",
-    "frost",
-    "edge"
+    "venom"
    ],
    "from": [
-    "c_muua27gbu9q4",
-    "c_muuaifyzo8vc",
-    "c_muuberm8ge8h"
+    "c_muu93w65k55t"
    ],
-   "name": "Spellblade",
-   "nameIdeas": "",
+   "name": "Venomancer",
    "notes": "",
-   "order": 1791149859237,
-   "passive": "Crits apply 2 of a random status: Poison, Burn or Chill.",
+   "order": 1791144447614,
+   "passive": "At the start of the fight apply 20 poison to the lowest HP enemy",
    "rename": false,
-   "updated": 1791155000000
-  },
-  "c_muuck8ca1kex": {
-   "ess": [
-    "venom",
-    "frost",
-    "ward",
-    "swift"
-   ],
-   "from": [
-    "c_muu98ulvacc4",
-    "c_muu8s3phmca2",
-    "c_muu7q2c8r12v"
-   ],
-   "name": "Frost Stalker",
-   "notes": "She is always cold for some reason",
-   "order": 1791150164794,
-   "passive": "Targets the enemy back row. Attacks apply 1 Poison and 1 Chill.",
-   "rename": false,
-   "updated": 1791155000000
+   "updated": 1791160745551
   },
   "c_muucnefb450t": {
    "ess": [
@@ -989,21 +437,526 @@
    "rename": false,
    "updated": 1791155000000
   },
-  "c_muucqat9mbn7": {
+  "c_muubahl3ny7g": {
    "ess": [
     "venom",
+    "ward",
+    "vital",
+    "gilt"
+   ],
+   "from": [
+    "c_muu9fbav9cav",
+    "c_muubfqfprgsy",
+    "c_muu9resprp7i",
+    "c_muu9coiwf8yb"
+   ],
+   "name": "Witch Doctor",
+   "notes": "",
+   "order": 1791148030599,
+   "passive": "Every 3 seconds, hexes a random enemy: 2 Poison and −20% damage for 3 seconds.",
+   "rename": false,
+   "updated": 1791155000000
+  },
+  "c_muub6hrov7i3": {
+   "ess": [
+    "swift",
+    "swift",
+    "gilt",
+    "gilt"
+   ],
+   "from": [
+    "c_muu91gvq8418",
+    "c_muu8a0kltcn4"
+   ],
+   "name": "Silver tongue",
+   "notes": "",
+   "order": 1791147844212,
+   "passive": "Market items cost 1 less gold. At the start of each fight, the enemy with the highest ATK loses 20% attack speed for 5 seconds.",
+   "updated": 1791155630957
+  },
+  "c_muu89hhv5yf5": {
+   "ess": [
+    "gilt"
+   ],
+   "from": [
+    "c_muu893hhv45u",
+    "c_muu88mtm5j3i"
+   ],
+   "name": "Thief",
+   "notes": "",
+   "order": 1791142944979,
+   "passive": "The first hit on each monster steals 1 gold. (Max 3 per fight)",
+   "updated": 1791222996544
+  },
+  "c_muu8m2w3w2sq": {
+   "ess": [
     "frost",
     "edge",
+    "vital",
+    "gilt"
+   ],
+   "from": [
+    "c_muu8hkj0igmk",
+    "c_muuaifyzo8vc",
+    "c_muu9coiwf8yb"
+   ],
+   "name": "Reaper",
+   "notes": "",
+   "order": 1791143532579,
+   "passive": "Every 3rd crit and on kill gains +3 max HP (up to +60) for this fight and heals 5.",
+   "rename": false,
+   "updated": 1791160945301
+  },
+  "c_muu8a0kltcn4": {
+   "ess": [
+    "gilt",
+    "gilt"
+   ],
+   "from": [
+    "c_muu89hhv5yf5"
+   ],
+   "name": "Merchant",
+   "notes": "Buffs people",
+   "order": 1791142969701,
+   "passive": "+1 gold after every won fight. Allies gain +1 ATK for every 10 gold you hold (up to +3).",
+   "updated": 1791155000000
+  },
+  "c_muuccpsasvwl": {
+   "ess": [
+    "frost",
+    "frost",
+    "ward",
+    "ward"
+   ],
+   "from": [
+    "c_muu98ulvacc4",
+    "c_muu7q2c8r12v",
+    "c_muu9ue1x7wfi"
+   ],
+   "name": "Icemaiden",
+   "notes": "",
+   "order": 1791149814154,
+   "passive": "Allies start each fight with 5 Shield. When an ally's Shield breaks, the attacker gains 2 Chill.",
+   "rename": false,
+   "updated": 1791155000000
+  },
+  "c_muu9v1dnhifa": {
+   "ess": [
+    "ward",
+    "ward",
+    "ward"
+   ],
+   "from": [
+    "c_muu9ue1x7wfi"
+   ],
+   "name": "Bulwark",
+   "notes": "",
+   "order": 1791145630139,
+   "passive": "Starts each fight with Shield equal to half its max HP. Gains 1 Shield whenever another ally is hit.",
+   "updated": 1791155000000
+  },
+  "c_muu8lrrukarl": {
+   "ess": [
+    "ward",
+    "ward",
+    "edge",
+    "edge"
+   ],
+   "from": [
+    "c_muu8kqk3v3ck",
+    "c_muu9ue1x7wfi"
+   ],
+   "name": "Champion",
+   "notes": "",
+   "order": 1791143518170,
+   "passive": "While it has Shield, enemies must attack it. Crits give it 3 Shield.",
+   "updated": 1791155000000
+  },
+  "c_muu893hhv45u": {
+   "ess": [],
+   "from": [],
+   "name": "Rogue",
+   "notes": "",
+   "order": 1791142926821,
+   "passive": "1 gold at end of round",
+   "updated": 1791161425385
+  },
+  "c_muu7pm5ad90i": {
+   "ess": [],
+   "from": [],
+   "name": "Mage",
+   "notes": "",
+   "order": 1791142017886,
+   "passive": "Whenever you apply a status or heal apply 1 more",
+   "updated": 1791171457819
+  },
+  "c_muu81a83luco": {
+   "ess": [
+    "ember",
+    "ember"
+   ],
+   "from": [
+    "c_muu80wgi8uoq"
+   ],
+   "name": "Flamecaller",
+   "notes": "",
+   "order": 1791142562307,
+   "passive": "Burn this hero applies loses a quarter of its stacks each tick instead of half.",
+   "updated": 1791155000000
+  },
+  "c_muu93w65k55t": {
+   "ess": [
+    "venom",
+    "venom"
+   ],
+   "from": [
+    "c_muu8sumchvtt"
+   ],
+   "name": "Plaguecaller",
+   "notes": "",
+   "order": 1791144363677,
+   "passive": "When a Poisoned enemy dies, its Poison spreads to a random enemy.",
+   "updated": 1791155000000
+  },
+  "c_muua27gbu9q4": {
+   "ess": [
+    "ember",
+    "frost"
+   ],
+   "from": [
+    "c_muu7pu09ggnx",
+    "c_muu80wgi8uoq"
+   ],
+   "name": "Elementalist",
+   "notes": "",
+   "order": 1791145964603,
+   "passive": "Attacks alternate between Burn and Chill. Enemies with both take +20% damage.",
+   "updated": 1791155000000
+  },
+  "c_muucdoklpfu4": {
+   "ess": [
+    "venom",
+    "ember",
+    "frost",
+    "edge"
+   ],
+   "from": [
+    "c_muua27gbu9q4",
+    "c_muuaifyzo8vc",
+    "c_muuberm8ge8h"
+   ],
+   "name": "Spellblade",
+   "nameIdeas": "",
+   "notes": "",
+   "order": 1791149859237,
+   "passive": "Crits apply 2 of a random status: Poison, Burn or Chill.",
+   "rename": false,
+   "updated": 1791155000000
+  },
+  "c_muub1s5b46u4": {
+   "ess": [
+    "edge",
+    "edge",
+    "gilt",
+    "gilt"
+   ],
+   "from": [
+    "c_muu8kqk3v3ck",
+    "c_muu8hkj0igmk",
+    "c_muu8a0kltcn4"
+   ],
+   "name": "Bounty hunter",
+   "notes": "",
+   "order": 1791147624383,
+   "passive": "Targets the highest-HP enemy. Killing an elite or boss pays +5 gold.",
+   "updated": 1791155545040
+  },
+  "c_muuberm8ge8h": {
+   "ess": [
+    "venom",
+    "edge"
+   ],
+   "from": [
+    "c_muu8sumchvtt",
+    "c_muu8kfxb9l85"
+   ],
+   "name": "Cutthroat",
+   "notes": "",
+   "order": 1791148230224,
+   "passive": "His first attack each fight is a guaranteed crit. Crits against Poisoned enemies apply 2 Poison.",
+   "updated": 1791161232511
+  },
+  "c_muu9phmxqag5": {
+   "ess": [
+    "venom",
+    "vital",
+    "swift",
+    "gilt"
+   ],
+   "from": [
+    "c_muu9fbav9cav",
+    "c_muu91gvq8418",
+    "c_muubfqfprgsy",
+    "c_muubf8nae0xm"
+   ],
+   "name": "Necrodancer",
+   "notes": "",
+   "order": 1791145371273,
+   "passive": "At the start of a fight summon Wilfred to fight with you",
+   "rename": false,
+   "updated": 1791158069745
+  },
+  "c_muu9resprp7i": {
+   "ess": [
+    "ward",
+    "vital"
+   ],
+   "from": [
+    "c_muu8t3slx20j",
+    "c_muu8dtb3foya"
+   ],
+   "name": "Cleric",
+   "notes": "",
+   "order": 1791145460905,
+   "passive": "Every 2 seconds, heals the most injured ally 5. Healing beyond full HP becomes Shield.",
+   "updated": 1791155000000
+  },
+  "c_muu9o6j6xwfi": {
+   "ess": [
+    "venom",
+    "ember",
+    "frost",
+    "ward"
+   ],
+   "from": [
+    "c_muu98ulvacc4",
+    "c_muu8dwwwleo2",
+    "c_muua27gbu9q4"
+   ],
+   "name": "Runeguard",
+   "notes": "",
+   "order": 1791145310226,
+   "passive": "When its Shield absorbs a hit, the attacker gains 1 Poison, 1 Burn and 1 Chill.",
+   "rename": false,
+   "updated": 1791155000000
+  },
+  "c_muu8iedpyjas": {
+   "ess": [
+    "venom",
+    "edge",
+    "swift",
+    "gilt"
+   ],
+   "from": [
+    "c_muu8hkj0igmk",
+    "c_muu91gvq8418",
+    "c_muubfqfprgsy",
+    "c_muuberm8ge8h"
+   ],
+   "name": "Assassin",
+   "notes": "",
+   "order": 1791143360845,
+   "passive": "Targets the lowest-HP enemy. Instantly kills enemies below 15% HP.",
+   "updated": 1791155000000
+  },
+  "c_muu8trhnchpq": {
+   "ess": [
+    "ember",
     "swift"
    ],
    "from": [
-    "c_muuberm8ge8h",
-    "c_muuaifyzo8vc"
+    "c_muu8rt2490lr",
+    "c_muu80wgi8uoq"
    ],
-   "name": "Nightblade",
+   "name": "Berserker",
    "notes": "",
-   "order": 1791150447933,
-   "passive": "Can't be targeted for the first 3 seconds of each fight. Attacks during that time crit and apply 2 Poison and 2 Chill.",
+   "order": 1791143891051,
+   "passive": "Each hit gives +5% attack speed for the rest of the fight (up to +50%). At the cap, attacks also apply 1 Burn.",
+   "rename": false,
+   "updated": 1791155000000
+  },
+  "c_muu9ue1x7wfi": {
+   "ess": [
+    "ward",
+    "ward"
+   ],
+   "from": [
+    "c_muu8dtb3foya"
+   ],
+   "name": "Shieldmaiden",
+   "notes": "",
+   "order": 1791145599909,
+   "passive": "Attacks deal bonus damage equal to a quarter of her Shield.",
+   "updated": 1791161171210
+  },
+  "c_muu9oupl17gi": {
+   "ess": [
+    "venom",
+    "venom",
+    "vital",
+    "vital"
+   ],
+   "from": [
+    "c_muu9coiwf8yb",
+    "c_muu9fbav9cav",
+    "c_muu93w65k55t"
+   ],
+   "name": "Necromancer",
+   "notes": "",
+   "order": 1791145341561,
+   "passive": "The first two enemies that die each fight rise as skeletons that fight for you.",
+   "rename": false,
+   "updated": 1791155935765
+  },
+  "c_muub9dnnh0qc": {
+   "ess": [
+    "edge",
+    "vital",
+    "swift",
+    "gilt"
+   ],
+   "from": [
+    "c_muu8hkj0igmk",
+    "c_muubf8nae0xm"
+   ],
+   "name": "Heretic",
+   "notes": "",
+   "order": 1791147978851,
+   "passive": "Ignores enemy Shield and Armor. Crits heal it 4.",
+   "rename": false,
+   "updated": 1791155000000
+  },
+  "c_muu88mtm5j3i": {
+   "ess": [],
+   "from": [],
+   "name": "Warrior",
+   "notes": "",
+   "order": 1791142905226,
+   "passive": "Heal 1 every 2 seconds, +1 Armor",
+   "updated": 1791171447909
+  },
+  "c_muu7pu09ggnx": {
+   "ess": [
+    "frost"
+   ],
+   "from": [
+    "c_muu7pm5ad90i"
+   ],
+   "name": "Frost mage",
+   "notes": "",
+   "order": 1791142028073,
+   "passive": "Attacks apply 1 Chill.",
+   "updated": 1791155000000
+  },
+  "c_muucd48tezf2": {
+   "ess": [
+    "ember",
+    "frost",
+    "ward",
+    "swift"
+   ],
+   "from": [
+    "c_muu8dwwwleo2",
+    "c_muu8trhnchpq",
+    "c_muua27gbu9q4",
+    "c_muu98ulvacc4"
+   ],
+   "name": "Storm dancer",
+   "notes": "",
+   "order": 1791149832894,
+   "passive": "Every 4th attack hits all enemies and applies 1 Burn and 1 Chill to each.",
+   "updated": 1791155000000
+  },
+  "c_muu9fbav9cav": {
+   "ess": [
+    "venom",
+    "vital"
+   ],
+   "from": [
+    "c_muu8t3slx20j",
+    "c_muu8sumchvtt"
+   ],
+   "name": "Plague doctor",
+   "notes": "",
+   "order": 1791144896503,
+   "passive": "Whenever Poison he applied deals damage, heals the most injured ally 1.",
+   "updated": 1791161204798
+  },
+  "c_muu8kqk3v3ck": {
+   "ess": [
+    "edge",
+    "edge"
+   ],
+   "from": [
+    "c_muu8kfxb9l85"
+   ],
+   "name": "Duelist",
+   "notes": "",
+   "order": 1791143469939,
+   "passive": "Challenges the enemy opposite him to a duel. Characters in a duel can only target each other and no-one else can target them.",
+   "rename": false,
+   "updated": 1791161286970
+  },
+  "c_muu8emlv6f5o": {
+   "ess": [
+    "ember",
+    "ward",
+    "vital",
+    "swift"
+   ],
+   "from": [
+    "c_muu8dwwwleo2",
+    "c_muu8trhnchpq",
+    "c_muu9resprp7i",
+    "c_muubf8nae0xm"
+   ],
+   "name": "Phoenix",
+   "notes": "",
+   "order": 1791143184883,
+   "passive": "Once per fight, when it would die, it revives at half HP and gives every enemy 3 Burn.",
+   "updated": 1791155000000
+  },
+  "c_muubfqfprgsy": {
+   "ess": [
+    "venom",
+    "gilt"
+   ],
+   "from": [
+    "c_muu8sumchvtt",
+    "c_muu89hhv5yf5"
+   ],
+   "name": "Apothecary",
+   "notes": "",
+   "order": 1791148275349,
+   "passive": "Enemies killed while Poisoned drop +1 gold.",
+   "updated": 1791155000000
+  },
+  "c_muu8dtb3foya": {
+   "ess": [
+    "ward"
+   ],
+   "from": [
+    "c_muu88mtm5j3i"
+   ],
+   "name": "Sentinel",
+   "notes": "",
+   "order": 1791143146911,
+   "passive": "Starts each fight with 8 Shield.",
+   "updated": 1791155000000
+  },
+  "c_muu91gvq8418": {
+   "ess": [
+    "swift",
+    "gilt"
+   ],
+   "from": [
+    "c_muu89hhv5yf5",
+    "c_muu8rt2490lr"
+   ],
+   "name": "Bard",
+   "notes": "",
+   "order": 1791144250550,
+   "passive": "Allies gain +10% attack speed. +1 gold after every won fight.",
    "updated": 1791155000000
   },
   "c_muuczwluamkn": {
@@ -1024,512 +977,83 @@
    "passive": "Crits also hit every other enemy in the target's row.",
    "rename": false,
    "updated": 1791155000000
+  },
+  "c_muu8v6mqq9lr": {
+   "ess": [
+    "swift",
+    "swift",
+    "swift"
+   ],
+   "from": [
+    "c_muu8s3phmca2"
+   ],
+   "name": "Shadow Archer",
+   "notes": "",
+   "order": 1791143957330,
+   "passive": "Attacks always target the enemy with the highest ATK. Every 4rd ATK blinds the enemy causing them to skip their next attack",
+   "rename": false,
+   "updated": 1791157345422
+  },
+  "c_muu7q2c8r12v": {
+   "ess": [
+    "frost",
+    "frost"
+   ],
+   "from": [
+    "c_muu7pu09ggnx"
+   ],
+   "name": "Rimecaller",
+   "notes": "",
+   "order": 1791142038872,
+   "passive": "Enemies that reach 5 Chill are Frozen and skip their next attack.",
+   "rename": false,
+   "updated": 1791155000000
+  },
+  "c_muu8dwwwleo2": {
+   "ess": [
+    "ember",
+    "ward"
+   ],
+   "from": [
+    "c_muu8dtb3foya",
+    "c_muu80wgi8uoq"
+   ],
+   "name": "Hearthguard",
+   "notes": "",
+   "order": 1791143151584,
+   "passive": "When his Shield absorbs a hit, the attacker gains 1 Burn. When he applies burn gain 1 shield.",
+   "rename": false,
+   "updated": 1791161136108
   }
  },
  "recipes": {
-  "r_cl1a109749e00": {
-   "classId": "c_muu80wgi8uoq",
-   "created": 1791160000000,
-   "effect": "The first Burn this hero applies each fight is 3 stacks.",
-   "name": "Kindling",
+  "r_cl1a109749e48": {
+   "classId": "c_muu8hkj0igmk",
+   "created": 1791160000072,
+   "effect": "+1 gold after a won fight if he got a kill.",
+   "name": "Hazard Pay",
    "need": [
-    "ember"
+    "edge",
+    "gilt"
    ],
    "notes": "Claude draft",
    "status": "idea",
-   "updated": 1791160000000
+   "updated": 1791160000072
   },
-  "r_cl1a109749e01": {
-   "classId": "c_muu80wgi8uoq",
-   "created": 1791160000001,
-   "effect": "Attacks against Burning enemies deal +1 damage per Burn stack (up to +5).",
-   "name": "Fan the Flames",
-   "need": [
-    "ember",
-    "ember"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000001
-  },
-  "r_cl1a109749e02": {
-   "classId": "c_muu80wgi8uoq",
-   "created": 1791160000002,
-   "effect": "Applying Burn to a Chilled enemy removes its Chill and deals 4 damage.",
-   "name": "Steam Burst",
-   "need": [
-    "ember",
-    "frost"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000002
-  },
-  "r_cl1a109749e03": {
-   "classId": "c_muu80wgi8uoq",
-   "created": 1791160000003,
-   "effect": "Crits double the target's Burn.",
-   "name": "Flashpoint",
-   "need": [
-    "ember",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000003
-  },
-  "r_cl1a109749e04": {
-   "classId": "c_muu7pu09ggnx",
-   "created": 1791160000004,
-   "effect": "Its first attack each fight gives every enemy 1 Chill.",
-   "name": "Cold Snap",
-   "need": [
-    "frost"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000004
-  },
-  "r_cl1a109749e05": {
-   "classId": "c_muu7pu09ggnx",
-   "created": 1791160000005,
-   "effect": "Deals +1 damage per Chill stack on the target.",
-   "name": "Deep Freeze",
+  "r_cl1a109749e8d": {
+   "classId": "c_muuccpsasvwl",
+   "created": 1791160000141,
+   "effect": "Allies with Shield are immune to Chill and Burn.",
+   "name": "Ice Queen",
    "need": [
     "frost",
-    "frost"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000005
-  },
-  "r_cl1a109749e06": {
-   "classId": "c_muu7pu09ggnx",
-   "created": 1791160000006,
-   "effect": "Gains 1 Shield whenever it applies Chill.",
-   "name": "Frost Armor",
-   "need": [
     "frost",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000006
-  },
-  "r_cl1a109749e07": {
-   "classId": "c_muu7pu09ggnx",
-   "created": 1791160000007,
-   "effect": "Chilled enemies deal 10% less damage.",
-   "name": "Numbing Cold",
-   "need": [
-    "frost",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000007
-  },
-  "r_cl1a109749e08": {
-   "classId": "c_muu89hhv5yf5",
-   "created": 1791160000008,
-   "effect": "The first hit on each enemy steals 1 gold (up to 3 per fight).",
-   "name": "Pickpocket",
-   "need": [
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000008
-  },
-  "r_cl1a109749e09": {
-   "classId": "c_muu89hhv5yf5",
-   "created": 1791160000009,
-   "effect": "+30% damage against enemies that aren't targeting it.",
-   "name": "Backstab",
-   "need": [
-    "edge",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000009
-  },
-  "r_cl1a109749e0a": {
-   "classId": "c_muu89hhv5yf5",
-   "created": 1791160000010,
-   "effect": "After a kill, gains 30% dodge for 3 seconds.",
-   "name": "Getaway",
-   "need": [
-    "swift",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000010
-  },
-  "r_cl1a109749e0b": {
-   "classId": "c_muu89hhv5yf5",
-   "created": 1791160000011,
-   "effect": "Its first attack each fight blinds the target, which skips its next attack.",
-   "name": "Dirty Tricks",
-   "need": [
-    "venom",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000011
-  },
-  "r_cl1a109749e0c": {
-   "classId": "c_muu8t3slx20j",
-   "created": 1791160000012,
-   "effect": "Heals 50% more on allies below a quarter HP.",
-   "name": "Triage",
-   "need": [
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000012
-  },
-  "r_cl1a109749e0d": {
-   "classId": "c_muu8t3slx20j",
-   "created": 1791160000013,
-   "effect": "Allies it heals also regenerate 1 HP per second for 3 seconds.",
-   "name": "Renew",
-   "need": [
-    "vital",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000013
-  },
-  "r_cl1a109749e0e": {
-   "classId": "c_muu8t3slx20j",
-   "created": 1791160000014,
-   "effect": "Each heal also removes 1 Poison or Burn from the ally.",
-   "name": "Bandage",
-   "need": [
-    "ward",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000014
-  },
-  "r_cl1a109749e0f": {
-   "classId": "c_muu8t3slx20j",
-   "created": 1791160000015,
-   "effect": "Heals every 2 seconds instead of 3.",
-   "name": "Quick Hands",
-   "need": [
-    "vital",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000015
-  },
-  "r_cl1a109749e10": {
-   "classId": "c_muu8kfxb9l85",
-   "created": 1791160000016,
-   "effect": "Its first attack each fight deals double damage.",
-   "name": "Opening Strike",
-   "need": [
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000016
-  },
-  "r_cl1a109749e11": {
-   "classId": "c_muu8kfxb9l85",
-   "created": 1791160000017,
-   "effect": "Crits ignore Armor.",
-   "name": "Precision",
-   "need": [
-    "edge",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000017
-  },
-  "r_cl1a109749e12": {
-   "classId": "c_muu8kfxb9l85",
-   "created": 1791160000018,
-   "effect": "20% chance to block a front-row attack entirely.",
-   "name": "Parry",
-   "need": [
-    "ward",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000018
-  },
-  "r_cl1a109749e13": {
-   "classId": "c_muu8kfxb9l85",
-   "created": 1791160000019,
-   "effect": "Every 4th attack strikes twice.",
-   "name": "Flurry",
-   "need": [
-    "edge",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000019
-  },
-  "r_cl1a109749e14": {
-   "classId": "c_muu8rt2490lr",
-   "created": 1791160000020,
-   "effect": "After dodging, its next attack deals +50% damage.",
-   "name": "Tumble",
-   "need": [
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000020
-  },
-  "r_cl1a109749e15": {
-   "classId": "c_muu8rt2490lr",
-   "created": 1791160000021,
-   "effect": "The first time it drops below half HP, gains 50% dodge for 3 seconds.",
-   "name": "Second Wind",
-   "need": [
-    "swift",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000021
-  },
-  "r_cl1a109749e16": {
-   "classId": "c_muu8rt2490lr",
-   "created": 1791160000022,
-   "effect": "In the back row, every 3rd attack targets the enemy back row.",
-   "name": "Knife Throw",
-   "need": [
-    "edge",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000022
-  },
-  "r_cl1a109749e17": {
-   "classId": "c_muu8rt2490lr",
-   "created": 1791160000023,
-   "effect": "+1 gold after a won fight if it was never hit.",
-   "name": "Show-off",
-   "need": [
-    "swift",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000023
-  },
-  "r_cl1a109749e18": {
-   "classId": "c_muu8sumchvtt",
-   "created": 1791160000024,
-   "effect": "Its first attack each fight applies 4 Poison.",
-   "name": "Toxic Coating",
-   "need": [
-    "venom"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000024
-  },
-  "r_cl1a109749e19": {
-   "classId": "c_muu8sumchvtt",
-   "created": 1791160000025,
-   "effect": "Poison it applies loses 1 stack every 2 ticks instead of every tick.",
-   "name": "Lingering Venom",
-   "need": [
-    "venom",
-    "venom"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000025
-  },
-  "r_cl1a109749e1a": {
-   "classId": "c_muu8sumchvtt",
-   "created": 1791160000026,
-   "effect": "Crits deal +1 damage per Poison stack on the target (up to +5).",
-   "name": "Venom Strike",
-   "need": [
-    "venom",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000026
-  },
-  "r_cl1a109749e1b": {
-   "classId": "c_muu8sumchvtt",
-   "created": 1791160000027,
-   "effect": "Poisoned enemies attack 10% slower.",
-   "name": "Sluggish Toxin",
-   "need": [
-    "venom",
-    "frost"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000027
-  },
-  "r_cl1a109749e1c": {
-   "classId": "c_muu8dtb3foya",
-   "created": 1791160000028,
-   "effect": "The first hit it takes each fight deals no damage.",
-   "name": "Brace",
-   "need": [
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000028
-  },
-  "r_cl1a109749e1d": {
-   "classId": "c_muu8dtb3foya",
-   "created": 1791160000029,
-   "effect": "Allies in its row start each fight with 4 Shield.",
-   "name": "Shield Wall",
-   "need": [
     "ward",
     "ward"
    ],
    "notes": "Claude draft",
    "status": "idea",
-   "updated": 1791160000029
-  },
-  "r_cl1a109749e1e": {
-   "classId": "c_muu8dtb3foya",
-   "created": 1791160000030,
-   "effect": "While Shielded, regenerates 1 HP per second.",
-   "name": "Steadfast",
-   "need": [
-    "ward",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000030
-  },
-  "r_cl1a109749e1f": {
-   "classId": "c_muu8dtb3foya",
-   "created": 1791160000031,
-   "effect": "When its Shield breaks, deals double its ATK to the attacker.",
-   "name": "Shield Bash",
-   "need": [
-    "ward",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000031
-  },
-  "r_cl1a109749e20": {
-   "classId": "c_muu81a83luco",
-   "created": 1791160000032,
-   "effect": "When a Burning enemy dies, half its Burn spreads to a random enemy.",
-   "name": "Wildfire",
-   "need": [
-    "ember",
-    "ember"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000032
-  },
-  "r_cl1a109749e21": {
-   "classId": "c_muu81a83luco",
-   "created": 1791160000033,
-   "effect": "Every 5th attack applies 2 Burn to every enemy.",
-   "name": "Inferno",
-   "need": [
-    "ember",
-    "ember",
-    "ember"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000033
-  },
-  "r_cl1a109749e22": {
-   "classId": "c_muu81a83luco",
-   "created": 1791160000034,
-   "effect": "Crits on Burning enemies deal +1 damage per Burn stack.",
-   "name": "Searing Crits",
-   "need": [
-    "ember",
-    "ember",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000034
-  },
-  "r_cl1a109749e23": {
-   "classId": "c_muu81a83luco",
-   "created": 1791160000035,
-   "effect": "Each tick of its Burn heals the most injured ally 1.",
-   "name": "Cauterize",
-   "need": [
-    "ember",
-    "ember",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000035
-  },
-  "r_cl1a109749e24": {
-   "classId": "c_muua27gbu9q4",
-   "created": 1791160000036,
-   "effect": "When an enemy has 3+ Burn and 3+ Chill, both are consumed to deal 10 damage.",
-   "name": "Thermal Shock",
-   "need": [
-    "ember",
-    "frost"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000036
-  },
-  "r_cl1a109749e25": {
-   "classId": "c_muua27gbu9q4",
-   "created": 1791160000037,
-   "effect": "Its pattern becomes Burn, Burn, Chill.",
-   "name": "Fire Focus",
-   "need": [
-    "ember",
-    "ember",
-    "frost"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000037
-  },
-  "r_cl1a109749e26": {
-   "classId": "c_muua27gbu9q4",
-   "created": 1791160000038,
-   "effect": "Its pattern becomes Chill, Chill, Burn.",
-   "name": "Ice Focus",
-   "need": [
-    "ember",
-    "frost",
-    "frost"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000038
+   "updated": 1791160000141
   },
   "r_cl1a109749e27": {
    "classId": "c_muua27gbu9q4",
@@ -1545,362 +1069,32 @@
    "status": "idea",
    "updated": 1791160000039
   },
-  "r_cl1a109749e28": {
-   "classId": "c_muu8trhnchpq",
-   "created": 1791160000040,
-   "effect": "Being hit also counts as a hit for its attack-speed stacks.",
-   "name": "Bloodrush",
+  "r_cl1a109749ec6": {
+   "classId": "c_muuck8ca1kex",
+   "created": 1791160000198,
+   "effect": "Back-row enemies take +20% damage from all heroes.",
+   "name": "Hunter's Mark",
    "need": [
-    "ember",
+    "venom",
+    "frost",
     "swift"
    ],
    "notes": "Claude draft",
    "status": "idea",
-   "updated": 1791160000040
+   "updated": 1791160000198
   },
-  "r_cl1a109749e29": {
-   "classId": "c_muu8trhnchpq",
-   "created": 1791160000041,
-   "effect": "At max stacks, attacks apply 2 Burn instead of 1.",
-   "name": "Rampage",
-   "need": [
-    "ember",
-    "ember",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000041
-  },
-  "r_cl1a109749e2a": {
-   "classId": "c_muu8trhnchpq",
-   "created": 1791160000042,
-   "effect": "Below half HP, heals 2 on each hit.",
-   "name": "Battle Trance",
-   "need": [
-    "ember",
-    "vital",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000042
-  },
-  "r_cl1a109749e2b": {
-   "classId": "c_muu8trhnchpq",
-   "created": 1791160000043,
-   "effect": "+15% crit chance at max stacks.",
-   "name": "Reckless",
-   "need": [
-    "ember",
-    "edge",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000043
-  },
-  "r_cl1a109749e2c": {
-   "classId": "c_muu8dwwwleo2",
-   "created": 1791160000044,
-   "effect": "Allies in his row are immune to Chill.",
-   "name": "Warm Hearth",
-   "need": [
-    "ember",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000044
-  },
-  "r_cl1a109749e2d": {
-   "classId": "c_muu8dwwwleo2",
-   "created": 1791160000045,
-   "effect": "At the start of each fight, gives every enemy 1 Burn for every 4 Shield he has.",
-   "name": "Blazing Shield",
-   "need": [
-    "ember",
-    "ember",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000045
-  },
-  "r_cl1a109749e2e": {
-   "classId": "c_muu8dwwwleo2",
-   "created": 1791160000046,
-   "effect": "Shield he gains is +1 for each Burning enemy (up to +3).",
-   "name": "Bonfire Guard",
-   "need": [
-    "ember",
-    "ward",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000046
-  },
-  "r_cl1a109749e2f": {
-   "classId": "c_muu8dwwwleo2",
-   "created": 1791160000047,
-   "effect": "Every 4 seconds, heals the most injured ally 1 per Burning enemy.",
-   "name": "Hearth's Embrace",
-   "need": [
-    "ember",
-    "ward",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000047
-  },
-  "r_cl1a109749e30": {
-   "classId": "c_muu7q2c8r12v",
-   "created": 1791160000048,
-   "effect": "Frozen enemies stay Frozen for 2 attacks instead of 1.",
-   "name": "Permafrost",
+  "r_cl1a109749e05": {
+   "classId": "c_muu7pu09ggnx",
    "need": [
     "frost",
     "frost"
    ],
-   "notes": "Claude draft",
+   "name": "Deep Freeze",
+   "effect": "Deals +1 damage for every 2 Chill on the target. (Max +10 on frozen enemies)",
+   "notes": "",
    "status": "idea",
-   "updated": 1791160000048
-  },
-  "r_cl1a109749e31": {
-   "classId": "c_muu7q2c8r12v",
-   "created": 1791160000049,
-   "effect": "Frozen enemies can't be healed or gain Shield.",
-   "name": "Ice Prison",
-   "need": [
-    "frost",
-    "frost",
-    "frost"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000049
-  },
-  "r_cl1a109749e32": {
-   "classId": "c_muu7q2c8r12v",
-   "created": 1791160000050,
-   "effect": "Hitting a Frozen enemy deals double damage and ends the Freeze.",
-   "name": "Shatter",
-   "need": [
-    "frost",
-    "frost",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000050
-  },
-  "r_cl1a109749e33": {
-   "classId": "c_muu7q2c8r12v",
-   "created": 1791160000051,
-   "effect": "Enemies Freeze at 4 Chill instead of 5.",
-   "name": "Flash Freeze",
-   "need": [
-    "frost",
-    "frost",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000051
-  },
-  "r_cl1a109749e34": {
-   "classId": "c_muuaifyzo8vc",
-   "created": 1791160000052,
-   "effect": "+10% crit chance against Chilled enemies.",
-   "name": "Frostbite Edge",
-   "need": [
-    "frost",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000052
-  },
-  "r_cl1a109749e35": {
-   "classId": "c_muuaifyzo8vc",
-   "created": 1791160000053,
-   "effect": "Crits remove all Chill from the target and deal +2 damage per stack removed.",
-   "name": "Brittle",
-   "need": [
-    "frost",
-    "frost",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000053
-  },
-  "r_cl1a109749e36": {
-   "classId": "c_muuaifyzo8vc",
-   "created": 1791160000054,
-   "effect": "Crits also give 1 Chill to the enemy behind the target.",
-   "name": "Ice Shards",
-   "need": [
-    "frost",
-    "edge",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000054
-  },
-  "r_cl1a109749e37": {
-   "classId": "c_muuaifyzo8vc",
-   "created": 1791160000055,
-   "effect": "+5% attack speed for each Chilled enemy (up to +25%).",
-   "name": "Glacial Rush",
-   "need": [
-    "frost",
-    "edge",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000055
-  },
-  "r_cl1a109749e38": {
-   "classId": "c_muu98ulvacc4",
-   "created": 1791160000056,
-   "effect": "Starts each fight with 2 Shield per enemy.",
-   "name": "Hoarfrost",
-   "need": [
-    "frost",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000056
-  },
-  "r_cl1a109749e39": {
-   "classId": "c_muu98ulvacc4",
-   "created": 1791160000057,
-   "effect": "Attackers that hit it gain 2 Chill instead of 1.",
-   "name": "Glacier",
-   "need": [
-    "frost",
-    "frost",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000057
-  },
-  "r_cl1a109749e3a": {
-   "classId": "c_muu98ulvacc4",
-   "created": 1791160000058,
-   "effect": "When its Shield breaks, every enemy gains 2 Chill.",
-   "name": "Ice Wall",
-   "need": [
-    "frost",
-    "ward",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000058
-  },
-  "r_cl1a109749e3b": {
-   "classId": "c_muu98ulvacc4",
-   "created": 1791160000059,
-   "effect": "When hit, heals 1 for each Chill on the attacker.",
-   "name": "Cold Comfort",
-   "need": [
-    "frost",
-    "ward",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000059
-  },
-  "r_cl1a109749e3c": {
-   "classId": "c_muu8a0kltcn4",
-   "created": 1791160000060,
-   "effect": "The first market reroll each visit costs 1 less.",
-   "name": "Bulk Discount",
-   "need": [
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000060
-  },
-  "r_cl1a109749e3d": {
-   "classId": "c_muu8a0kltcn4",
-   "created": 1791160000061,
-   "effect": "Interest cap +1.",
-   "name": "Investment",
-   "need": [
-    "gilt",
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000061
-  },
-  "r_cl1a109749e3e": {
-   "classId": "c_muu8a0kltcn4",
-   "created": 1791160000062,
-   "effect": "Allies start each fight with 1 Shield per 5 gold you hold (up to 5).",
-   "name": "Hired Guards",
-   "need": [
-    "ward",
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000062
-  },
-  "r_cl1a109749e3f": {
-   "classId": "c_muu8a0kltcn4",
-   "created": 1791160000063,
-   "effect": "Heroes in the market cost 1 less gold.",
-   "name": "Haggle",
-   "need": [
-    "swift",
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000063
-  },
-  "r_cl1a109749e40": {
-   "classId": "c_muu9coiwf8yb",
-   "created": 1791160000064,
-   "effect": "Each heal also heals her 2.",
-   "name": "Blood Bond",
-   "need": [
-    "vital",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000064
-  },
-  "r_cl1a109749e41": {
-   "classId": "c_muu9coiwf8yb",
-   "created": 1791160000065,
-   "effect": "Each heal also deals half its amount as damage to a random enemy.",
-   "name": "Crimson Tide",
-   "need": [
-    "vital",
-    "vital",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000065
+   "updated": 1791223096077,
+   "created": 1791160000005
   },
   "r_cl1a109749e42": {
    "classId": "c_muu9coiwf8yb",
@@ -1916,349 +1110,6 @@
    "status": "idea",
    "updated": 1791160000066
   },
-  "r_cl1a109749e43": {
-   "classId": "c_muu9coiwf8yb",
-   "created": 1791160000067,
-   "effect": "Her attacks make the target bleed: 1 damage per second for 3 seconds (stacks).",
-   "name": "Hemorrhage",
-   "need": [
-    "edge",
-    "vital",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000067
-  },
-  "r_cl1a109749e44": {
-   "classId": "c_muubf8nae0xm",
-   "created": 1791160000068,
-   "effect": "Heals 3 after each dodge.",
-   "name": "Inner Calm",
-   "need": [
-    "vital",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000068
-  },
-  "r_cl1a109749e45": {
-   "classId": "c_muubf8nae0xm",
-   "created": 1791160000069,
-   "effect": "After 3 seconds without being attacked, regenerates 3 HP per second.",
-   "name": "Meditation",
-   "need": [
-    "vital",
-    "vital",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000069
-  },
-  "r_cl1a109749e46": {
-   "classId": "c_muubf8nae0xm",
-   "created": 1791160000070,
-   "effect": "Each counterattack gives +10% attack speed for 3 seconds.",
-   "name": "Flowing Strikes",
-   "need": [
-    "vital",
-    "swift",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000070
-  },
-  "r_cl1a109749e47": {
-   "classId": "c_muubf8nae0xm",
-   "created": 1791160000071,
-   "effect": "Counterattacks are guaranteed crits.",
-   "name": "Pressure Point",
-   "need": [
-    "edge",
-    "vital",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000071
-  },
-  "r_cl1a109749e48": {
-   "classId": "c_muu8hkj0igmk",
-   "created": 1791160000072,
-   "effect": "+1 gold after a won fight if he got a kill.",
-   "name": "Hazard Pay",
-   "need": [
-    "edge",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000072
-  },
-  "r_cl1a109749e49": {
-   "classId": "c_muu8hkj0igmk",
-   "created": 1791160000073,
-   "effect": "+4 ATK against elites and bosses.",
-   "name": "Contract Killer",
-   "need": [
-    "edge",
-    "edge",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000073
-  },
-  "r_cl1a109749e4a": {
-   "classId": "c_muu8hkj0igmk",
-   "created": 1791160000074,
-   "effect": "Starts each fight with +1 ATK per 5 gold you hold (up to +4).",
-   "name": "Paid in Advance",
-   "need": [
-    "edge",
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000074
-  },
-  "r_cl1a109749e4b": {
-   "classId": "c_muu8hkj0igmk",
-   "created": 1791160000075,
-   "effect": "Gains 5 Shield after each kill.",
-   "name": "Bodyguard",
-   "need": [
-    "ward",
-    "edge",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000075
-  },
-  "r_cl1a109749e4c": {
-   "classId": "c_muu8kqk3v3ck",
-   "created": 1791160000076,
-   "effect": "Deals +25% damage to his duel opponent.",
-   "name": "En Garde",
-   "need": [
-    "edge",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000076
-  },
-  "r_cl1a109749e4d": {
-   "classId": "c_muu8kqk3v3ck",
-   "created": 1791160000077,
-   "effect": "When his duel opponent attacks him, 25% chance to strike back at once.",
-   "name": "Riposte",
-   "need": [
-    "edge",
-    "edge",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000077
-  },
-  "r_cl1a109749e4e": {
-   "classId": "c_muu8kqk3v3ck",
-   "created": 1791160000078,
-   "effect": "+20% dodge against his duel opponent.",
-   "name": "Footwork",
-   "need": [
-    "edge",
-    "edge",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000078
-  },
-  "r_cl1a109749e4f": {
-   "classId": "c_muu8kqk3v3ck",
-   "created": 1791160000079,
-   "effect": "When he wins a duel, heals 30% of his max HP and challenges the next enemy.",
-   "name": "Victor's Rest",
-   "need": [
-    "edge",
-    "edge",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000079
-  },
-  "r_cl1a109749e50": {
-   "classId": "c_muu91gvq8418",
-   "created": 1791160000080,
-   "effect": "Allies attack 25% faster for the first 3 seconds of each fight.",
-   "name": "Overture",
-   "need": [
-    "swift",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000080
-  },
-  "r_cl1a109749e51": {
-   "classId": "c_muu91gvq8418",
-   "created": 1791160000081,
-   "effect": "Her attack-speed aura is +15% instead of +10%.",
-   "name": "Allegro",
-   "need": [
-    "swift",
-    "swift",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000081
-  },
-  "r_cl1a109749e52": {
-   "classId": "c_muu91gvq8418",
-   "created": 1791160000082,
-   "effect": "Every 4 seconds, heals every ally 2.",
-   "name": "Soothing Song",
-   "need": [
-    "vital",
-    "swift",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000082
-  },
-  "r_cl1a109749e53": {
-   "classId": "c_muu91gvq8418",
-   "created": 1791160000083,
-   "effect": "Allies gain +5% crit chance.",
-   "name": "Battle Hymn",
-   "need": [
-    "edge",
-    "swift",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000083
-  },
-  "r_cl1a109749e54": {
-   "classId": "c_muu8s3phmca2",
-   "created": 1791160000084,
-   "effect": "Allies in her row gain +10% attack speed.",
-   "name": "Tailwind",
-   "need": [
-    "swift",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000084
-  },
-  "r_cl1a109749e55": {
-   "classId": "c_muu8s3phmca2",
-   "created": 1791160000085,
-   "effect": "Her follow-up attacks deal +50% damage.",
-   "name": "Gale Force",
-   "need": [
-    "swift",
-    "swift",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000085
-  },
-  "r_cl1a109749e56": {
-   "classId": "c_muu8s3phmca2",
-   "created": 1791160000086,
-   "effect": "Her follow-up attacks apply 1 Chill.",
-   "name": "Cutting Wind",
-   "need": [
-    "frost",
-    "swift",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000086
-  },
-  "r_cl1a109749e57": {
-   "classId": "c_muubfqfprgsy",
-   "created": 1791160000087,
-   "effect": "When an enemy dies while Poisoned, every ally heals 2.",
-   "name": "Tonic",
-   "need": [
-    "venom",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000087
-  },
-  "r_cl1a109749e58": {
-   "classId": "c_muubfqfprgsy",
-   "created": 1791160000088,
-   "effect": "Every 4th attack applies double Poison.",
-   "name": "Concentrate",
-   "need": [
-    "venom",
-    "venom",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000088
-  },
-  "r_cl1a109749e59": {
-   "classId": "c_muubfqfprgsy",
-   "created": 1791160000089,
-   "effect": "Every 4 seconds, removes 2 Poison or Burn from the most afflicted ally.",
-   "name": "Remedy",
-   "need": [
-    "venom",
-    "vital",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000089
-  },
-  "r_cl1a109749e5a": {
-   "classId": "c_muubfqfprgsy",
-   "created": 1791160000090,
-   "effect": "+1 gold after a won fight for each enemy that died Poisoned (up to +3).",
-   "name": "Snake Oil",
-   "need": [
-    "venom",
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000090
-  },
-  "r_cl1a109749e5b": {
-   "classId": "c_muu9fbav9cav",
-   "created": 1791160000091,
-   "effect": "Poisoned enemies receive 50% less healing.",
-   "name": "Quarantine",
-   "need": [
-    "venom",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000091
-  },
   "r_cl1a109749e5c": {
    "classId": "c_muu9fbav9cav",
    "created": 1791160000092,
@@ -2273,340 +1124,19 @@
    "status": "idea",
    "updated": 1791160000092
   },
-  "r_cl1a109749e5d": {
-   "classId": "c_muu9fbav9cav",
-   "created": 1791160000093,
-   "effect": "His heal from Poison ticks is 2 instead of 1.",
-   "name": "Leech",
+  "r_cl1a109749e9c": {
+   "classId": "c_muub9dnnh0qc",
+   "created": 1791160000156,
+   "effect": "Enemies it crits can't gain Shield for 3 seconds.",
+   "name": "Blasphemy",
    "need": [
-    "venom",
-    "vital",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000093
-  },
-  "r_cl1a109749e5e": {
-   "classId": "c_muu9fbav9cav",
-   "created": 1791160000094,
-   "effect": "Immune to Poison. Allies in his row take 1 less Poison damage per tick.",
-   "name": "Plague Mask",
-   "need": [
-    "venom",
-    "ward",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000094
-  },
-  "r_cl1a109749e5f": {
-   "classId": "c_muuberm8ge8h",
-   "created": 1791160000095,
-   "effect": "+1 damage per Poison stack on the target (up to +5).",
-   "name": "Exploit",
-   "need": [
-    "venom",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000095
-  },
-  "r_cl1a109749e60": {
-   "classId": "c_muuberm8ge8h",
-   "created": 1791160000096,
-   "effect": "Crits make the target attack 20% slower for 3 seconds.",
-   "name": "Hamstring",
-   "need": [
-    "venom",
     "edge",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000096
-  },
-  "r_cl1a109749e61": {
-   "classId": "c_muuberm8ge8h",
-   "created": 1791160000097,
-   "effect": "Crits deal bonus damage equal to the target's Poison.",
-   "name": "Toxic Blade",
-   "need": [
-    "venom",
-    "venom",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000097
-  },
-  "r_cl1a109749e62": {
-   "classId": "c_muuberm8ge8h",
-   "created": 1791160000098,
-   "effect": "After a kill, can't be targeted for 2 seconds.",
-   "name": "Vanish",
-   "need": [
-    "venom",
-    "edge",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000098
-  },
-  "r_cl1a109749e63": {
-   "classId": "c_muu93w65k55t",
-   "created": 1791160000099,
-   "effect": "Every 5th attack copies the target's Poison onto a neighbouring enemy.",
-   "name": "Contagion",
-   "need": [
-    "venom",
-    "venom"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000099
-  },
-  "r_cl1a109749e64": {
-   "classId": "c_muu93w65k55t",
-   "created": 1791160000100,
-   "effect": "Poison that spreads keeps its full strength.",
-   "name": "Pandemic",
-   "need": [
-    "venom",
-    "venom",
-    "venom"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000100
-  },
-  "r_cl1a109749e65": {
-   "classId": "c_muu93w65k55t",
-   "created": 1791160000101,
-   "effect": "Enemies with 5+ Poison also gain 1 Burn whenever their Poison ticks.",
-   "name": "Fever",
-   "need": [
-    "venom",
-    "venom",
-    "ember"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000101
-  },
-  "r_cl1a109749e66": {
-   "classId": "c_muu93w65k55t",
-   "created": 1791160000102,
-   "effect": "Enemies with 5+ Poison attack 15% slower.",
-   "name": "Creeping Sickness",
-   "need": [
-    "venom",
-    "venom",
-    "frost"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000102
-  },
-  "r_cl1a109749e67": {
-   "classId": "c_muu9resprp7i",
-   "created": 1791160000103,
-   "effect": "Allies below a quarter HP take 30% less damage.",
-   "name": "Sanctuary",
-   "need": [
-    "ward",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000103
-  },
-  "r_cl1a109749e68": {
-   "classId": "c_muu9resprp7i",
-   "created": 1791160000104,
-   "effect": "Shield from her overhealing is doubled.",
-   "name": "Aegis",
-   "need": [
-    "ward",
-    "ward",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000104
-  },
-  "r_cl1a109749e69": {
-   "classId": "c_muu9resprp7i",
-   "created": 1791160000105,
-   "effect": "Every 3rd heal heals twice as much.",
-   "name": "Greater Heal",
-   "need": [
-    "ward",
-    "vital",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000105
-  },
-  "r_cl1a109749e6a": {
-   "classId": "c_muu9resprp7i",
-   "created": 1791160000106,
-   "effect": "Heals every 1.5 seconds instead of 2.",
-   "name": "Swift Prayer",
-   "need": [
-    "ward",
-    "vital",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000106
-  },
-  "r_cl1a109749e6b": {
-   "classId": "c_muu9ue1x7wfi",
-   "created": 1791160000107,
-   "effect": "Every 4th attack adds half her Shield as damage instead of a quarter.",
-   "name": "Shield Slam",
-   "need": [
-    "ward",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000107
-  },
-  "r_cl1a109749e6c": {
-   "classId": "c_muu9ue1x7wfi",
-   "created": 1791160000108,
-   "effect": "Gains 2 Shield each time she attacks.",
-   "name": "Hold the Line",
-   "need": [
-    "ward",
-    "ward",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000108
-  },
-  "r_cl1a109749e6d": {
-   "classId": "c_muu9ue1x7wfi",
-   "created": 1791160000109,
-   "effect": "When her Shield absorbs a hit, the attacker takes 2 damage.",
-   "name": "Spiked Shield",
-   "need": [
-    "ward",
-    "ward",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000109
-  },
-  "r_cl1a109749e6e": {
-   "classId": "c_muu9ue1x7wfi",
-   "created": 1791160000110,
-   "effect": "When an ally falls below half HP, gives them 8 Shield (once per ally).",
-   "name": "Shield Maiden's Vow",
-   "need": [
-    "ward",
-    "ward",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000110
-  },
-  "r_cl1a109749e6f": {
-   "classId": "c_muu81homh3tq",
-   "created": 1791160000111,
-   "effect": "Its hit-all attacks deal 75% damage instead of 60%.",
-   "name": "Heat Wave",
-   "need": [
-    "ember",
-    "ember",
-    "ember"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000111
-  },
-  "r_cl1a109749e70": {
-   "classId": "c_muu81homh3tq",
-   "created": 1791160000112,
-   "effect": "Every 5th attack applies 3 Burn to every enemy.",
-   "name": "Firestorm",
-   "need": [
-    "ember",
-    "ember",
-    "ember",
-    "ember"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000112
-  },
-  "r_cl1a109749e71": {
-   "classId": "c_muu81homh3tq",
-   "created": 1791160000113,
-   "effect": "Crits make the target's Burn deal all its remaining damage at once.",
-   "name": "Combustion",
-   "need": [
-    "ember",
-    "ember",
-    "ember",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000113
-  },
-  "r_cl1a109749e72": {
-   "classId": "c_muu81homh3tq",
-   "created": 1791160000114,
-   "effect": "While any enemy is Burning, every ally regenerates 1 HP every 2 seconds.",
-   "name": "Warmth",
-   "need": [
-    "ember",
-    "ember",
-    "ember",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000114
-  },
-  "r_cl1a109749e73": {
-   "classId": "c_muucnefb450t",
-   "created": 1791160000115,
-   "effect": "After each dodge, its next attack applies 3 Burn.",
-   "name": "Fire Step",
-   "need": [
-    "ember",
-    "ember",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000115
-  },
-  "r_cl1a109749e74": {
-   "classId": "c_muucnefb450t",
-   "created": 1791160000116,
-   "effect": "+10% dodge while any enemy is Burning.",
-   "name": "Smoke Veil",
-   "need": [
-    "ember",
     "swift",
-    "swift"
+    "gilt"
    ],
    "notes": "Claude draft",
    "status": "idea",
-   "updated": 1791160000116
+   "updated": 1791160000156
   },
   "r_cl1a109749e75": {
    "classId": "c_muucnefb450t",
@@ -2623,48 +1153,33 @@
    "status": "idea",
    "updated": 1791160000117
   },
-  "r_cl1a109749e76": {
-   "classId": "c_muucnefb450t",
-   "created": 1791160000118,
-   "effect": "Heals 2 whenever a dodge leaves Burn on the attacker.",
-   "name": "Dance of Embers",
+  "r_cl1a109749e3f": {
+   "classId": "c_muu8a0kltcn4",
+   "created": 1791160000063,
+   "effect": "Heroes in the market cost 1 less gold.",
+   "name": "Haggle",
    "need": [
-    "ember",
-    "vital",
     "swift",
-    "swift"
+    "gilt",
+    "gilt"
    ],
    "notes": "Claude draft",
    "status": "idea",
-   "updated": 1791160000118
+   "updated": 1791160000063
   },
-  "r_cl1a109749e77": {
-   "classId": "c_muu8fq9g7iy1",
-   "created": 1791160000119,
-   "effect": "Enemies that hit it gain 2 Burn instead of 1.",
-   "name": "Magma Skin",
+  "r_cl1a109749e87": {
+   "classId": "c_muuczwluamkn",
+   "created": 1791160000135,
+   "effect": "Crit cleave hits also apply 1 Chill.",
+   "name": "Frost Edge",
    "need": [
-    "ember",
-    "ember",
-    "ward"
+    "frost",
+    "frost",
+    "edge"
    ],
    "notes": "Claude draft",
    "status": "idea",
-   "updated": 1791160000119
-  },
-  "r_cl1a109749e78": {
-   "classId": "c_muu8fq9g7iy1",
-   "created": 1791160000120,
-   "effect": "When its Shield breaks, every enemy gains 2 Burn.",
-   "name": "Cooling Crust",
-   "need": [
-    "ember",
-    "ward",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000120
+   "updated": 1791160000135
   },
   "r_cl1a109749e79": {
    "classId": "c_muu8fq9g7iy1",
@@ -2680,6 +1195,1260 @@
    "notes": "Claude draft",
    "status": "idea",
    "updated": 1791160000121
+  },
+  "r_cl1a109749ee4": {
+   "classId": "c_muu9rlact8dy",
+   "created": 1791160000228,
+   "effect": "Gives Shield every 2 seconds instead of 3.",
+   "name": "Divine Bulwark",
+   "need": [
+    "ward",
+    "ward",
+    "vital",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000228
+  },
+  "r_cl1a109749edd": {
+   "classId": "c_muubahl3ny7g",
+   "created": 1791160000221,
+   "effect": "Each hex also jumps to a second enemy.",
+   "name": "Big Juju",
+   "need": [
+    "venom",
+    "ward",
+    "vital",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000221
+  },
+  "r_cl1a109749e9e": {
+   "classId": "c_muub9dnnh0qc",
+   "created": 1791160000158,
+   "effect": "Each hit permanently removes 2 Shield or 1 Armor from the target.",
+   "name": "Apostate",
+   "need": [
+    "edge",
+    "vital",
+    "swift",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000158
+  },
+  "r_cl1a109749e18": {
+   "classId": "c_muu8sumchvtt",
+   "need": [
+    "vital"
+   ],
+   "name": "Bitter Harvest",
+   "effect": "When a Poisoned enemy dies, heal the most injured ally 3. If it was Festering, heal every ally 3.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791223734902,
+   "created": 1791160000024
+  },
+  "r_cl1a109749ec1": {
+   "classId": "c_muucnsji9spe",
+   "created": 1791160000193,
+   "effect": "The first bomb each fight applies triple statuses.",
+   "name": "The Big One",
+   "need": [
+    "venom",
+    "ember",
+    "edge",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000193
+  },
+  "r_cl1a109749e31": {
+   "classId": "c_muu7q2c8r12v",
+   "created": 1791160000049,
+   "effect": "Frozen enemies can't be healed or gain Shield.",
+   "name": "Ice Prison",
+   "need": [
+    "frost",
+    "frost",
+    "frost"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000049
+  },
+  "r_cl1a109749e78": {
+   "classId": "c_muu8fq9g7iy1",
+   "created": 1791160000120,
+   "effect": "When its Shield breaks, every enemy gains 2 Burn.",
+   "name": "Cooling Crust",
+   "need": [
+    "ember",
+    "ward",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000120
+  },
+  "r_cl1a109749e22": {
+   "classId": "c_muu81a83luco",
+   "created": 1791160000034,
+   "effect": "Crits on Burning enemies deal +1 damage per Burn stack.",
+   "name": "Searing Crits",
+   "need": [
+    "ember",
+    "ember",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000034
+  },
+  "r_cl1a109749ee6": {
+   "classId": "c_muu8lrrukarl",
+   "created": 1791160000230,
+   "effect": "Enemies forced to attack it deal 15% less damage.",
+   "name": "Challenge",
+   "need": [
+    "ward",
+    "ward",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000230
+  },
+  "r_cl1a109749e90": {
+   "classId": "c_muu8m2w3w2sq",
+   "created": 1791160000144,
+   "effect": "+1 gold for every 3rd crit (up to 3 per fight).",
+   "name": "Grim Toll",
+   "need": [
+    "edge",
+    "vital",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000144
+  },
+  "r_cl1a109749e62": {
+   "classId": "c_muuberm8ge8h",
+   "created": 1791160000098,
+   "effect": "After a kill, can't be targeted for 2 seconds.",
+   "name": "Vanish",
+   "need": [
+    "venom",
+    "edge",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000098
+  },
+  "r_cl1a109749e84": {
+   "classId": "c_muu7r2uqpswr",
+   "created": 1791160000132,
+   "effect": "Every 5th attack gives every enemy 2 Chill.",
+   "name": "Blizzard",
+   "need": [
+    "frost",
+    "frost",
+    "frost",
+    "frost"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000132
+  },
+  "r_cl1a109749e9d": {
+   "classId": "c_muub9dnnh0qc",
+   "created": 1791160000157,
+   "effect": "+1 gold each time a crit heals it (up to 3 per fight).",
+   "name": "False Prophet",
+   "need": [
+    "vital",
+    "swift",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000157
+  },
+  "r_cl1a109749e5a": {
+   "classId": "c_muubfqfprgsy",
+   "created": 1791160000090,
+   "effect": "+1 gold after a won fight for each enemy that died Poisoned (up to +3).",
+   "name": "Snake Oil",
+   "need": [
+    "venom",
+    "gilt",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000090
+  },
+  "r_cl1a109749e9b": {
+   "classId": "c_muub9dnnh0qc",
+   "created": 1791160000155,
+   "effect": "Crits heal it 8 instead of 4.",
+   "name": "Zealot",
+   "need": [
+    "edge",
+    "vital",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000155
+  },
+  "r_cl1a109749ee1": {
+   "classId": "c_muub3d9lyt44",
+   "created": 1791160000225,
+   "effect": "The full heal can trigger twice per fight.",
+   "name": "Last Stand",
+   "need": [
+    "ward",
+    "vital",
+    "swift",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000225
+  },
+  "r_cl1a109749e36": {
+   "classId": "c_muuaifyzo8vc",
+   "created": 1791160000054,
+   "effect": "Crits also give 1 Chill to the enemy behind the target.",
+   "name": "Ice Shards",
+   "need": [
+    "frost",
+    "edge",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000054
+  },
+  "r_cl1a109749e53": {
+   "classId": "c_muu91gvq8418",
+   "created": 1791160000083,
+   "effect": "Allies gain +5% crit chance.",
+   "name": "Battle Hymn",
+   "need": [
+    "edge",
+    "swift",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000083
+  },
+  "r_cl1a109749ecf": {
+   "classId": "c_muu9hfleces9",
+   "created": 1791160000207,
+   "effect": "Interest cap +1.",
+   "name": "Philosopher's Stone",
+   "need": [
+    "venom",
+    "gilt",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000207
+  },
+  "r_cl1a109749e93": {
+   "classId": "c_muu8cz7uo8uh",
+   "created": 1791160000147,
+   "effect": "+1 gold after each won fight for every 2 heroes in your guild.",
+   "name": "Guild Dues",
+   "need": [
+    "gilt",
+    "gilt",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000147
+  },
+  "r_cl1a109749e4d": {
+   "classId": "c_muu8kqk3v3ck",
+   "created": 1791160000077,
+   "effect": "When his duel opponent attacks him, 25% chance to strike back at once.",
+   "name": "Riposte",
+   "need": [
+    "edge",
+    "edge",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000077
+  },
+  "r_muugaeoldxdt": {
+   "classId": "c_muu9phmxqag5",
+   "created": 1791156424917,
+   "effect": "Wilfred heals for 50% of attack damage done by Necrodancer",
+   "name": "[placeholder]",
+   "need": [
+    "vital",
+    "vital",
+    "vital"
+   ],
+   "notes": "If Wilfred is dead this doesn't revive her",
+   "status": "idea",
+   "updated": 1791156494041
+  },
+  "r_cl1a109749eb5": {
+   "classId": "c_muu7sibtrs2m",
+   "created": 1791160000181,
+   "effect": "Every 4th attack applies 3 of each status.",
+   "name": "Rainbow",
+   "need": [
+    "venom",
+    "ember",
+    "frost",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000181
+  },
+  "r_cl1a109749ebf": {
+   "classId": "c_muucnsji9spe",
+   "created": 1791160000191,
+   "effect": "Throws a bomb every 3rd attack instead of every 4th.",
+   "name": "Short Fuse",
+   "need": [
+    "ember",
+    "edge",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000191
+  },
+  "r_cl1a109749ea2": {
+   "classId": "c_muuayv3nak54",
+   "created": 1791160000162,
+   "effect": "+10% crit chance per kill this fight (up to +30%).",
+   "name": "Perfect Edge",
+   "need": [
+    "edge",
+    "edge",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000162
+  },
+  "r_cl1a109749e7d": {
+   "classId": "c_muucd48tezf2",
+   "created": 1791160000125,
+   "effect": "Storm attacks apply 2 Chill instead of 1.",
+   "name": "Squall",
+   "need": [
+    "frost",
+    "ward",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000125
+  },
+  "r_cl1a109749e17": {
+   "classId": "c_muu8rt2490lr",
+   "need": [
+    "gilt"
+   ],
+   "name": "Well Prepared",
+   "effect": "You dodge the first attack thrown at you.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791221568991,
+   "created": 1791160000023
+  },
+  "r_cl1a109749e0d": {
+   "classId": "c_muu8t3slx20j",
+   "need": [
+    "vital",
+    "vital"
+   ],
+   "name": "Renew",
+   "effect": "Healing you apply to heroes below 50% hp is increased by 50%.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791223983061,
+   "created": 1791160000013
+  },
+  "r_cl1a109749ed5": {
+   "classId": "c_muu9oupl17gi",
+   "created": 1791160000213,
+   "effect": "Skeletons attack 20% faster.",
+   "name": "Restless Dead",
+   "need": [
+    "venom",
+    "venom",
+    "vital",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000213
+  },
+  "r_cl1a109749e26": {
+   "classId": "c_muua27gbu9q4",
+   "created": 1791160000038,
+   "effect": "Its pattern becomes Chill, Chill, Burn.",
+   "name": "Ice Focus",
+   "need": [
+    "ember",
+    "frost",
+    "frost"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000038
+  },
+  "r_cl1a109749e5e": {
+   "classId": "c_muu9fbav9cav",
+   "created": 1791160000094,
+   "effect": "Immune to Poison. Allies in his row take 1 less Poison damage per tick.",
+   "name": "Plague Mask",
+   "need": [
+    "venom",
+    "ward",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000094
+  },
+  "r_cl1a109749eb3": {
+   "classId": "c_muu7sibtrs2m",
+   "created": 1791160000179,
+   "effect": "Each status it applies heals the most injured ally 1.",
+   "name": "Prism Heal",
+   "need": [
+    "ember",
+    "frost",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000179
+  },
+  "r_cl1a109749e6e": {
+   "classId": "c_muu9ue1x7wfi",
+   "created": 1791160000110,
+   "effect": "When an ally falls below half HP, gives them 8 Shield (once per ally).",
+   "name": "Shield Maiden's Vow",
+   "need": [
+    "ward",
+    "ward",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000110
+  },
+  "r_cl1a109749eb6": {
+   "classId": "c_muucdoklpfu4",
+   "created": 1791160000182,
+   "effect": "+5% crit chance for each different status on the target.",
+   "name": "Enchanted Blade",
+   "need": [
+    "venom",
+    "ember",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000182
+  },
+  "r_cl1a109749e12": {
+   "classId": "c_muu8kfxb9l85",
+   "need": [
+    "venom"
+   ],
+   "name": "Poisoned Blade",
+   "effect": "Crits apply 5 Poison.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791221472634,
+   "created": 1791160000018
+  },
+  "r_muuhbz6iksar": {
+   "classId": "c_muu9phmxqag5",
+   "created": 1791158177754,
+   "effect": "Wilfred gains Necrodancer's essence passives",
+   "name": "Perfect partners",
+   "need": [
+    "venom",
+    "vital",
+    "swift",
+    "gilt"
+   ],
+   "notes": "",
+   "status": "idea",
+   "updated": 1791158177754
+  },
+  "r_cl1a109749eae": {
+   "classId": "c_muu8v6mqq9lr",
+   "created": 1791160000174,
+   "effect": "Every 5th attack hits every enemy.",
+   "name": "Volley",
+   "need": [
+    "swift",
+    "swift",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000174
+  },
+  "r_cl1a109749e43": {
+   "classId": "c_muu9coiwf8yb",
+   "created": 1791160000067,
+   "effect": "Her attacks make the target bleed: 1 damage per second for 3 seconds (stacks).",
+   "name": "Hemorrhage",
+   "need": [
+    "edge",
+    "vital",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000067
+  },
+  "r_cl1a109749e94": {
+   "classId": "c_muu8cz7uo8uh",
+   "created": 1791160000148,
+   "effect": "Interest cap +2.",
+   "name": "Grand Treasury",
+   "need": [
+    "gilt",
+    "gilt",
+    "gilt",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000148
+  },
+  "r_cl1a109749e50": {
+   "classId": "c_muu91gvq8418",
+   "created": 1791160000080,
+   "effect": "Allies attack 25% faster for the first 3 seconds of each fight.",
+   "name": "Overture",
+   "need": [
+    "swift",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000080
+  },
+  "r_cl1a109749e4e": {
+   "classId": "c_muu8kqk3v3ck",
+   "created": 1791160000078,
+   "effect": "+20% dodge against his duel opponent.",
+   "name": "Footwork",
+   "need": [
+    "edge",
+    "edge",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000078
+  },
+  "r_cl1a109749ec5": {
+   "classId": "c_muucqat9mbn7",
+   "created": 1791160000197,
+   "effect": "Crits during stealth Freeze the target.",
+   "name": "Midnight",
+   "need": [
+    "venom",
+    "frost",
+    "edge",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000197
+  },
+  "r_cl1a109749ec0": {
+   "classId": "c_muucnsji9spe",
+   "created": 1791160000192,
+   "effect": "Bombed enemies attack 20% slower for 3 seconds.",
+   "name": "Sticky Bomb",
+   "need": [
+    "venom",
+    "ember",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000192
+  },
+  "r_cl1a109749ecd": {
+   "classId": "c_muu8iedpyjas",
+   "created": 1791160000205,
+   "effect": "After an execute, its next attack is a guaranteed crit.",
+   "name": "Clean Kill",
+   "need": [
+    "venom",
+    "edge",
+    "swift",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000205
+  },
+  "r_cl1a109749ea1": {
+   "classId": "c_muub1s5b46u4",
+   "created": 1791160000161,
+   "effect": "+30% damage to elites and bosses.",
+   "name": "Big Game",
+   "need": [
+    "edge",
+    "edge",
+    "gilt",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000161
+  },
+  "r_cl1a109749ed2": {
+   "classId": "c_muu9oupl17gi",
+   "created": 1791160000210,
+   "effect": "Skeletons start with 5 Shield.",
+   "name": "Bone Armor",
+   "need": [
+    "venom",
+    "venom",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000210
+  },
+  "r_cl1a109749eab": {
+   "classId": "c_muub6hrov7i3",
+   "created": 1791160000171,
+   "effect": "A random non-boss enemy sits out the first 3 seconds of each fight.",
+   "name": "Bribe",
+   "need": [
+    "swift",
+    "gilt",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000171
+  },
+  "r_cl1a109749e40": {
+   "classId": "c_muu9coiwf8yb",
+   "created": 1791160000064,
+   "effect": "Each heal also heals her 2.",
+   "name": "Blood Bond",
+   "need": [
+    "vital",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000064
+  },
+  "r_cl1a109749eb8": {
+   "classId": "c_muucdoklpfu4",
+   "created": 1791160000184,
+   "effect": "Crits apply 3 statuses instead of 2.",
+   "name": "Runic Edge",
+   "need": [
+    "venom",
+    "frost",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000184
+  },
+  "r_cl1a109749e2e": {
+   "classId": "c_muu8dwwwleo2",
+   "created": 1791160000046,
+   "effect": "Shield he gains is +1 for each Burning enemy (up to +3).",
+   "name": "Bonfire Guard",
+   "need": [
+    "ember",
+    "ward",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000046
+  },
+  "r_cl1a109749e8c": {
+   "classId": "c_muuccpsasvwl",
+   "created": 1791160000140,
+   "effect": "Allies start each fight with 8 Shield instead of 5.",
+   "name": "Snow Wall",
+   "need": [
+    "frost",
+    "ward",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000140
+  },
+  "r_cl1a109749e6c": {
+   "classId": "c_muu9ue1x7wfi",
+   "created": 1791160000108,
+   "effect": "Gains 2 Shield each time she attacks.",
+   "name": "Hold the Line",
+   "need": [
+    "ward",
+    "ward",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000108
+  },
+  "r_cl1a109749e83": {
+   "classId": "c_muu7r2uqpswr",
+   "created": 1791160000131,
+   "effect": "Enemies at 5 Chill take 2 damage per second.",
+   "name": "Absolute Zero",
+   "need": [
+    "frost",
+    "frost",
+    "frost"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000131
+  },
+  "r_cl1a109749e60": {
+   "classId": "c_muuberm8ge8h",
+   "created": 1791160000096,
+   "effect": "Crits make the target attack 20% slower for 3 seconds.",
+   "name": "Hamstring",
+   "need": [
+    "venom",
+    "edge",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000096
+  },
+  "r_cl1a109749e3e": {
+   "classId": "c_muu8a0kltcn4",
+   "created": 1791160000062,
+   "effect": "Allies start each fight with 1 Shield per 5 gold you hold (up to 5).",
+   "name": "Hired Guards",
+   "need": [
+    "ward",
+    "gilt",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000062
+  },
+  "r_cl1a109749e29": {
+   "classId": "c_muu8trhnchpq",
+   "created": 1791160000041,
+   "effect": "At max stacks, attacks apply 2 Burn instead of 1.",
+   "name": "Rampage",
+   "need": [
+    "ember",
+    "ember",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000041
+  },
+  "r_cl1a109749e28": {
+   "classId": "c_muu8trhnchpq",
+   "created": 1791160000040,
+   "effect": "Being hit also counts as a hit for its attack-speed stacks.",
+   "name": "Bloodrush",
+   "need": [
+    "ember",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000040
+  },
+  "r_cl1a109749e8a": {
+   "classId": "c_muuczwluamkn",
+   "created": 1791160000138,
+   "effect": "Every 4th attack is a guaranteed crit.",
+   "name": "Spinning Blades",
+   "need": [
+    "frost",
+    "edge",
+    "edge",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000138
+  },
+  "r_cl1a109749e13": {
+   "classId": "c_muu8kfxb9l85",
+   "need": [
+    "frost"
+   ],
+   "name": "Cold Read.",
+   "effect": "+2.5% crit chance per Chill on the target.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791221259706,
+   "created": 1791160000019
+  },
+  "r_cl1a109749eda": {
+   "classId": "c_muubahl3ny7g",
+   "created": 1791160000218,
+   "effect": "Allies hit by a hexed enemy gain 2 Shield.",
+   "name": "Voodoo Ward",
+   "need": [
+    "venom",
+    "ward",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000218
+  },
+  "r_cl1a109749e1c": {
+   "classId": "c_muu8dtb3foya",
+   "need": [
+    "ember"
+   ],
+   "name": "Backdraft",
+   "effect": "Whenever your shield breaks, the attacker gains 3 burn.",
+   "notes": "Could do \"first time\" but combo's are fun.",
+   "status": "idea",
+   "updated": 1791222888120,
+   "created": 1791160000028
+  },
+  "r_cl1a109749e14": {
+   "classId": "c_muu8rt2490lr",
+   "need": [
+    "ember"
+   ],
+   "name": "Juggling Torches",
+   "effect": "Every 4th attack hits a second enemy and applies 2 Burn to both.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791221625184,
+   "created": 1791160000020
+  },
+  "r_cl1a109749e5d": {
+   "classId": "c_muu9fbav9cav",
+   "created": 1791160000093,
+   "effect": "His heal from Poison ticks is 2 instead of 1.",
+   "name": "Leech",
+   "need": [
+    "venom",
+    "vital",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000093
+  },
+  "r_cl1a109749e32": {
+   "classId": "c_muu7q2c8r12v",
+   "created": 1791160000050,
+   "effect": "Hitting a Frozen enemy deals double damage and ends the Freeze.",
+   "name": "Shatter",
+   "need": [
+    "frost",
+    "frost",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000050
+  },
+  "r_cl1a109749e55": {
+   "classId": "c_muu8s3phmca2",
+   "created": 1791160000085,
+   "effect": "Her follow-up attacks deal +50% damage.",
+   "name": "Gale Force",
+   "need": [
+    "swift",
+    "swift",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000085
+  },
+  "r_muuitzxipabq": {
+   "classId": "c_muu8s3phmca2",
+   "created": 1791160698150,
+   "effect": "Attacks ignore Armor",
+   "name": "Piercing hits",
+   "need": [
+    "edge",
+    "swift"
+   ],
+   "notes": "",
+   "status": "idea",
+   "updated": 1791160698150
+  },
+  "r_cl1a109749e86": {
+   "classId": "c_muu7r2uqpswr",
+   "created": 1791160000134,
+   "effect": "Killing a Frozen enemy gives every enemy 2 Chill.",
+   "name": "Shatterpoint",
+   "need": [
+    "frost",
+    "frost",
+    "frost",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000134
+  },
+  "r_cl1a109749e38": {
+   "classId": "c_muu98ulvacc4",
+   "created": 1791160000056,
+   "effect": "Starts each fight with 2 Shield per enemy.",
+   "name": "Hoarfrost",
+   "need": [
+    "frost",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000056
+  },
+  "r_cl1a109749e7c": {
+   "classId": "c_muucd48tezf2",
+   "created": 1791160000124,
+   "effect": "Gains 3 Shield whenever its storm attack triggers.",
+   "name": "Eye of the Storm",
+   "need": [
+    "ember",
+    "frost",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000124
+  },
+  "r_cl1a109749e69": {
+   "classId": "c_muu9resprp7i",
+   "created": 1791160000105,
+   "effect": "Every 3rd heal heals twice as much.",
+   "name": "Greater Heal",
+   "need": [
+    "ward",
+    "vital",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000105
+  },
+  "r_cl1a109749e65": {
+   "classId": "c_muu93w65k55t",
+   "created": 1791160000101,
+   "effect": "Enemies with 5+ Poison also gain 1 Burn whenever their Poison ticks.",
+   "name": "Fever",
+   "need": [
+    "venom",
+    "venom",
+    "ember"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000101
+  },
+  "r_cl1a109749e63": {
+   "classId": "c_muu93w65k55t",
+   "created": 1791160000099,
+   "effect": "Every 5th attack copies the target's Poison onto a neighbouring enemy.",
+   "name": "Contagion",
+   "need": [
+    "venom",
+    "venom"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000099
+  },
+  "r_cl1a109749e4b": {
+   "classId": "c_muu8hkj0igmk",
+   "created": 1791160000075,
+   "effect": "Gains 5 Shield after each kill.",
+   "name": "Bodyguard",
+   "need": [
+    "ward",
+    "edge",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000075
+  },
+  "r_cl1a109749eb7": {
+   "classId": "c_muucdoklpfu4",
+   "created": 1791160000183,
+   "effect": "Crits on enemies with both Burn and Chill deal double damage.",
+   "name": "Elemental Strike",
+   "need": [
+    "ember",
+    "frost",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000183
+  },
+  "r_cl1a109749e8e": {
+   "classId": "c_muuccpsasvwl",
+   "created": 1791160000142,
+   "effect": "Every 4 seconds, gives the most injured ally 4 Shield.",
+   "name": "Winter's Grace",
+   "need": [
+    "frost",
+    "frost",
+    "ward",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000142
+  },
+  "r_cl1a109749e6d": {
+   "classId": "c_muu9ue1x7wfi",
+   "created": 1791160000109,
+   "effect": "When her Shield absorbs a hit, the attacker takes 2 damage.",
+   "name": "Spiked Shield",
+   "need": [
+    "ward",
+    "ward",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000109
+  },
+  "r_cl1a109749e77": {
+   "classId": "c_muu8fq9g7iy1",
+   "created": 1791160000119,
+   "effect": "Enemies that hit it gain 2 Burn instead of 1.",
+   "name": "Magma Skin",
+   "need": [
+    "ember",
+    "ember",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000119
+  },
+  "r_cl1a109749ebb": {
+   "classId": "c_muu9o6j6xwfi",
+   "created": 1791160000187,
+   "effect": "Allies in its row take 20% less damage from statuses.",
+   "name": "Warding Runes",
+   "need": [
+    "ember",
+    "frost",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000187
+  },
+  "r_cl1a109749ec2": {
+   "classId": "c_muucqat9mbn7",
+   "created": 1791160000194,
+   "effect": "Stealth attacks apply 4 Poison instead of 2.",
+   "name": "Night Venom",
+   "need": [
+    "venom",
+    "frost",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000194
+  },
+  "r_cl1a109749e34": {
+   "classId": "c_muuaifyzo8vc",
+   "created": 1791160000052,
+   "effect": "+10% crit chance against Chilled enemies.",
+   "name": "Frostbite Edge",
+   "need": [
+    "frost",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000052
+  },
+  "r_cl1a109749eed": {
+   "classId": "c_muu9v1dnhifa",
+   "created": 1791160000237,
+   "effect": "When its Shield absorbs a hit, the attacker takes 3 damage.",
+   "name": "Spiked Wall",
+   "need": [
+    "ward",
+    "ward",
+    "ward",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000237
+  },
+  "r_cl1a109749e67": {
+   "classId": "c_muu9resprp7i",
+   "created": 1791160000103,
+   "effect": "Allies below a quarter HP take 30% less damage.",
+   "name": "Sanctuary",
+   "need": [
+    "ward",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000103
+  },
+  "r_cl1a109749eb9": {
+   "classId": "c_muucdoklpfu4",
+   "created": 1791160000185,
+   "effect": "Every 3rd attack is a guaranteed crit.",
+   "name": "Arcane Edge",
+   "need": [
+    "venom",
+    "ember",
+    "frost",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000185
+  },
+  "r_cl1a109749e97": {
+   "classId": "c_muu9qxrkyxif",
+   "created": 1791160000151,
+   "effect": "Each lifesteal heal gives +2% attack speed (up to +30%).",
+   "name": "Blood Frenzy",
+   "need": [
+    "vital",
+    "vital",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000151
+  },
+  "r_cl1a109749e2d": {
+   "classId": "c_muu8dwwwleo2",
+   "created": 1791160000045,
+   "effect": "At the start of each fight, gives every enemy 1 Burn for every 4 Shield he has.",
+   "name": "Blazing Shield",
+   "need": [
+    "ember",
+    "ember",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000045
+  },
+  "r_cl1a109749e35": {
+   "classId": "c_muuaifyzo8vc",
+   "created": 1791160000053,
+   "effect": "Crits remove all Chill from the target and deal +2 damage per stack removed.",
+   "name": "Brittle",
+   "need": [
+    "frost",
+    "frost",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000053
+  },
+  "r_cl1a109749e15": {
+   "classId": "c_muu8rt2490lr",
+   "need": [
+    "swift",
+    "swift"
+   ],
+   "name": "Vault",
+   "effect": "When a hit brings you below half HP, leap to the back row and gain 100% dodge for 2 seconds. When you kill an enemy, heal 25% HP and leap to the front row.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791222147412,
+   "created": 1791160000021
+  },
+  "r_cl1a109749e16": {
+   "classId": "c_muu8rt2490lr",
+   "need": [
+    "vital"
+   ],
+   "name": "Second Breath.",
+   "effect": "Front row: each dodge heals you 2. Back row: every 4th attack heals the most injured ally 2.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791221616523,
+   "created": 1791160000022
+  },
+  "r_cl1a109749edb": {
+   "classId": "c_muubahl3ny7g",
+   "created": 1791160000219,
+   "effect": "+1 gold when a hexed enemy dies.",
+   "name": "Juju Coin",
+   "need": [
+    "venom",
+    "vital",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000219
+  },
+  "r_cl1a109749ece": {
+   "classId": "c_muu9hfleces9",
+   "created": 1791160000206,
+   "effect": "Every 5th Poison tick on an enemy turns 1 Poison into 1 gold (up to 3 per fight).",
+   "name": "Transmute",
+   "need": [
+    "venom",
+    "venom",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000206
   },
   "r_cl1a109749e7a": {
    "classId": "c_muu8fq9g7iy1",
@@ -2710,642 +2479,30 @@
    "status": "idea",
    "updated": 1791160000123
   },
-  "r_cl1a109749e7c": {
-   "classId": "c_muucd48tezf2",
-   "created": 1791160000124,
-   "effect": "Gains 3 Shield whenever its storm attack triggers.",
-   "name": "Eye of the Storm",
+  "r_cl1a109749e1a": {
+   "classId": "c_muu8sumchvtt",
    "need": [
-    "ember",
-    "frost",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000124
-  },
-  "r_cl1a109749e7d": {
-   "classId": "c_muucd48tezf2",
-   "created": 1791160000125,
-   "effect": "Storm attacks apply 2 Chill instead of 1.",
-   "name": "Squall",
-   "need": [
-    "frost",
-    "ward",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000125
-  },
-  "r_cl1a109749e7e": {
-   "classId": "c_muucd48tezf2",
-   "created": 1791160000126,
-   "effect": "Storm attacks hit twice.",
-   "name": "Tempest",
-   "need": [
-    "ember",
-    "frost",
-    "ward",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000126
-  },
-  "r_cl1a109749e7f": {
-   "classId": "c_muu8emlv6f5o",
-   "created": 1791160000127,
-   "effect": "After reviving, gains +50% attack speed.",
-   "name": "Rising Flame",
-   "need": [
-    "ember",
-    "ward",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000127
-  },
-  "r_cl1a109749e80": {
-   "classId": "c_muu8emlv6f5o",
-   "created": 1791160000128,
-   "effect": "Heals 1 whenever Burn damages an enemy.",
-   "name": "Cinder Wings",
-   "need": [
-    "ember",
-    "vital",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000128
-  },
-  "r_cl1a109749e81": {
-   "classId": "c_muu8emlv6f5o",
-   "created": 1791160000129,
-   "effect": "Revives at full HP instead of half.",
-   "name": "Rebirth",
-   "need": [
-    "ward",
-    "vital",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000129
-  },
-  "r_cl1a109749e82": {
-   "classId": "c_muu8emlv6f5o",
-   "created": 1791160000130,
-   "effect": "Can revive twice per fight.",
-   "name": "Eternal Flame",
-   "need": [
-    "ember",
-    "ward",
-    "vital",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000130
-  },
-  "r_cl1a109749e83": {
-   "classId": "c_muu7r2uqpswr",
-   "created": 1791160000131,
-   "effect": "Enemies at 5 Chill take 2 damage per second.",
-   "name": "Absolute Zero",
-   "need": [
-    "frost",
-    "frost",
-    "frost"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000131
-  },
-  "r_cl1a109749e84": {
-   "classId": "c_muu7r2uqpswr",
-   "created": 1791160000132,
-   "effect": "Every 5th attack gives every enemy 2 Chill.",
-   "name": "Blizzard",
-   "need": [
-    "frost",
-    "frost",
-    "frost",
-    "frost"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000132
-  },
-  "r_cl1a109749e85": {
-   "classId": "c_muu7r2uqpswr",
-   "created": 1791160000133,
-   "effect": "Gains 1 Shield per Frozen enemy each second.",
-   "name": "Ice Armor",
-   "need": [
-    "frost",
-    "frost",
-    "frost",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000133
-  },
-  "r_cl1a109749e86": {
-   "classId": "c_muu7r2uqpswr",
-   "created": 1791160000134,
-   "effect": "Killing a Frozen enemy gives every enemy 2 Chill.",
-   "name": "Shatterpoint",
-   "need": [
-    "frost",
-    "frost",
-    "frost",
     "edge"
    ],
-   "notes": "Claude draft",
+   "name": "Venom Strike",
+   "effect": "Crits make the targets Poison tick once.",
+   "notes": "",
    "status": "idea",
-   "updated": 1791160000134
+   "updated": 1791219027429,
+   "created": 1791160000026
   },
-  "r_cl1a109749e87": {
-   "classId": "c_muuczwluamkn",
-   "created": 1791160000135,
-   "effect": "Crit cleave hits also apply 1 Chill.",
-   "name": "Frost Edge",
-   "need": [
-    "frost",
-    "frost",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000135
-  },
-  "r_cl1a109749e88": {
-   "classId": "c_muuczwluamkn",
-   "created": 1791160000136,
-   "effect": "+10% crit chance for each other enemy in the target's row.",
-   "name": "Whirlwind",
-   "need": [
-    "frost",
-    "edge",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000136
-  },
-  "r_cl1a109749e89": {
-   "classId": "c_muuczwluamkn",
-   "created": 1791160000137,
-   "effect": "Crits on Frozen enemies hit every enemy.",
-   "name": "Eye of the Blizzard",
-   "need": [
-    "frost",
-    "frost",
-    "edge",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000137
-  },
-  "r_cl1a109749e8a": {
-   "classId": "c_muuczwluamkn",
-   "created": 1791160000138,
-   "effect": "Every 4th attack is a guaranteed crit.",
-   "name": "Spinning Blades",
-   "need": [
-    "frost",
-    "edge",
-    "edge",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000138
-  },
-  "r_cl1a109749e8b": {
-   "classId": "c_muuccpsasvwl",
-   "created": 1791160000139,
-   "effect": "When her own Shield breaks, the attacker is Frozen.",
-   "name": "Frozen Bastion",
-   "need": [
-    "frost",
-    "frost",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000139
-  },
-  "r_cl1a109749e8c": {
-   "classId": "c_muuccpsasvwl",
-   "created": 1791160000140,
-   "effect": "Allies start each fight with 8 Shield instead of 5.",
-   "name": "Snow Wall",
-   "need": [
-    "frost",
-    "ward",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000140
-  },
-  "r_cl1a109749e8d": {
-   "classId": "c_muuccpsasvwl",
-   "created": 1791160000141,
-   "effect": "Allies with Shield are immune to Chill and Burn.",
-   "name": "Ice Queen",
-   "need": [
-    "frost",
-    "frost",
-    "ward",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000141
-  },
-  "r_cl1a109749e8e": {
-   "classId": "c_muuccpsasvwl",
-   "created": 1791160000142,
-   "effect": "Every 4 seconds, gives the most injured ally 4 Shield.",
-   "name": "Winter's Grace",
-   "need": [
-    "frost",
-    "frost",
-    "ward",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000142
-  },
-  "r_cl1a109749e8f": {
-   "classId": "c_muu8m2w3w2sq",
-   "created": 1791160000143,
-   "effect": "Each kill heals every ally 3.",
-   "name": "Soul Harvest",
-   "need": [
-    "frost",
-    "edge",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000143
-  },
-  "r_cl1a109749e90": {
-   "classId": "c_muu8m2w3w2sq",
-   "created": 1791160000144,
-   "effect": "+1 gold for every 3rd crit (up to 3 per fight).",
-   "name": "Grim Toll",
-   "need": [
-    "edge",
-    "vital",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000144
-  },
-  "r_cl1a109749e91": {
-   "classId": "c_muu8m2w3w2sq",
-   "created": 1791160000145,
-   "effect": "Each kill gives every enemy 2 Chill.",
-   "name": "Cold Reckoning",
-   "need": [
-    "frost",
-    "edge",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000145
-  },
-  "r_cl1a109749e92": {
-   "classId": "c_muu8m2w3w2sq",
-   "created": 1791160000146,
-   "effect": "Once per fight, a lethal hit leaves it at 1 HP instead.",
-   "name": "Death's Door",
-   "need": [
-    "frost",
-    "edge",
-    "vital",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000146
-  },
-  "r_cl1a109749e93": {
-   "classId": "c_muu8cz7uo8uh",
-   "created": 1791160000147,
-   "effect": "+1 gold after each won fight for every 2 heroes in your guild.",
-   "name": "Guild Dues",
-   "need": [
-    "gilt",
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000147
-  },
-  "r_cl1a109749e94": {
-   "classId": "c_muu8cz7uo8uh",
-   "created": 1791160000148,
-   "effect": "Interest cap +2.",
-   "name": "Grand Treasury",
-   "need": [
-    "gilt",
-    "gilt",
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000148
-  },
-  "r_cl1a109749e95": {
-   "classId": "c_muu8cz7uo8uh",
-   "created": 1791160000149,
-   "effect": "Allies start each fight with 1 Armor.",
-   "name": "Guild Armory",
-   "need": [
-    "ward",
-    "gilt",
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000149
-  },
-  "r_cl1a109749e96": {
-   "classId": "c_muu8cz7uo8uh",
-   "created": 1791160000150,
-   "effect": "The market offers 1 extra hero.",
-   "name": "Recruiter",
-   "need": [
-    "swift",
-    "gilt",
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000150
-  },
-  "r_cl1a109749e97": {
-   "classId": "c_muu9qxrkyxif",
-   "created": 1791160000151,
-   "effect": "Each lifesteal heal gives +2% attack speed (up to +30%).",
-   "name": "Blood Frenzy",
-   "need": [
-    "vital",
-    "vital",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000151
-  },
-  "r_cl1a109749e98": {
-   "classId": "c_muu9qxrkyxif",
-   "created": 1791160000152,
-   "effect": "Lifesteal is 75% of damage dealt instead of half.",
-   "name": "Crimson Night",
-   "need": [
-    "vital",
-    "vital",
-    "vital",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000152
-  },
-  "r_cl1a109749e99": {
-   "classId": "c_muu9qxrkyxif",
-   "created": 1791160000153,
-   "effect": "Heals 1 extra per Poison stack on its target (up to 5).",
-   "name": "Vampiric Bite",
+  "r_cl1a109749e57": {
+   "classId": "c_muubfqfprgsy",
+   "created": 1791160000087,
+   "effect": "When an enemy dies while Poisoned, every ally heals 2.",
+   "name": "Tonic",
    "need": [
     "venom",
-    "vital",
-    "vital",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000153
-  },
-  "r_cl1a109749e9a": {
-   "classId": "c_muu9qxrkyxif",
-   "created": 1791160000154,
-   "effect": "Once per fight, below a quarter HP, gains 50% dodge for 4 seconds.",
-   "name": "Bat Form",
-   "need": [
-    "vital",
-    "vital",
-    "vital",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000154
-  },
-  "r_cl1a109749e9b": {
-   "classId": "c_muub9dnnh0qc",
-   "created": 1791160000155,
-   "effect": "Crits heal it 8 instead of 4.",
-   "name": "Zealot",
-   "need": [
-    "edge",
-    "vital",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000155
-  },
-  "r_cl1a109749e9c": {
-   "classId": "c_muub9dnnh0qc",
-   "created": 1791160000156,
-   "effect": "Enemies it crits can't gain Shield for 3 seconds.",
-   "name": "Blasphemy",
-   "need": [
-    "edge",
-    "swift",
     "gilt"
    ],
    "notes": "Claude draft",
    "status": "idea",
-   "updated": 1791160000156
-  },
-  "r_cl1a109749e9d": {
-   "classId": "c_muub9dnnh0qc",
-   "created": 1791160000157,
-   "effect": "+1 gold each time a crit heals it (up to 3 per fight).",
-   "name": "False Prophet",
-   "need": [
-    "vital",
-    "swift",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000157
-  },
-  "r_cl1a109749e9e": {
-   "classId": "c_muub9dnnh0qc",
-   "created": 1791160000158,
-   "effect": "Each hit permanently removes 2 Shield or 1 Armor from the target.",
-   "name": "Apostate",
-   "need": [
-    "edge",
-    "vital",
-    "swift",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000158
-  },
-  "r_cl1a109749e9f": {
-   "classId": "c_muub1s5b46u4",
-   "created": 1791160000159,
-   "effect": "The first enemy it targets takes +25% damage from all heroes.",
-   "name": "Mark",
-   "need": [
-    "edge",
-    "edge",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000159
-  },
-  "r_cl1a109749ea0": {
-   "classId": "c_muub1s5b46u4",
-   "created": 1791160000160,
-   "effect": "Killing its target pays +2 gold.",
-   "name": "Wanted Poster",
-   "need": [
-    "edge",
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000160
-  },
-  "r_cl1a109749ea1": {
-   "classId": "c_muub1s5b46u4",
-   "created": 1791160000161,
-   "effect": "+30% damage to elites and bosses.",
-   "name": "Big Game",
-   "need": [
-    "edge",
-    "edge",
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000161
-  },
-  "r_cl1a109749ea2": {
-   "classId": "c_muuayv3nak54",
-   "created": 1791160000162,
-   "effect": "+10% crit chance per kill this fight (up to +30%).",
-   "name": "Perfect Edge",
-   "need": [
-    "edge",
-    "edge",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000162
-  },
-  "r_cl1a109749ea3": {
-   "classId": "c_muuayv3nak54",
-   "created": 1791160000163,
-   "effect": "Each attack in a kill chain deals +25% more than the last.",
-   "name": "Thousand Cuts",
-   "need": [
-    "edge",
-    "edge",
-    "edge",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000163
-  },
-  "r_cl1a109749ea4": {
-   "classId": "c_muuayv3nak54",
-   "created": 1791160000164,
-   "effect": "Its first attack each fight is a guaranteed ×4 crit.",
-   "name": "Iaido",
-   "need": [
-    "edge",
-    "edge",
-    "edge",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000164
-  },
-  "r_cl1a109749ea5": {
-   "classId": "c_muuayv3nak54",
-   "created": 1791160000165,
-   "effect": "25% chance to block a front-row attack entirely.",
-   "name": "Masterful Parry",
-   "need": [
-    "ward",
-    "edge",
-    "edge",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000165
-  },
-  "r_cl1a109749ea6": {
-   "classId": "c_muu8omul8tqu",
-   "created": 1791160000166,
-   "effect": "Crits give +5% dodge for the rest of the fight (up to +25%).",
-   "name": "Dancing Edge",
-   "need": [
-    "edge",
-    "edge",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000166
-  },
-  "r_cl1a109749ea7": {
-   "classId": "c_muu8omul8tqu",
-   "created": 1791160000167,
-   "effect": "After a dodge, its next attack strikes twice.",
-   "name": "Blade Waltz",
-   "need": [
-    "edge",
-    "swift",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000167
+   "updated": 1791160000087
   },
   "r_cl1a109749ea8": {
    "classId": "c_muu8omul8tqu",
@@ -3362,696 +2519,49 @@
    "status": "idea",
    "updated": 1791160000168
   },
-  "r_cl1a109749ea9": {
-   "classId": "c_muu8omul8tqu",
-   "created": 1791160000169,
-   "effect": "Heals 2 on each dodge.",
-   "name": "Graceful",
+  "r_cl1a109749ee9": {
+   "classId": "c_muu8lrrukarl",
+   "created": 1791160000233,
+   "effect": "Once per fight, below a quarter HP, regains 15 Shield.",
+   "name": "Last Breath",
    "need": [
-    "edge",
-    "vital",
-    "swift",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000169
-  },
-  "r_cl1a109749eaa": {
-   "classId": "c_muub6hrov7i3",
-   "created": 1791160000170,
-   "effect": "The slowed enemy also deals 20% less damage.",
-   "name": "Sweet Talk",
-   "need": [
-    "swift",
-    "swift",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000170
-  },
-  "r_cl1a109749eab": {
-   "classId": "c_muub6hrov7i3",
-   "created": 1791160000171,
-   "effect": "A random non-boss enemy sits out the first 3 seconds of each fight.",
-   "name": "Bribe",
-   "need": [
-    "swift",
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000171
-  },
-  "r_cl1a109749eac": {
-   "classId": "c_muub6hrov7i3",
-   "created": 1791160000172,
-   "effect": "The first market reroll each visit is free.",
-   "name": "Silver Lining",
-   "need": [
-    "swift",
-    "swift",
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000172
-  },
-  "r_cl1a109749ead": {
-   "classId": "c_muub6hrov7i3",
-   "created": 1791160000173,
-   "effect": "The slowed enemy attacks its own allies for 2 seconds.",
-   "name": "Charm",
-   "need": [
-    "vital",
-    "swift",
-    "swift",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000173
-  },
-  "r_cl1a109749eae": {
-   "classId": "c_muu8v6mqq9lr",
-   "created": 1791160000174,
-   "effect": "Every 5th attack hits every enemy.",
-   "name": "Volley",
-   "need": [
-    "swift",
-    "swift",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000174
-  },
-  "r_cl1a109749eaf": {
-   "classId": "c_muu8v6mqq9lr",
-   "created": 1791160000175,
-   "effect": "Blinds every 3rd attack instead of every 4th.",
-   "name": "Rapid Fire",
-   "need": [
-    "swift",
-    "swift",
-    "swift",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000175
-  },
-  "r_cl1a109749eb0": {
-   "classId": "c_muu8v6mqq9lr",
-   "created": 1791160000176,
-   "effect": "Blinded enemies also gain 3 Poison.",
-   "name": "Poison Arrows",
-   "need": [
-    "venom",
-    "swift",
-    "swift",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000176
-  },
-  "r_cl1a109749eb1": {
-   "classId": "c_muu8v6mqq9lr",
-   "created": 1791160000177,
-   "effect": "Attacks on blinded enemies are guaranteed crits.",
-   "name": "Headshot",
-   "need": [
-    "edge",
-    "swift",
-    "swift",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000177
-  },
-  "r_cl1a109749eb2": {
-   "classId": "c_muu7sibtrs2m",
-   "created": 1791160000178,
-   "effect": "Enemies with Poison, Burn and Chill take +25% damage.",
-   "name": "Spectrum",
-   "need": [
-    "venom",
-    "ember",
-    "frost"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000178
-  },
-  "r_cl1a109749eb3": {
-   "classId": "c_muu7sibtrs2m",
-   "created": 1791160000179,
-   "effect": "Each status it applies heals the most injured ally 1.",
-   "name": "Prism Heal",
-   "need": [
-    "ember",
-    "frost",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000179
-  },
-  "r_cl1a109749eb4": {
-   "classId": "c_muu7sibtrs2m",
-   "created": 1791160000180,
-   "effect": "When an enemy dies, its statuses move to a random enemy.",
-   "name": "Refraction",
-   "need": [
-    "venom",
-    "frost",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000180
-  },
-  "r_cl1a109749eb5": {
-   "classId": "c_muu7sibtrs2m",
-   "created": 1791160000181,
-   "effect": "Every 4th attack applies 3 of each status.",
-   "name": "Rainbow",
-   "need": [
-    "venom",
-    "ember",
-    "frost",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000181
-  },
-  "r_cl1a109749eb6": {
-   "classId": "c_muucdoklpfu4",
-   "created": 1791160000182,
-   "effect": "+5% crit chance for each different status on the target.",
-   "name": "Enchanted Blade",
-   "need": [
-    "venom",
-    "ember",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000182
-  },
-  "r_cl1a109749eb7": {
-   "classId": "c_muucdoklpfu4",
-   "created": 1791160000183,
-   "effect": "Crits on enemies with both Burn and Chill deal double damage.",
-   "name": "Elemental Strike",
-   "need": [
-    "ember",
-    "frost",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000183
-  },
-  "r_cl1a109749eb8": {
-   "classId": "c_muucdoklpfu4",
-   "created": 1791160000184,
-   "effect": "Crits apply 3 statuses instead of 2.",
-   "name": "Runic Edge",
-   "need": [
-    "venom",
-    "frost",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000184
-  },
-  "r_cl1a109749eb9": {
-   "classId": "c_muucdoklpfu4",
-   "created": 1791160000185,
-   "effect": "Every 3rd attack is a guaranteed crit.",
-   "name": "Arcane Edge",
-   "need": [
-    "venom",
-    "ember",
-    "frost",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000185
-  },
-  "r_cl1a109749eba": {
-   "classId": "c_muu9o6j6xwfi",
-   "created": 1791160000186,
-   "effect": "Gains 1 Shield whenever an enemy's status ticks (up to 2 per second).",
-   "name": "Runic Shell",
-   "need": [
-    "venom",
-    "ember",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000186
-  },
-  "r_cl1a109749ebb": {
-   "classId": "c_muu9o6j6xwfi",
-   "created": 1791160000187,
-   "effect": "Allies in its row take 20% less damage from statuses.",
-   "name": "Warding Runes",
-   "need": [
-    "ember",
-    "frost",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000187
-  },
-  "r_cl1a109749ebc": {
-   "classId": "c_muu9o6j6xwfi",
-   "created": 1791160000188,
-   "effect": "Enemies with Poison, Burn and Chill attack 25% slower.",
-   "name": "Rune of Binding",
-   "need": [
-    "venom",
-    "frost",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000188
-  },
-  "r_cl1a109749ebd": {
-   "classId": "c_muu9o6j6xwfi",
-   "created": 1791160000189,
-   "effect": "When its Shield breaks, every enemy gains 2 Poison, 2 Burn and 2 Chill.",
-   "name": "Glyph Wall",
-   "need": [
-    "venom",
-    "ember",
-    "frost",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000189
-  },
-  "r_cl1a109749ebe": {
-   "classId": "c_muucnsji9spe",
-   "created": 1791160000190,
-   "effect": "Bombs can crit.",
-   "name": "Shrapnel",
-   "need": [
-    "venom",
-    "ember",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000190
-  },
-  "r_cl1a109749ebf": {
-   "classId": "c_muucnsji9spe",
-   "created": 1791160000191,
-   "effect": "Throws a bomb every 3rd attack instead of every 4th.",
-   "name": "Short Fuse",
-   "need": [
-    "ember",
-    "edge",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000191
-  },
-  "r_cl1a109749ec0": {
-   "classId": "c_muucnsji9spe",
-   "created": 1791160000192,
-   "effect": "Bombed enemies attack 20% slower for 3 seconds.",
-   "name": "Sticky Bomb",
-   "need": [
-    "venom",
-    "ember",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000192
-  },
-  "r_cl1a109749ec1": {
-   "classId": "c_muucnsji9spe",
-   "created": 1791160000193,
-   "effect": "The first bomb each fight applies triple statuses.",
-   "name": "The Big One",
-   "need": [
-    "venom",
-    "ember",
-    "edge",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000193
-  },
-  "r_cl1a109749ec2": {
-   "classId": "c_muucqat9mbn7",
-   "created": 1791160000194,
-   "effect": "Stealth attacks apply 4 Poison instead of 2.",
-   "name": "Night Venom",
-   "need": [
-    "venom",
-    "frost",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000194
-  },
-  "r_cl1a109749ec3": {
-   "classId": "c_muucqat9mbn7",
-   "created": 1791160000195,
-   "effect": "After each kill, can't be targeted for 2 seconds.",
-   "name": "Shadow Step",
-   "need": [
-    "frost",
-    "edge",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000195
-  },
-  "r_cl1a109749ec4": {
-   "classId": "c_muucqat9mbn7",
-   "created": 1791160000196,
-   "effect": "Stealth lasts 5 seconds instead of 3.",
-   "name": "Ambush",
-   "need": [
-    "venom",
-    "edge",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000196
-  },
-  "r_cl1a109749ec5": {
-   "classId": "c_muucqat9mbn7",
-   "created": 1791160000197,
-   "effect": "Crits during stealth Freeze the target.",
-   "name": "Midnight",
-   "need": [
-    "venom",
-    "frost",
-    "edge",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000197
-  },
-  "r_cl1a109749ec6": {
-   "classId": "c_muuck8ca1kex",
-   "created": 1791160000198,
-   "effect": "Back-row enemies take +20% damage from all heroes.",
-   "name": "Hunter's Mark",
-   "need": [
-    "venom",
-    "frost",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000198
-  },
-  "r_cl1a109749ec7": {
-   "classId": "c_muuck8ca1kex",
-   "created": 1791160000199,
-   "effect": "Every 3 seconds, gains 1 Shield per Chilled enemy.",
-   "name": "Cold Hide",
-   "need": [
-    "frost",
     "ward",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000199
-  },
-  "r_cl1a109749ec8": {
-   "classId": "c_muuck8ca1kex",
-   "created": 1791160000200,
-   "effect": "Poison on Chilled enemies deals 50% more damage.",
-   "name": "Frostbite Venom",
-   "need": [
-    "venom",
-    "frost",
-    "ward"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000200
-  },
-  "r_cl1a109749ec9": {
-   "classId": "c_muuck8ca1kex",
-   "created": 1791160000201,
-   "effect": "Front-row enemies can't target her.",
-   "name": "Stalk",
-   "need": [
-    "venom",
-    "frost",
     "ward",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000201
-  },
-  "r_cl1a109749eca": {
-   "classId": "c_muu8iedpyjas",
-   "created": 1791160000202,
-   "effect": "Executes enemies below 20% HP instead of 15%.",
-   "name": "Shadow Strike",
-   "need": [
-    "venom",
     "edge",
-    "swift"
+    "vital"
    ],
    "notes": "Claude draft",
    "status": "idea",
-   "updated": 1791160000202
+   "updated": 1791160000233
   },
-  "r_cl1a109749ecb": {
-   "classId": "c_muu8iedpyjas",
-   "created": 1791160000203,
-   "effect": "Each execute pays +1 gold.",
-   "name": "Contract",
+  "r_cl1a109749e71": {
+   "classId": "c_muu81homh3tq",
+   "created": 1791160000113,
+   "effect": "Crits make the target's Burn deal all its remaining damage at once.",
+   "name": "Combustion",
    "need": [
-    "edge",
-    "swift",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000203
-  },
-  "r_cl1a109749ecc": {
-   "classId": "c_muu8iedpyjas",
-   "created": 1791160000204,
-   "effect": "Its target takes +1 damage per Poison stack from every source.",
-   "name": "Death Mark",
-   "need": [
-    "venom",
-    "edge",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000204
-  },
-  "r_cl1a109749ecd": {
-   "classId": "c_muu8iedpyjas",
-   "created": 1791160000205,
-   "effect": "After an execute, its next attack is a guaranteed crit.",
-   "name": "Clean Kill",
-   "need": [
-    "venom",
-    "edge",
-    "swift",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000205
-  },
-  "r_cl1a109749ece": {
-   "classId": "c_muu9hfleces9",
-   "created": 1791160000206,
-   "effect": "Every 5th Poison tick on an enemy turns 1 Poison into 1 gold (up to 3 per fight).",
-   "name": "Transmute",
-   "need": [
-    "venom",
-    "venom",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000206
-  },
-  "r_cl1a109749ecf": {
-   "classId": "c_muu9hfleces9",
-   "created": 1791160000207,
-   "effect": "Interest cap +1.",
-   "name": "Philosopher's Stone",
-   "need": [
-    "venom",
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000207
-  },
-  "r_cl1a109749ed0": {
-   "classId": "c_muu9hfleces9",
-   "created": 1791160000208,
-   "effect": "Every 5 seconds, gives the most injured ally a potion that heals 6.",
-   "name": "Golden Elixir",
-   "need": [
-    "venom",
-    "venom",
-    "gilt",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000208
-  },
-  "r_cl1a109749ed1": {
-   "classId": "c_muu9hfleces9",
-   "created": 1791160000209,
-   "effect": "Enemies that die while Poisoned explode, giving their neighbours 3 Poison.",
-   "name": "Volatile Mixture",
-   "need": [
-    "venom",
-    "venom",
     "ember",
+    "ember",
+    "ember",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000113
+  },
+  "r_cl1a109749ea0": {
+   "classId": "c_muub1s5b46u4",
+   "created": 1791160000160,
+   "effect": "Killing its target pays +2 gold.",
+   "name": "Wanted Poster",
+   "need": [
+    "edge",
+    "gilt",
     "gilt"
    ],
    "notes": "Claude draft",
    "status": "idea",
-   "updated": 1791160000209
-  },
-  "r_cl1a109749ed2": {
-   "classId": "c_muu9oupl17gi",
-   "created": 1791160000210,
-   "effect": "Skeletons start with 5 Shield.",
-   "name": "Bone Armor",
-   "need": [
-    "venom",
-    "venom",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000210
-  },
-  "r_cl1a109749ed3": {
-   "classId": "c_muu9oupl17gi",
-   "created": 1791160000211,
-   "effect": "Skeletons have +50% ATK.",
-   "name": "Unholy Strength",
-   "need": [
-    "venom",
-    "vital",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000211
-  },
-  "r_cl1a109749ed4": {
-   "classId": "c_muu9oupl17gi",
-   "created": 1791160000212,
-   "effect": "Raises the first three enemies that die instead of two.",
-   "name": "Army of the Dead",
-   "need": [
-    "venom",
-    "venom",
-    "vital",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000212
-  },
-  "r_cl1a109749ed5": {
-   "classId": "c_muu9oupl17gi",
-   "created": 1791160000213,
-   "effect": "Skeletons attack 20% faster.",
-   "name": "Restless Dead",
-   "need": [
-    "venom",
-    "venom",
-    "vital",
-    "swift"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000213
-  },
-  "r_cl1a109749ed6": {
-   "classId": "c_muu95oxqva1i",
-   "created": 1791160000214,
-   "effect": "Every 4 seconds, applies 2 Poison to every enemy.",
-   "name": "Toxic Cloud",
-   "need": [
-    "venom",
-    "venom",
-    "venom"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000214
-  },
-  "r_cl1a109749ed7": {
-   "classId": "c_muu95oxqva1i",
-   "created": 1791160000215,
-   "effect": "Poison it applies never wears off.",
-   "name": "Plague Lord",
-   "need": [
-    "venom",
-    "venom",
-    "venom",
-    "venom"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000215
-  },
-  "r_cl1a109749ed8": {
-   "classId": "c_muu95oxqva1i",
-   "created": 1791160000216,
-   "effect": "Heals 1 per second for each Poisoned enemy (up to 3).",
-   "name": "Venom Siphon",
-   "need": [
-    "venom",
-    "venom",
-    "venom",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000216
+   "updated": 1791160000160
   },
   "r_cl1a109749ed9": {
    "classId": "c_muu95oxqva1i",
@@ -4068,68 +2578,11 @@
    "status": "idea",
    "updated": 1791160000217
   },
-  "r_cl1a109749eda": {
-   "classId": "c_muubahl3ny7g",
-   "created": 1791160000218,
-   "effect": "Allies hit by a hexed enemy gain 2 Shield.",
-   "name": "Voodoo Ward",
-   "need": [
-    "venom",
-    "ward",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000218
-  },
-  "r_cl1a109749edb": {
-   "classId": "c_muubahl3ny7g",
-   "created": 1791160000219,
-   "effect": "+1 gold when a hexed enemy dies.",
-   "name": "Juju Coin",
-   "need": [
-    "venom",
-    "vital",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000219
-  },
-  "r_cl1a109749edc": {
-   "classId": "c_muubahl3ny7g",
-   "created": 1791160000220,
-   "effect": "Hexes last 5 seconds instead of 3.",
-   "name": "Fetish",
-   "need": [
-    "ward",
-    "vital",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000220
-  },
-  "r_cl1a109749edd": {
-   "classId": "c_muubahl3ny7g",
-   "created": 1791160000221,
-   "effect": "Each hex also jumps to a second enemy.",
-   "name": "Big Juju",
-   "need": [
-    "venom",
-    "ward",
-    "vital",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000221
-  },
-  "r_cl1a109749ede": {
-   "classId": "c_muub3d9lyt44",
-   "created": 1791160000222,
-   "effect": "When an ally drops below half HP, every ally gains +20% attack speed for 3 seconds.",
-   "name": "Rally",
+  "r_cl1a109749e81": {
+   "classId": "c_muu8emlv6f5o",
+   "created": 1791160000129,
+   "effect": "Revives at full HP instead of half.",
+   "name": "Rebirth",
    "need": [
     "ward",
     "vital",
@@ -4137,93 +2590,7 @@
    ],
    "notes": "Claude draft",
    "status": "idea",
-   "updated": 1791160000222
-  },
-  "r_cl1a109749edf": {
-   "classId": "c_muub3d9lyt44",
-   "created": 1791160000223,
-   "effect": "+1 gold after each won fight where no ally died.",
-   "name": "Fanfare",
-   "need": [
-    "vital",
-    "swift",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000223
-  },
-  "r_cl1a109749ee0": {
-   "classId": "c_muub3d9lyt44",
-   "created": 1791160000224,
-   "effect": "Front-row allies gain +1 Armor.",
-   "name": "Standard Bearer",
-   "need": [
-    "ward",
-    "swift",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000224
-  },
-  "r_cl1a109749ee1": {
-   "classId": "c_muub3d9lyt44",
-   "created": 1791160000225,
-   "effect": "The full heal can trigger twice per fight.",
-   "name": "Last Stand",
-   "need": [
-    "ward",
-    "vital",
-    "swift",
-    "gilt"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000225
-  },
-  "r_cl1a109749ee2": {
-   "classId": "c_muu9rlact8dy",
-   "created": 1791160000226,
-   "effect": "Shield it gives heals the ally 2 when it breaks.",
-   "name": "Holy Shield",
-   "need": [
-    "ward",
-    "ward",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000226
-  },
-  "r_cl1a109749ee3": {
-   "classId": "c_muu9rlact8dy",
-   "created": 1791160000227,
-   "effect": "Once per fight, fully heals the ally with the lowest HP.",
-   "name": "Lay on Hands",
-   "need": [
-    "ward",
-    "vital",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000227
-  },
-  "r_cl1a109749ee4": {
-   "classId": "c_muu9rlact8dy",
-   "created": 1791160000228,
-   "effect": "Gives Shield every 2 seconds instead of 3.",
-   "name": "Divine Bulwark",
-   "need": [
-    "ward",
-    "ward",
-    "vital",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000228
+   "updated": 1791160000129
   },
   "r_cl1a109749ee5": {
    "classId": "c_muu9rlact8dy",
@@ -4240,77 +2607,143 @@
    "status": "idea",
    "updated": 1791160000229
   },
-  "r_cl1a109749ee6": {
-   "classId": "c_muu8lrrukarl",
-   "created": 1791160000230,
-   "effect": "Enemies forced to attack it deal 15% less damage.",
-   "name": "Challenge",
+  "r_cl1a109749e39": {
+   "classId": "c_muu98ulvacc4",
+   "created": 1791160000057,
+   "effect": "Attackers that hit it gain 2 Chill instead of 1.",
+   "name": "Glacier",
    "need": [
-    "ward",
-    "ward",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000230
-  },
-  "r_cl1a109749ee7": {
-   "classId": "c_muu8lrrukarl",
-   "created": 1791160000231,
-   "effect": "When hit while Shielded, 25% chance to strike back at once.",
-   "name": "Counter Guard",
-   "need": [
-    "ward",
-    "edge",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000231
-  },
-  "r_cl1a109749ee8": {
-   "classId": "c_muu8lrrukarl",
-   "created": 1791160000232,
-   "effect": "+1 Armor for every 10 Shield it has (up to +3).",
-   "name": "Indomitable",
-   "need": [
-    "ward",
-    "ward",
-    "edge",
-    "edge"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000232
-  },
-  "r_cl1a109749ee9": {
-   "classId": "c_muu8lrrukarl",
-   "created": 1791160000233,
-   "effect": "Once per fight, below a quarter HP, regains 15 Shield.",
-   "name": "Last Breath",
-   "need": [
-    "ward",
-    "ward",
-    "edge",
-    "vital"
-   ],
-   "notes": "Claude draft",
-   "status": "idea",
-   "updated": 1791160000233
-  },
-  "r_cl1a109749eea": {
-   "classId": "c_muu9v1dnhifa",
-   "created": 1791160000234,
-   "effect": "Allies in its row gain +1 Armor.",
-   "name": "Fortress",
-   "need": [
-    "ward",
-    "ward",
+    "frost",
+    "frost",
     "ward"
    ],
    "notes": "Claude draft",
    "status": "idea",
-   "updated": 1791160000234
+   "updated": 1791160000057
+  },
+  "r_cl1a109749ed7": {
+   "classId": "c_muu95oxqva1i",
+   "created": 1791160000215,
+   "effect": "Poison it applies never wears off.",
+   "name": "Plague Lord",
+   "need": [
+    "venom",
+    "venom",
+    "venom",
+    "venom"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000215
+  },
+  "r_cl1a109749e3d": {
+   "classId": "c_muu8a0kltcn4",
+   "created": 1791160000061,
+   "effect": "Interest cap +1.",
+   "name": "Investment",
+   "need": [
+    "gilt",
+    "gilt",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000061
+  },
+  "r_cl1a109749ec8": {
+   "classId": "c_muuck8ca1kex",
+   "created": 1791160000200,
+   "effect": "Poison on Chilled enemies deals 50% more damage.",
+   "name": "Frostbite Venom",
+   "need": [
+    "venom",
+    "frost",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000200
+  },
+  "r_cl1a109749e5b": {
+   "classId": "c_muu9fbav9cav",
+   "created": 1791160000091,
+   "effect": "Poisoned enemies receive 50% less healing.",
+   "name": "Quarantine",
+   "need": [
+    "venom",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000091
+  },
+  "r_cl1a109749e0e": {
+   "classId": "c_muu8t3slx20j",
+   "need": [
+    "ward"
+   ],
+   "name": "Bandage",
+   "effect": "On heal, additionally apply a 2 health shield.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791223428924,
+   "created": 1791160000014
+  },
+  "r_cl1a109749e30": {
+   "classId": "c_muu7q2c8r12v",
+   "created": 1791160000048,
+   "effect": "Frozen enemies stay Frozen for 2 attacks instead of 1.",
+   "name": "Permafrost",
+   "need": [
+    "frost",
+    "frost"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000048
+  },
+  "r_cl1a109749e72": {
+   "classId": "c_muu81homh3tq",
+   "created": 1791160000114,
+   "effect": "While any enemy is Burning, every ally regenerates 1 HP every 2 seconds.",
+   "name": "Warmth",
+   "need": [
+    "ember",
+    "ember",
+    "ember",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000114
+  },
+  "r_cl1a109749e51": {
+   "classId": "c_muu91gvq8418",
+   "created": 1791160000081,
+   "effect": "Her attack-speed aura is +15% instead of +10%.",
+   "name": "Allegro",
+   "need": [
+    "swift",
+    "swift",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000081
+  },
+  "r_cl1a109749e64": {
+   "classId": "c_muu93w65k55t",
+   "created": 1791160000100,
+   "effect": "Poison that spreads keeps its full strength.",
+   "name": "Pandemic",
+   "need": [
+    "venom",
+    "venom",
+    "venom"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000100
   },
   "r_cl1a109749eeb": {
    "classId": "c_muu9v1dnhifa",
@@ -4327,35 +2760,103 @@
    "status": "idea",
    "updated": 1791160000235
   },
-  "r_cl1a109749eec": {
-   "classId": "c_muu9v1dnhifa",
-   "created": 1791160000236,
-   "effect": "Each second while Shielded, heals the most injured ally 1.",
-   "name": "Bastion of Life",
+  "r_cl1a109749ea7": {
+   "classId": "c_muu8omul8tqu",
+   "created": 1791160000167,
+   "effect": "After a dodge, its next attack strikes twice.",
+   "name": "Blade Waltz",
    "need": [
-    "ward",
-    "ward",
-    "ward",
-    "vital"
+    "edge",
+    "swift",
+    "swift"
    ],
    "notes": "Claude draft",
    "status": "idea",
-   "updated": 1791160000236
+   "updated": 1791160000167
   },
-  "r_cl1a109749eed": {
-   "classId": "c_muu9v1dnhifa",
-   "created": 1791160000237,
-   "effect": "When its Shield absorbs a hit, the attacker takes 3 damage.",
-   "name": "Spiked Wall",
+  "r_cl1a109749ee8": {
+   "classId": "c_muu8lrrukarl",
+   "created": 1791160000232,
+   "effect": "+1 Armor for every 10 Shield it has (up to +3).",
+   "name": "Indomitable",
    "need": [
     "ward",
     "ward",
-    "ward",
+    "edge",
     "edge"
    ],
    "notes": "Claude draft",
    "status": "idea",
-   "updated": 1791160000237
+   "updated": 1791160000232
+  },
+  "r_cl1a109749e6b": {
+   "classId": "c_muu9ue1x7wfi",
+   "created": 1791160000107,
+   "effect": "Every 4th attack adds half her Shield as damage instead of a quarter.",
+   "name": "Shield Slam",
+   "need": [
+    "ward",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000107
+  },
+  "r_cl1a109749ee3": {
+   "classId": "c_muu9rlact8dy",
+   "created": 1791160000227,
+   "effect": "Once per fight, fully heals the ally with the lowest HP.",
+   "name": "Lay on Hands",
+   "need": [
+    "ward",
+    "vital",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000227
+  },
+  "r_cl1a109749ead": {
+   "classId": "c_muub6hrov7i3",
+   "created": 1791160000173,
+   "effect": "The slowed enemy attacks its own allies for 2 seconds.",
+   "name": "Charm",
+   "need": [
+    "vital",
+    "swift",
+    "swift",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000173
+  },
+  "r_cl1a109749e33": {
+   "classId": "c_muu7q2c8r12v",
+   "created": 1791160000051,
+   "effect": "Enemies Freeze at 4 Chill instead of 5.",
+   "name": "Flash Freeze",
+   "need": [
+    "frost",
+    "frost",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000051
+  },
+  "r_cl1a109749e19": {
+   "classId": "c_muu8sumchvtt",
+   "need": [
+    "venom",
+    "venom"
+   ],
+   "name": "Virulence",
+   "effect": "Once per enemy, when its attack brings that enemy to 8 Poison, the Poison doubles.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791219031425,
+   "created": 1791160000025
   },
   "r_muufsia4wpev": {
    "classId": "c_muub1s5b46u4",
@@ -4372,6 +2873,158 @@
    "status": "idea",
    "updated": 1791155589772
   },
+  "r_cl1a109749e1e": {
+   "classId": "c_muu8dtb3foya",
+   "need": [
+    "vital"
+   ],
+   "name": "Protector",
+   "effect": "Gain 2 shield whenever an ally is attacked.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791224208755,
+   "created": 1791160000030
+  },
+  "r_cl1a109749eb0": {
+   "classId": "c_muu8v6mqq9lr",
+   "created": 1791160000176,
+   "effect": "Blinded enemies also gain 3 Poison.",
+   "name": "Poison Arrows",
+   "need": [
+    "venom",
+    "swift",
+    "swift",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000176
+  },
+  "r_cl1a109749e74": {
+   "classId": "c_muucnefb450t",
+   "created": 1791160000116,
+   "effect": "+10% dodge while any enemy is Burning.",
+   "name": "Smoke Veil",
+   "need": [
+    "ember",
+    "swift",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000116
+  },
+  "r_cl1a109749eec": {
+   "classId": "c_muu9v1dnhifa",
+   "created": 1791160000236,
+   "effect": "Each second while Shielded, heals the most injured ally 1.",
+   "name": "Bastion of Life",
+   "need": [
+    "ward",
+    "ward",
+    "ward",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000236
+  },
+  "r_cl1a109749edc": {
+   "classId": "c_muubahl3ny7g",
+   "created": 1791160000220,
+   "effect": "Hexes last 5 seconds instead of 3.",
+   "name": "Fetish",
+   "need": [
+    "ward",
+    "vital",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000220
+  },
+  "r_cl1a109749e2b": {
+   "classId": "c_muu8trhnchpq",
+   "created": 1791160000043,
+   "effect": "+15% crit chance at max stacks.",
+   "name": "Reckless",
+   "need": [
+    "ember",
+    "edge",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000043
+  },
+  "r_cl1a109749e91": {
+   "classId": "c_muu8m2w3w2sq",
+   "created": 1791160000145,
+   "effect": "Each kill gives every enemy 2 Chill.",
+   "name": "Cold Reckoning",
+   "need": [
+    "frost",
+    "edge",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000145
+  },
+  "r_cl1a109749e25": {
+   "classId": "c_muua27gbu9q4",
+   "created": 1791160000037,
+   "effect": "Its pattern becomes Burn, Burn, Chill.",
+   "name": "Fire Focus",
+   "need": [
+    "ember",
+    "ember",
+    "frost"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000037
+  },
+  "r_cl1a109749e1b": {
+   "classId": "c_muu8sumchvtt",
+   "need": [
+    "gilt"
+   ],
+   "name": "Tainted Coin",
+   "effect": "Festering enemies drop 1 gold when they die.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791223758589,
+   "created": 1791160000027
+  },
+  "r_cl1a109749ec7": {
+   "classId": "c_muuck8ca1kex",
+   "created": 1791160000199,
+   "effect": "Every 3 seconds, gains 1 Shield per Chilled enemy.",
+   "name": "Cold Hide",
+   "need": [
+    "frost",
+    "ward",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000199
+  },
+  "r_cl1a109749eea": {
+   "classId": "c_muu9v1dnhifa",
+   "created": 1791160000234,
+   "effect": "Allies in its row gain +1 Armor.",
+   "name": "Fortress",
+   "need": [
+    "ward",
+    "ward",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000234
+  },
   "r_muug3j6xu55s": {
    "classId": "c_muu9phmxqag5",
    "created": 1791156104169,
@@ -4387,19 +3040,297 @@
    "status": "idea",
    "updated": 1791156294016
   },
-  "r_muugaeoldxdt": {
-   "classId": "c_muu9phmxqag5",
-   "created": 1791156424917,
-   "effect": "Wilfred heals for 50% of attack damage done by Necrodancer",
-   "name": "[placeholder]",
+  "r_cl1a109749ec3": {
+   "classId": "c_muucqat9mbn7",
+   "created": 1791160000195,
+   "effect": "After each kill, can't be targeted for 2 seconds.",
+   "name": "Shadow Step",
    "need": [
+    "frost",
+    "edge",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000195
+  },
+  "r_cl1a109749e8f": {
+   "classId": "c_muu8m2w3w2sq",
+   "created": 1791160000143,
+   "effect": "Each kill heals every ally 3.",
+   "name": "Soul Harvest",
+   "need": [
+    "frost",
+    "edge",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000143
+  },
+  "r_cl1a109749ebc": {
+   "classId": "c_muu9o6j6xwfi",
+   "created": 1791160000188,
+   "effect": "Enemies with Poison, Burn and Chill attack 25% slower.",
+   "name": "Rune of Binding",
+   "need": [
+    "venom",
+    "frost",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000188
+  },
+  "r_cl1a109749e23": {
+   "classId": "c_muu81a83luco",
+   "created": 1791160000035,
+   "effect": "Each tick of its Burn heals the most injured ally 1.",
+   "name": "Cauterize",
+   "need": [
+    "ember",
+    "ember",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000035
+  },
+  "r_cl1a109749eba": {
+   "classId": "c_muu9o6j6xwfi",
+   "created": 1791160000186,
+   "effect": "Gains 1 Shield whenever an enemy's status ticks (up to 2 per second).",
+   "name": "Runic Shell",
+   "need": [
+    "venom",
+    "ember",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000186
+  },
+  "r_cl1a109749e59": {
+   "classId": "c_muubfqfprgsy",
+   "created": 1791160000089,
+   "effect": "Every 4 seconds, removes 2 Poison or Burn from the most afflicted ally.",
+   "name": "Remedy",
+   "need": [
+    "venom",
+    "vital",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000089
+  },
+  "r_cl1a109749e1f": {
+   "classId": "c_muu8dtb3foya",
+   "need": [
+    "frost"
+   ],
+   "name": "Cold Iron",
+   "effect": "While your shield is up, enemy attackers do not halve their chill and instead increase it by 1.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791221053158,
+   "created": 1791160000031
+  },
+  "r_cl1a109749ed6": {
+   "classId": "c_muu95oxqva1i",
+   "created": 1791160000214,
+   "effect": "Every 4 seconds, applies 2 Poison to every enemy.",
+   "name": "Toxic Cloud",
+   "need": [
+    "venom",
+    "venom",
+    "venom"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000214
+  },
+  "r_cl1a109749e45": {
+   "classId": "c_muubf8nae0xm",
+   "created": 1791160000069,
+   "effect": "After 3 seconds without being attacked, regenerates 3 HP per second.",
+   "name": "Meditation",
+   "need": [
+    "vital",
+    "vital",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000069
+  },
+  "r_cl1a109749e3a": {
+   "classId": "c_muu98ulvacc4",
+   "created": 1791160000058,
+   "effect": "When its Shield breaks, every enemy gains 2 Chill.",
+   "name": "Ice Wall",
+   "need": [
+    "frost",
+    "ward",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000058
+  },
+  "r_cl1a109749e10": {
+   "classId": "c_muu8kfxb9l85",
+   "need": [
+    "gilt"
+   ],
+   "name": "Pristine Gear",
+   "effect": "Your first attack each fight is a guaranteed crit.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791221379550,
+   "created": 1791160000016
+  },
+  "r_cl1a109749ea6": {
+   "classId": "c_muu8omul8tqu",
+   "created": 1791160000166,
+   "effect": "Crits give +5% dodge for the rest of the fight (up to +25%).",
+   "name": "Dancing Edge",
+   "need": [
+    "edge",
+    "edge",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000166
+  },
+  "r_cl1a109749e6a": {
+   "classId": "c_muu9resprp7i",
+   "created": 1791160000106,
+   "effect": "Heals every 1.5 seconds instead of 2.",
+   "name": "Swift Prayer",
+   "need": [
+    "ward",
+    "vital",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000106
+  },
+  "r_cl1a109749ecc": {
+   "classId": "c_muu8iedpyjas",
+   "created": 1791160000204,
+   "effect": "Its target takes +1 damage per Poison stack from every source.",
+   "name": "Death Mark",
+   "need": [
+    "venom",
+    "edge",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000204
+  },
+  "r_cl1a109749e70": {
+   "classId": "c_muu81homh3tq",
+   "created": 1791160000112,
+   "effect": "Every 5th attack applies 3 Burn to every enemy.",
+   "name": "Firestorm",
+   "need": [
+    "ember",
+    "ember",
+    "ember",
+    "ember"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000112
+  },
+  "r_cl1a109749e68": {
+   "classId": "c_muu9resprp7i",
+   "created": 1791160000104,
+   "effect": "Shield from her overhealing is doubled.",
+   "name": "Aegis",
+   "need": [
+    "ward",
+    "ward",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000104
+  },
+  "r_cl1a109749eaf": {
+   "classId": "c_muu8v6mqq9lr",
+   "created": 1791160000175,
+   "effect": "Blinds every 3rd attack instead of every 4th.",
+   "name": "Rapid Fire",
+   "need": [
+    "swift",
+    "swift",
+    "swift",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000175
+  },
+  "r_cl1a109749e2c": {
+   "classId": "c_muu8dwwwleo2",
+   "created": 1791160000044,
+   "effect": "Allies in his row are immune to Chill.",
+   "name": "Warm Hearth",
+   "need": [
+    "ember",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000044
+  },
+  "r_cl1a109749e98": {
+   "classId": "c_muu9qxrkyxif",
+   "created": 1791160000152,
+   "effect": "Lifesteal is 75% of damage dealt instead of half.",
+   "name": "Crimson Night",
+   "need": [
+    "vital",
     "vital",
     "vital",
     "vital"
    ],
-   "notes": "If Wilfred is dead this doesn't revive her",
+   "notes": "Claude draft",
    "status": "idea",
-   "updated": 1791156494041
+   "updated": 1791160000152
+  },
+  "r_cl1a109749e7e": {
+   "classId": "c_muucd48tezf2",
+   "created": 1791160000126,
+   "effect": "Storm attacks hit twice.",
+   "name": "Tempest",
+   "need": [
+    "ember",
+    "frost",
+    "ward",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000126
+  },
+  "r_cl1a109749e5f": {
+   "classId": "c_muuberm8ge8h",
+   "created": 1791160000095,
+   "effect": "+1 damage per Poison stack on the target (up to +5).",
+   "name": "Exploit",
+   "need": [
+    "venom",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000095
   },
   "r_muugetcu8xql": {
    "classId": "c_muu9phmxqag5",
@@ -4416,33 +3347,1086 @@
    "status": "idea",
    "updated": 1791156630558
   },
-  "r_muuhbz6iksar": {
-   "classId": "c_muu9phmxqag5",
-   "created": 1791158177754,
-   "effect": "Wilfred gains Necrodancer's essence passives",
-   "name": "Perfect partners",
+  "r_cl1a109749e8b": {
+   "classId": "c_muuccpsasvwl",
+   "created": 1791160000139,
+   "effect": "When her own Shield breaks, the attacker is Frozen.",
+   "name": "Frozen Bastion",
+   "need": [
+    "frost",
+    "frost",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000139
+  },
+  "r_cl1a109749e54": {
+   "classId": "c_muu8s3phmca2",
+   "created": 1791160000084,
+   "effect": "Allies in her row gain +10% attack speed.",
+   "name": "Tailwind",
+   "need": [
+    "swift",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000084
+  },
+  "r_cl1a109749ebd": {
+   "classId": "c_muu9o6j6xwfi",
+   "created": 1791160000189,
+   "effect": "When its Shield breaks, every enemy gains 2 Poison, 2 Burn and 2 Chill.",
+   "name": "Glyph Wall",
    "need": [
     "venom",
+    "ember",
+    "frost",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000189
+  },
+  "r_cl1a109749ee0": {
+   "classId": "c_muub3d9lyt44",
+   "created": 1791160000224,
+   "effect": "Front-row allies gain +1 Armor.",
+   "name": "Standard Bearer",
+   "need": [
+    "ward",
+    "swift",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000224
+  },
+  "r_cl1a109749ede": {
+   "classId": "c_muub3d9lyt44",
+   "created": 1791160000222,
+   "effect": "When an ally drops below half HP, every ally gains +20% attack speed for 3 seconds.",
+   "name": "Rally",
+   "need": [
+    "ward",
+    "vital",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000222
+  },
+  "r_cl1a109749e1d": {
+   "classId": "c_muu8dtb3foya",
+   "need": [
+    "ward",
+    "ward"
+   ],
+   "name": "Interpose",
+   "effect": "The first hit on each other ally, lands on the the Sentinel instead",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791221123885,
+   "created": 1791160000029
+  },
+  "r_cl1a109749e92": {
+   "classId": "c_muu8m2w3w2sq",
+   "created": 1791160000146,
+   "effect": "Once per fight, a lethal hit leaves it at 1 HP instead.",
+   "name": "Death's Door",
+   "need": [
+    "frost",
+    "edge",
+    "vital",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000146
+  },
+  "r_cl1a109749ed3": {
+   "classId": "c_muu9oupl17gi",
+   "created": 1791160000211,
+   "effect": "Skeletons have +50% ATK.",
+   "name": "Unholy Strength",
+   "need": [
+    "venom",
+    "vital",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000211
+  },
+  "r_cl1a109749e0b": {
+   "classId": "c_muu89hhv5yf5",
+   "need": [
+    "venom"
+   ],
+   "name": "Finisher",
+   "effect": "Attacks against enemies below half HP apply 2 Poison.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791221877031,
+   "created": 1791160000011
+  },
+  "r_cl1a109749eac": {
+   "classId": "c_muub6hrov7i3",
+   "created": 1791160000172,
+   "effect": "The first market reroll each visit is free.",
+   "name": "Silver Lining",
+   "need": [
+    "swift",
+    "swift",
+    "gilt",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000172
+  },
+  "r_cl1a109749e73": {
+   "classId": "c_muucnefb450t",
+   "created": 1791160000115,
+   "effect": "After each dodge, its next attack applies 3 Burn.",
+   "name": "Fire Step",
+   "need": [
+    "ember",
+    "ember",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000115
+  },
+  "r_cl1a109749e11": {
+   "classId": "c_muu8kfxb9l85",
+   "need": [
+    "edge",
+    "edge"
+   ],
+   "name": "Momentum",
+   "effect": "Each attack that doesn't crit gives +10% crit chance until one does.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791222169364,
+   "created": 1791160000017
+  },
+  "r_cl1a109749ed8": {
+   "classId": "c_muu95oxqva1i",
+   "created": 1791160000216,
+   "effect": "Heals 1 per second for each Poisoned enemy (up to 3).",
+   "name": "Venom Siphon",
+   "need": [
+    "venom",
+    "venom",
+    "venom",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000216
+  },
+  "r_cl1a109749e76": {
+   "classId": "c_muucnefb450t",
+   "created": 1791160000118,
+   "effect": "Heals 2 whenever a dodge leaves Burn on the attacker.",
+   "name": "Dance of Embers",
+   "need": [
+    "ember",
+    "vital",
+    "swift",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000118
+  },
+  "r_cl1a109749e56": {
+   "classId": "c_muu8s3phmca2",
+   "created": 1791160000086,
+   "effect": "Her follow-up attacks apply 1 Chill.",
+   "name": "Cutting Wind",
+   "need": [
+    "frost",
+    "swift",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000086
+  },
+  "r_cl1a109749e00": {
+   "classId": "c_muu80wgi8uoq",
+   "need": [
+    "ward"
+   ],
+   "name": "Flame Barrier",
+   "effect": "Whenever  burning enemy dies, gain the burn as a shield.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791213381681,
+   "created": 1791160000000
+  },
+  "r_cl1a109749e09": {
+   "classId": "c_muu89hhv5yf5",
+   "need": [
+    "edge"
+   ],
+   "name": "Backstab",
+   "effect": "Your first attack against each enemy does +50% damage. If it crits, the bonus applies to the next attack too.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791221976890,
+   "created": 1791160000009
+  },
+  "r_cl1a109749e47": {
+   "classId": "c_muubf8nae0xm",
+   "created": 1791160000071,
+   "effect": "Counterattacks are guaranteed crits.",
+   "name": "Pressure Point",
+   "need": [
+    "edge",
+    "vital",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000071
+  },
+  "r_cl1a109749ea3": {
+   "classId": "c_muuayv3nak54",
+   "created": 1791160000163,
+   "effect": "Each attack in a kill chain deals +25% more than the last.",
+   "name": "Thousand Cuts",
+   "need": [
+    "edge",
+    "edge",
+    "edge",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000163
+  },
+  "r_cl1a109749e3b": {
+   "classId": "c_muu98ulvacc4",
+   "created": 1791160000059,
+   "effect": "When hit, heals 1 for each Chill on the attacker.",
+   "name": "Cold Comfort",
+   "need": [
+    "frost",
+    "ward",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000059
+  },
+  "r_cl1a109749e07": {
+   "classId": "c_muu7pu09ggnx",
+   "need": [
+    "ward"
+   ],
+   "name": "Numbing Cold",
+   "effect": "Chilled enemies deal -1 damage. Frozen enemies deal -2 instead.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791218587330,
+   "created": 1791160000007
+  },
+  "r_cl1a109749e89": {
+   "classId": "c_muuczwluamkn",
+   "created": 1791160000137,
+   "effect": "Crits on Frozen enemies hit every enemy.",
+   "name": "Eye of the Blizzard",
+   "need": [
+    "frost",
+    "frost",
+    "edge",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000137
+  },
+  "r_cl1a109749e88": {
+   "classId": "c_muuczwluamkn",
+   "created": 1791160000136,
+   "effect": "+10% crit chance for each other enemy in the target's row.",
+   "name": "Whirlwind",
+   "need": [
+    "frost",
+    "edge",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000136
+  },
+  "r_cl1a109749ea4": {
+   "classId": "c_muuayv3nak54",
+   "created": 1791160000164,
+   "effect": "Its first attack each fight is a guaranteed ×4 crit.",
+   "name": "Iaido",
+   "need": [
+    "edge",
+    "edge",
+    "edge",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000164
+  },
+  "r_cl1a109749ed4": {
+   "classId": "c_muu9oupl17gi",
+   "created": 1791160000212,
+   "effect": "Raises the first three enemies that die instead of two.",
+   "name": "Army of the Dead",
+   "need": [
+    "venom",
+    "venom",
+    "vital",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000212
+  },
+  "r_cl1a109749ed1": {
+   "classId": "c_muu9hfleces9",
+   "created": 1791160000209,
+   "effect": "Enemies that die while Poisoned explode, giving their neighbours 3 Poison.",
+   "name": "Volatile Mixture",
+   "need": [
+    "venom",
+    "venom",
+    "ember",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000209
+  },
+  "r_cl1a109749ec4": {
+   "classId": "c_muucqat9mbn7",
+   "created": 1791160000196,
+   "effect": "Stealth lasts 5 seconds instead of 3.",
+   "name": "Ambush",
+   "need": [
+    "venom",
+    "edge",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000196
+  },
+  "r_cl1a109749e85": {
+   "classId": "c_muu7r2uqpswr",
+   "created": 1791160000133,
+   "effect": "Gains 1 Shield per Frozen enemy each second.",
+   "name": "Ice Armor",
+   "need": [
+    "frost",
+    "frost",
+    "frost",
+    "ward"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000133
+  },
+  "r_cl1a109749ee2": {
+   "classId": "c_muu9rlact8dy",
+   "created": 1791160000226,
+   "effect": "Shield it gives heals the ally 2 when it breaks.",
+   "name": "Holy Shield",
+   "need": [
+    "ward",
+    "ward",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000226
+  },
+  "r_cl1a109749e61": {
+   "classId": "c_muuberm8ge8h",
+   "created": 1791160000097,
+   "effect": "Crits deal bonus damage equal to the target's Poison.",
+   "name": "Toxic Blade",
+   "need": [
+    "venom",
+    "venom",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000097
+  },
+  "r_cl1a109749ed0": {
+   "classId": "c_muu9hfleces9",
+   "created": 1791160000208,
+   "effect": "Every 5 seconds, gives the most injured ally a potion that heals 6.",
+   "name": "Golden Elixir",
+   "need": [
+    "venom",
+    "venom",
+    "gilt",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000208
+  },
+  "r_cl1a109749e4c": {
+   "classId": "c_muu8kqk3v3ck",
+   "created": 1791160000076,
+   "effect": "Deals +25% damage to his duel opponent.",
+   "name": "En Garde",
+   "need": [
+    "edge",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000076
+  },
+  "r_cl1a109749ea5": {
+   "classId": "c_muuayv3nak54",
+   "created": 1791160000165,
+   "effect": "25% chance to block a front-row attack entirely.",
+   "name": "Masterful Parry",
+   "need": [
+    "ward",
+    "edge",
+    "edge",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000165
+  },
+  "r_cl1a109749e46": {
+   "classId": "c_muubf8nae0xm",
+   "created": 1791160000070,
+   "effect": "Each counterattack gives +10% attack speed for 3 seconds.",
+   "name": "Flowing Strikes",
+   "need": [
+    "vital",
+    "swift",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000070
+  },
+  "r_cl1a109749ee7": {
+   "classId": "c_muu8lrrukarl",
+   "created": 1791160000231,
+   "effect": "When hit while Shielded, 25% chance to strike back at once.",
+   "name": "Counter Guard",
+   "need": [
+    "ward",
+    "edge",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000231
+  },
+  "r_cl1a109749e95": {
+   "classId": "c_muu8cz7uo8uh",
+   "created": 1791160000149,
+   "effect": "Allies start each fight with 1 Armor.",
+   "name": "Guild Armory",
+   "need": [
+    "ward",
+    "gilt",
+    "gilt",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000149
+  },
+  "r_cl1a109749e2f": {
+   "classId": "c_muu8dwwwleo2",
+   "created": 1791160000047,
+   "effect": "Every 4 seconds, heals the most injured ally 1 per Burning enemy.",
+   "name": "Hearth's Embrace",
+   "need": [
+    "ember",
+    "ward",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000047
+  },
+  "r_cl1a109749e08": {
+   "classId": "c_muu89hhv5yf5",
+   "need": [
+    "gilt",
+    "gilt"
+   ],
+   "name": "Gilded Knives",
+   "effect": "Attacks do +1 damage for every 3 gold in the bank. (Max + 5)",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791223015166,
+   "created": 1791160000008
+  },
+  "r_cl1a109749eb1": {
+   "classId": "c_muu8v6mqq9lr",
+   "created": 1791160000177,
+   "effect": "Attacks on blinded enemies are guaranteed crits.",
+   "name": "Headshot",
+   "need": [
+    "edge",
+    "swift",
+    "swift",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000177
+  },
+  "r_cl1a109749e9f": {
+   "classId": "c_muub1s5b46u4",
+   "created": 1791160000159,
+   "effect": "The first enemy it targets takes +25% damage from all heroes.",
+   "name": "Mark",
+   "need": [
+    "edge",
+    "edge",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000159
+  },
+  "r_cl1a109749e41": {
+   "classId": "c_muu9coiwf8yb",
+   "created": 1791160000065,
+   "effect": "Each heal also deals half its amount as damage to a random enemy.",
+   "name": "Crimson Tide",
+   "need": [
+    "vital",
+    "vital",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000065
+  },
+  "r_cl1a109749ea9": {
+   "classId": "c_muu8omul8tqu",
+   "created": 1791160000169,
+   "effect": "Heals 2 on each dodge.",
+   "name": "Graceful",
+   "need": [
+    "edge",
+    "vital",
+    "swift",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000169
+  },
+  "r_cl1a109749e49": {
+   "classId": "c_muu8hkj0igmk",
+   "created": 1791160000073,
+   "effect": "+4 ATK against elites and bosses.",
+   "name": "Contract Killer",
+   "need": [
+    "edge",
+    "edge",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000073
+  },
+  "r_cl1a109749e4a": {
+   "classId": "c_muu8hkj0igmk",
+   "created": 1791160000074,
+   "effect": "Starts each fight with +1 ATK per 5 gold you hold (up to +4).",
+   "name": "Paid in Advance",
+   "need": [
+    "edge",
+    "gilt",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000074
+  },
+  "r_cl1a109749e02": {
+   "classId": "c_muu80wgi8uoq",
+   "need": [
+    "swift"
+   ],
+   "name": "Stoke",
+   "effect": "Attacking a burning enemy grants +5% attack speed for the rest of the battle (Once per enemy).",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791223714826,
+   "created": 1791160000002
+  },
+  "r_cl1a109749eb2": {
+   "classId": "c_muu7sibtrs2m",
+   "created": 1791160000178,
+   "effect": "Enemies with Poison, Burn and Chill take +25% damage.",
+   "name": "Spectrum",
+   "need": [
+    "venom",
+    "ember",
+    "frost"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000178
+  },
+  "r_cl1a109749eb4": {
+   "classId": "c_muu7sibtrs2m",
+   "created": 1791160000180,
+   "effect": "When an enemy dies, its statuses move to a random enemy.",
+   "name": "Refraction",
+   "need": [
+    "venom",
+    "frost",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000180
+  },
+  "r_cl1a109749e21": {
+   "classId": "c_muu81a83luco",
+   "created": 1791160000033,
+   "effect": "Every 5th attack applies 2 Burn to every enemy.",
+   "name": "Inferno",
+   "need": [
+    "ember",
+    "ember",
+    "ember"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000033
+  },
+  "r_cl1a109749e24": {
+   "classId": "c_muua27gbu9q4",
+   "created": 1791160000036,
+   "effect": "When an enemy has 3+ Burn and 3+ Chill, both are consumed to deal 10 damage.",
+   "name": "Thermal Shock",
+   "need": [
+    "ember",
+    "frost"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000036
+  },
+  "r_cl1a109749e0f": {
+   "classId": "c_muu8t3slx20j",
+   "need": [
+    "swift"
+   ],
+   "name": "Quick Hands",
+   "effect": "After healing another hero, you dodge the next attack.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791223418814,
+   "created": 1791160000015
+  },
+  "r_cl1a109749e0a": {
+   "classId": "c_muu89hhv5yf5",
+   "need": [
+    "swift"
+   ],
+   "name": "Getaway",
+   "effect": "After a kill, dodge the next attack.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791221893971,
+   "created": 1791160000010
+  },
+  "r_cl1a109749e3c": {
+   "classId": "c_muu8a0kltcn4",
+   "created": 1791160000060,
+   "effect": "The first market reroll each visit costs 1 less.",
+   "name": "Bulk Discount",
+   "need": [
+    "gilt",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000060
+  },
+  "r_cl1a109749e01": {
+   "classId": "c_muu80wgi8uoq",
+   "need": [
+    "ember",
+    "ember"
+   ],
+   "name": "Fan the Flames",
+   "effect": "Ablaze enemies spread 1 burn to adjacent enemies every 2 seconds.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791215551065,
+   "created": 1791160000001
+  },
+  "r_cl1a109749ebe": {
+   "classId": "c_muucnsji9spe",
+   "created": 1791160000190,
+   "effect": "Bombs can crit.",
+   "name": "Shrapnel",
+   "need": [
+    "venom",
+    "ember",
+    "edge"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000190
+  },
+  "r_cl1a109749eca": {
+   "classId": "c_muu8iedpyjas",
+   "created": 1791160000202,
+   "effect": "Executes enemies below 20% HP instead of 15%.",
+   "name": "Shadow Strike",
+   "need": [
+    "venom",
+    "edge",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000202
+  },
+  "r_cl1a109749e2a": {
+   "classId": "c_muu8trhnchpq",
+   "created": 1791160000042,
+   "effect": "Below half HP, heals 2 on each hit.",
+   "name": "Battle Trance",
+   "need": [
+    "ember",
+    "vital",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000042
+  },
+  "r_cl1a109749e52": {
+   "classId": "c_muu91gvq8418",
+   "created": 1791160000082,
+   "effect": "Every 4 seconds, heals every ally 2.",
+   "name": "Soothing Song",
+   "need": [
     "vital",
     "swift",
     "gilt"
    ],
-   "notes": "",
+   "notes": "Claude draft",
    "status": "idea",
-   "updated": 1791158177754
+   "updated": 1791160000082
   },
-  "r_muuitzxipabq": {
-   "classId": "c_muu8s3phmca2",
-   "created": 1791160698150,
-   "effect": "Attacks ignore Armor",
-   "name": "Piercing hits",
+  "r_cl1a109749e6f": {
+   "classId": "c_muu81homh3tq",
+   "created": 1791160000111,
+   "effect": "Its hit-all attacks deal 75% damage instead of 60%.",
+   "name": "Heat Wave",
    "need": [
+    "ember",
+    "ember",
+    "ember"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000111
+  },
+  "r_cl1a109749e96": {
+   "classId": "c_muu8cz7uo8uh",
+   "created": 1791160000150,
+   "effect": "The market offers 1 extra hero.",
+   "name": "Recruiter",
+   "need": [
+    "swift",
+    "gilt",
+    "gilt",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000150
+  },
+  "r_cl1a109749e66": {
+   "classId": "c_muu93w65k55t",
+   "created": 1791160000102,
+   "effect": "Enemies with 5+ Poison attack 15% slower.",
+   "name": "Creeping Sickness",
+   "need": [
+    "venom",
+    "venom",
+    "frost"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000102
+  },
+  "r_cl1a109749e82": {
+   "classId": "c_muu8emlv6f5o",
+   "created": 1791160000130,
+   "effect": "Can revive twice per fight.",
+   "name": "Eternal Flame",
+   "need": [
+    "ember",
+    "ward",
+    "vital",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000130
+  },
+  "r_cl1a109749e9a": {
+   "classId": "c_muu9qxrkyxif",
+   "created": 1791160000154,
+   "effect": "Once per fight, below a quarter HP, gains 50% dodge for 4 seconds.",
+   "name": "Bat Form",
+   "need": [
+    "vital",
+    "vital",
+    "vital",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000154
+  },
+  "r_cl1a109749e58": {
+   "classId": "c_muubfqfprgsy",
+   "created": 1791160000088,
+   "effect": "Every 4th attack applies double Poison.",
+   "name": "Concentrate",
+   "need": [
+    "venom",
+    "venom",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000088
+  },
+  "r_cl1a109749e37": {
+   "classId": "c_muuaifyzo8vc",
+   "created": 1791160000055,
+   "effect": "+5% attack speed for each Chilled enemy (up to +25%).",
+   "name": "Glacial Rush",
+   "need": [
+    "frost",
     "edge",
     "swift"
    ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000055
+  },
+  "r_cl1a109749e99": {
+   "classId": "c_muu9qxrkyxif",
+   "created": 1791160000153,
+   "effect": "Heals 1 extra per Poison stack on its target (up to 5).",
+   "name": "Vampiric Bite",
+   "need": [
+    "venom",
+    "vital",
+    "vital",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000153
+  },
+  "r_cl1a109749e44": {
+   "classId": "c_muubf8nae0xm",
+   "created": 1791160000068,
+   "effect": "Heals 3 after each dodge.",
+   "name": "Inner Calm",
+   "need": [
+    "vital",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000068
+  },
+  "r_cl1a109749e0c": {
+   "classId": "c_muu8t3slx20j",
+   "need": [
+    "venom"
+   ],
+   "name": "Side Effects",
+   "effect": "On attack move 2 of each status on a random ally with status to the target.",
    "notes": "",
    "status": "idea",
-   "updated": 1791160698150
+   "updated": 1791224084988,
+   "created": 1791160000012
+  },
+  "r_cl1a109749e4f": {
+   "classId": "c_muu8kqk3v3ck",
+   "created": 1791160000079,
+   "effect": "When he wins a duel, heals 30% of his max HP and challenges the next enemy.",
+   "name": "Victor's Rest",
+   "need": [
+    "edge",
+    "edge",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000079
+  },
+  "r_cl1a109749e20": {
+   "classId": "c_muu81a83luco",
+   "created": 1791160000032,
+   "effect": "When a Burning enemy dies, half its Burn spreads to a random enemy.",
+   "name": "Wildfire",
+   "need": [
+    "ember",
+    "ember"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000032
+  },
+  "r_cl1a109749eaa": {
+   "classId": "c_muub6hrov7i3",
+   "created": 1791160000170,
+   "effect": "The slowed enemy also deals 20% less damage.",
+   "name": "Sweet Talk",
+   "need": [
+    "swift",
+    "swift",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000170
+  },
+  "r_cl1a109749e80": {
+   "classId": "c_muu8emlv6f5o",
+   "created": 1791160000128,
+   "effect": "Heals 1 whenever Burn damages an enemy.",
+   "name": "Cinder Wings",
+   "need": [
+    "ember",
+    "vital",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000128
+  },
+  "r_cl1a109749e7f": {
+   "classId": "c_muu8emlv6f5o",
+   "created": 1791160000127,
+   "effect": "After reviving, gains +50% attack speed.",
+   "name": "Rising Flame",
+   "need": [
+    "ember",
+    "ward",
+    "vital"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000127
+  },
+  "r_cl1a109749edf": {
+   "classId": "c_muub3d9lyt44",
+   "created": 1791160000223,
+   "effect": "+1 gold after each won fight where no ally died.",
+   "name": "Fanfare",
+   "need": [
+    "vital",
+    "swift",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000223
+  },
+  "r_cl1a109749e03": {
+   "classId": "c_muu80wgi8uoq",
+   "need": [
+    "frost"
+   ],
+   "name": "Scald",
+   "effect": "Enemies who are both Burning and Chilled get +1 status from this hero.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791223701410,
+   "created": 1791160000003
+  },
+  "r_cl1a109749ecb": {
+   "classId": "c_muu8iedpyjas",
+   "created": 1791160000203,
+   "effect": "Each execute pays +1 gold.",
+   "name": "Contract",
+   "need": [
+    "edge",
+    "swift",
+    "gilt"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000203
+  },
+  "r_cl1a109749ec9": {
+   "classId": "c_muuck8ca1kex",
+   "created": 1791160000201,
+   "effect": "Front-row enemies can't target her.",
+   "name": "Stalk",
+   "need": [
+    "venom",
+    "frost",
+    "ward",
+    "swift"
+   ],
+   "notes": "Claude draft",
+   "status": "idea",
+   "updated": 1791160000201
+  },
+  "r_muvdxg1pfp65": {
+   "classId": "c_muu7pu09ggnx",
+   "need": [
+    "ember"
+   ],
+   "name": "Frostburn",
+   "effect": "Enemies who are both Burning and Chilled take 2 more damage from heroes. Frozen and Ablaze enemies take 8 more instead.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791223687138,
+   "created": 1791212927101
+  },
+  "r_muvdxk5q87vh": {
+   "classId": "c_muu7pu09ggnx",
+   "need": [
+    "edge"
+   ],
+   "name": "Precise Cut",
+   "effect": "Attacks against Frozen enemies are guaranteed to crit.",
+   "notes": "",
+   "status": "idea",
+   "updated": 1791218578650,
+   "created": 1791212932430
   }
  }
 }
