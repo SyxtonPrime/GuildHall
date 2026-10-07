@@ -10,6 +10,7 @@
 //   take the hit · onPoisonDamage/onBurnDamage(x,t,d,B) · onAttackEnd(u,t,B).
 // Status an attack applies on hit goes through hitApply (Mage +1, Scald); heals from abilities go through abilityHeal (Mage +1, Healer bonuses);
 // area effects and moved stacks use applyStatus. "Every Nth attack" is nthAttack(u,N). Rulings: docs/hero-refactor-plan.md.
+const BLOOD_COST=ENV('BLOOD',2), BLOOD_HEAL=ENV('BLOODHEAL',0.5), MONK_DODGE=ENV('MONKDODGE',0.10), COUNTER_MULT=ENV('COUNTER',1); // balance knobs under test
 function acroRow(u,B){ // Acrobat: the bonus follows the row
   if(u.acro==='front') u.dodge-=0.2; else if(u.acro==='back') u.spd/=1.15;
   u.acro=u.row; if(u.row==='front') u.dodge+=0.2; else u.spd*=1.15; }
@@ -73,8 +74,8 @@ const HOOKS={
   Eager:{hooks:{onStart:(u,B)=>addBuff(u,'eager','spd',0.2,Infinity,B), onKill:(u,t,B)=>dropBuff(u,'eager')}},
   'Second Wind':{hooks:{onKill:(u,t,B)=>abilityHeal(u,u,Math.round((u.maxHp-u.hp)/4),B)}},
   'Mark for Death':{hooks:{onTarget:(u,t,ac,B)=>{ if(t.hp<t.maxHp/4) ac.mult*=1.5; }}}},
- 'Blood mage':{passive:{hooks:{onHit:(u,t,d,B)=>{ if(d>0) abilityHeal(u,lowestAlly(u,B),d*(u.flags.sanguine&&isFestering(t)?2:1),B); },
-    onAttackEnd:(u,t,B)=>{ if(!(t&&u.flags.sanguine&&isFestering(t))) dealDamage(null,u,2,{type:'cost',ignoreArmor:true,ignoreShield:true},B); }}},
+ 'Blood mage':{passive:{hooks:{onHit:(u,t,d,B)=>{ if(d>0) abilityHeal(u,lowestAlly(u,B),Math.round(d*BLOOD_HEAL*(u.flags.sanguine&&isFestering(t)?2:1)),B); },
+    onAttackEnd:(u,t,B)=>{ if(!(t&&u.flags.sanguine&&isFestering(t))) dealDamage(null,u,BLOOD_COST,{type:'cost',ignoreArmor:true,ignoreShield:true},B); }}},
   Sanguine:{flag:'sanguine'},
   Hemorrhage:{hooks:{onTarget:(u,t,ac,B)=>{ ac.critBonus=(ac.critBonus||0)+0.1*afflictions(t); }, onCrit:(u,t,B)=>{ const d=u.lastDealt||0; if(d>0) alliesOf(u,B).forEach(x=>abilityHeal(u,x,d,B)); }}},
   Stockpile:{hooks:{onStart:(u,B)=>{ u.reserve=Math.floor(bank(B)/2); }, onAttack:(u,a,B)=>{ if(u.reserve>=2){ u.reserve-=2; a.mult*=1.5; } }}},
@@ -90,7 +91,7 @@ const HOOKS={
   'Cold Blood':{hooks:{onTarget:(u,t,ac,B)=>{ if(t.kw.crippled) ac.mult*=2; }, onHit:(u,t,d,B)=>{ if(d>0) abilityHeal(u,u,Math.round(d/4),B); }}},
   Whetstone:{hooks:{onCrit:(u,t,B)=>{ if(!u.whet){ u.whet=1; hitApply(u,t,'chill',20,B); } }}},
   'Glacial Rush':{hooks:{onAttack:(u,a,B)=>{ let n=0; aliveEnemies(u,B).forEach(e=>{ if(isFrozen(e)) n+=0.1; else if(e.st.chill>0) n+=0.05; }); addBuff(u,'rush','spd',Math.min(0.3,n),Infinity,B); }}}},
- Monk:{passive:{mod:{dodge:0.15},hooks:{onDodge:(u,src,B)=>{ if(src.alive&&!u.inCounter){ u.inCounter=true; try{ attack(u,B,src,{counter:true}); } finally{ u.inCounter=false; } } }}},
+ Monk:{passive:{mod:{dodge:MONK_DODGE},hooks:{onDodge:(u,src,B)=>{ if(src.alive&&!u.inCounter){ u.inCounter=true; try{ attack(u,B,src,{counter:true,mult:COUNTER_MULT}); } finally{ u.inCounter=false; } } }}},
   Flow:{hooks:{onIncoming:(u,src,ac,B)=>{ ac.dodgeBonus=(ac.dodgeBonus||0)+0.1*(u.flow||0); }, onDodge:(u,src,B)=>{ u.flow=0; abilityHeal(u,u,Math.round(u.maxHp/10),B); }, onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack') u.flow=(u.flow||0)+1; }}},
   'Pressure Point':{hooks:{onAttack:(u,a,B)=>{ if(a.counter) a.forceCrit=true; }}},
   Deflect:{hooks:{onDodge:(u,src,B)=>{ const adj=adjacentOf(src,B).filter(x=>x.alive); if(adj.length) splash(u,pick(adj),Math.round(src.atk/2),B); }}},
