@@ -273,7 +273,7 @@ Bot knobs added for the next passes: `CHILLSLOW`, `CHILLSHED`, `FESTER`, `BURNDM
 ### Settled for phase 2
 
 - **Decided.** Stats are a sum along the route. Each class carries a small stat contribution keyed by a classification (Front line, Mid, Back line to begin with; finer later), and a hero's stats are the sum of its starter's, tier 3's and capstone's contributions, so the same capstone reached by two routes has different stats. The table lives with the classes (in the bench) once the classifications are set.
-- **Decided.** Each training opens one slot and promotes if the gems allow; costs stay 5 then 9 gold for now. Starters have two slots, so the third opens at the first training and the fourth at the second.
+- **Decided.** Each training opens one slot and promotes if the gems allow. Training costs 7 then 11 and a hire 5 (raised from 5/9 and 3 on 7 October 2026: with ~35 gold passing through by the first boss, the near-guaranteed comp of 1 tier 3 + 3 starters + 5 gems cost 32 and was affordable; it is 38 now, while the 3-hero comp is 24). Starters have two slots, so the third opens at the first training and the fourth at the second.
 - **Decided.** `recipes.json` stays the source of truth; the bench is the editor.
 - The game's source now lives in `game/src/` (split 6 October 2026); the generated files are built by `tools/build.js`.
 

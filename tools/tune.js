@@ -3,7 +3,7 @@ const E=require(process.env.ENGINE||'../game/engine.js');
 const ri=n=>Math.floor(Math.random()*n), pick=a=>a[ri(a.length)], shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=ri(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
 const nm=id=>E.CLASSES[id]?E.CLASSES[id].name:id; // class ids are opaque; report names
 const ALL=E.STARTERS; // the market sells starters; the bot trains them up the tree
-const lvCost=h=>h.lv===1?5:h.lv===2?9:null;
+const lvCost=h=>h.lv===1?7:h.lv===2?11:null;
 const ofTier=(t,own)=>Object.keys(E.RELICS).filter(k=>(E.RELICS[k].tier||'common')===t&&!own.includes(k));
 function rollRelic(w,own){ const r=Math.random(); let acc=0,t='common'; for(const k of ['common','rare','legendary']){ acc+=w[k]; if(r<acc){t=k;break;} } const p=ofTier(t,own); if(p.length) return pick(p); const a=Object.keys(E.RELICS).filter(k=>!own.includes(k)); return a.length?pick(a):null; }
 function addHero(run,id){ const rc=r=>run.heroes.filter(h=>h.row===r).length; let row=E.defaultRow(id); if(rc(row)>=(E.ROW_MAX||4)) row=row==='front'?'back':'front'; run.heroes.push(E.newHero(id,row)); }
@@ -18,8 +18,8 @@ function shopPhase(run){
   const gems=[0,1,2].map(()=>Math.random()<0.15+0.02*run.floor?pick(E.RARE_GEMS):pick(E.BASIC_GEMS));
   const relic=(process.env.EVEN&&run.floor%2)?null:rollRelic({common:0.65,rare:0.30,legendary:0.05},run.relics);
   run.pm=run.pm||3; const SC={3:6,4:10}; const cap=run.pm+(run.relics.includes('contract')?1:0);
-  for(let k=0;k<2;k++){ if(run.heroes.length>=run.pm&&SC[run.pm]&&run.gold>=SC[run.pm]+3&&(run.floor>=3||Math.random()<0.3)){ run.gold-=SC[run.pm]; run.pm++; } }
-  let hired=0; while(run.heroes.length<cap&&run.gold>=3&&hired<heroes.length&&(run.heroes.length<3||run.floor<=6||Math.random()<0.4)){ run.gold-=3; addHero(run,heroes[hired++]); }
+  for(let k=0;k<2;k++){ if(run.heroes.length>=run.pm&&SC[run.pm]&&run.gold>=SC[run.pm]+5&&(run.floor>=3||Math.random()<0.3)){ run.gold-=SC[run.pm]; run.pm++; } }
+  let hired=0; while(run.heroes.length<cap&&run.gold>=5&&hired<heroes.length&&(run.heroes.length<3||run.floor<=6||Math.random()<0.4)){ run.gold-=5; addHero(run,heroes[hired++]); }
   if(relic&&!process.env.FORCE_RELIC&&run.gold>=E.RELICS[relic].cost+3&&Math.random()<0.5){ run.gold-=E.RELICS[relic].cost; run.relics.push(relic); }
   const gcap=run.heroes.reduce((n,h)=>n+openIdx(h).length,0)-run.bag.length;
   const scored=gems.map(g=>({g,sc:run.heroes.reduce((m,h)=>Math.max(m,openIdx(h).length?newSkills(h,g):0),0)})).sort((a,b)=>b.sc-a.sc);
