@@ -58,7 +58,7 @@ const ENEMIES={
   hooks:{onHit:(u,t,dmg,B)=>heal(u,dmg,B)}},
  rifttitan:{name:'Stone Titan',row:'front',hp:210,atk:9,spd:0.6,armor:2,boss:true,ab:'+2 ATK every 3s. Every 5th attack hits everyone.',
   hooks:{onSecond:(u)=>{ if(u.secs%3===0) u.atk+=2; }, onAttack:(u,a)=>{ if(nthAttack(u,5)) a.hitAll=true; }}},
- bonedragon:{name:'Bone Dragon',row:'front',hp:160,atk:8,spd:0.7,armor:1,boss:true,ab:'Every 5th attack breathes on everyone. Heals 20 whenever another enemy dies. Immune to Poison.',flags:{boneproof:1},
+ bonedragon:{name:'Bone Dragon',row:'front',hp:160,atk:8,spd:0.7,armor:1,boss:true,ab:'Every 5th attack breathes on everyone. Heals 20 whenever another enemy dies. Takes half damage from Poison.',flags:{poisonResist:1},
   hooks:{onAttack:(u,a)=>{ if(nthAttack(u,5)) a.hitAll=true; }, onAllyDeath:(u,d,B)=>heal(u,20,B)}},
  // --- bosses added v35 (Scout's Camp picks between an act's own bosses) ---
  ratking:{name:'Rat King',row:'front',hp:162,atk:9,spd:0.9,boss:true,ab:'Every 5s, two Rats join the fight. +1 ATK for every Rat alive.',
