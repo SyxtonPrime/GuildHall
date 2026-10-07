@@ -1,12 +1,14 @@
 // ---------- Stats ----------
-function computeStats(h,relics){
+// ctx: {gemMult} doubles basic gem socket effects (Master Jeweller). h.permAtk and h.souls are run-permanent gains (Bounty hunter, Reaper).
+function computeStats(h,relics,ctx){
   relics=relics||[];
   const L=h.lv, m=1+0.15*(L-1), base=classStats(h.root||rootOf(h.id),heroPath(h)); // the route's stats, grown 15% per ★
-  let hp=base.hp*m+(h.bonusHp||0)+(h.giftHp||0), atk=base.atk*m+(h.giftAtk||0), spd=base.spd, armor=base.armor, crit=base.crit, dodge=base.dodge;
+  let hp=base.hp*m+(h.bonusHp||0)+(h.giftHp||0)+(h.souls||0), atk=base.atk*m+(h.giftAtk||0)+(h.permAtk||0), spd=base.spd, armor=base.armor, crit=base.crit, dodge=base.dodge;
   const apply={};
   let statusMult=1, targetLowest=false, startShield=0, regen=0;
   const flags={};
   const sc=slotCounts(h,relics.includes('prism')), gh=sc.hand, ga=sc.armor, gold={win:0,kill:0,interest:0,elite:0};
+  const gm=(ctx&&ctx.gemMult)||1; if(gm!==1){ for(const k in gh) gh[k]*=gm; for(const k in ga) ga[k]*=gm; }
   const retaliate={}; let spikes=0, lifesteal=0, shieldPerAttack=0;
   // hand (weapon / off-hand): offensive
   if(gh.venom) apply.poison=(apply.poison||0)+gh.venom;

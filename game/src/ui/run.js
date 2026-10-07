@@ -17,7 +17,7 @@ function actBoss(){ run.bosses=run.bosses||{}; const k=actKey(run.floor); if(!ru
 function offerPaths(){ run.choices=genChoices(run.floor,run.depth,{boss:actBoss()}); run.pick=run.choices.findIndex(c=>c.enc); if(run.pick<0) run.pick=0; run.enc=run.choices[run.pick].enc||null; }
 function pickPath(i){ run.pick=i; run.enc=run.choices[i].enc||null; }
 function loadRun(){ const r=load(KEY_RUN,null); if(!r) return null; if(r.heroes.some(h=>!CLASSES[h.id])) return null; /* a save from before the class tree */ restoreMergedGems(r.merged); if(!r.choices){ r.choices=[{kind:r.enc?r.enc.kind:'fight',enc:r.enc}]; r.pick=0; } if(r.mergeAct===undefined){ r.mergeAct=0; r.merged=r.merged||[]; r.mergeN=r.mergeN||0; } if(r.choices.some(c=>c.kind==='forge')){ r.choices=r.choices.filter(c=>c.kind!=='forge'); r.pick=0; r.enc=r.choices[0].enc; } return r; }
-const rerollCost=()=>Math.max(0,1+(run.rr||0)-(run.relics.includes('scales')?1:0)-(run.heroes.some(h=>computeStats(h,run.relics).flags.fasttalker)?1:0)); // Fast Talker (Merchant)
+const rerollCost=()=>Math.max(0,1+(run.rr||0)-(run.relics.includes('scales')?1:0)-(heroFlag('fasttalker')?1:0)); // Fast Talker (Merchant)
 const gemFx=(g,active)=>{ const d=GEMS[g]; if(!d.hand) return esc(d.desc); const row=(k,lab)=>`<div class="gfx ${active&&active!==k?'off':''}"><span class="gk ${k}">${lab}</span> ${esc(d[k])}</div>`; return row('hand','Weapon')+row('armor','Armor'); };
 // rare gem body: bonus/drawback, plus (with Prismatic Lens, 3+ essences) every essence's socket effects
 const rareFx=(g,activeKind)=>{ const d=GEMS[g], eff=esc(d.desc.replace(/^[^.]*\. ?/,''));
@@ -31,7 +31,7 @@ function rollRelic(weights,owned){ const r=Math.random(); let acc=0, t='common';
 const SHOP_RELIC_W={common:0.65,rare:0.30,legendary:0.05};
 const RELIC_HOARD_GOLD=10; // boss reward when no relics are left
 function rollShop(charge){
-  if(charge){ const c=rerollCost(); if(run.gold<c) return; run.gold-=c; run.rerolls++; run.rr=(run.rr||0)+1; if(run.frozen){ run.frozen=false; toast('Market unfrozen'); } }
+  if(charge){ const c=rerollCost(); if(run.gold<c) return; spend(c); run.rerolls++; run.rr=(run.rr||0)+1; if(run.frozen){ run.frozen=false; toast('Market unfrozen'); } }
   else { run.rr=0; if(run.frozen&&run.shop){ run.frozen=false; saveRun(); return; } } // frozen: carry the same stock over once (bought slots stay empty), then unfreeze
   const owned=run.heroes.map(h=>h.id);
   const hpool=shuffle(unlockedHeroes().filter(h=>!owned.includes(h)));
@@ -43,18 +43,20 @@ function rollShop(charge){
   heroes.forEach(h=>seen('h',h.id)); gems.forEach(g=>seen('g',g.id)); if(relic) seen('r',relic.id);
   saveRun();
 }
-const heroCost=3, lvCost=h=>h.lv===1?5:h.lv===2?9:null; // cost to unlock the next gear slot (also raises the hero's ★)
+const heroFlag=f=>run.heroes.some(h=>computeStats(h,run.relics).flags[f]); // run-level effects of class skills (Silver tongue, Guildmaster, Fast Talker)
+const heroCost=()=>3-(heroFlag('silver')?1:0), lvCost=h=>h.lv===1?5:h.lv===2?9:null; // cost to unlock the next gear slot (also raises the hero's ★)
+const spend=n=>{ run.gold-=n; run.spent=(run.spent||0)+n; }; // War Bonds reads gold spent this run
 const openSet=h=>h.open||Array.from({length:SLOTS(h.lv)},(_,k)=>k); // unlocked gear slots; older saves: the first lv+1
 const slotOpen=(h,k)=>openSet(h).includes(k);
 // Training: pays, opens the slot and promotes. 'noupgrade' when the hero's gems meet none of its upgrades; several fits leave run.promo for the UI to resolve.
-function unlockSlot(h,k){ const c=lvCost(h); if(!c||run.gold<c||slotOpen(h,k)) return false; if(!upgradeOptions(h).length) return 'noupgrade'; run.gold-=c; h.open=openSet(h); const opts=trainHero(h,k); if(opts.length>1) run.promo={hi:run.heroes.indexOf(h),opts}; return true; }
+function unlockSlot(h,k){ const c=lvCost(h); if(!c||run.gold<c||slotOpen(h,k)) return false; if(!upgradeOptions(h).length) return 'noupgrade'; spend(c); h.open=openSet(h); const opts=trainHero(h,k); if(opts.length>1) run.promo={hi:run.heroes.indexOf(h),opts}; return true; }
 function rollGems(n,forceRare){
   const basics=shuffle(BASIC_GEMS), rares=shuffle(RARE_GEMS.filter(k=>GEMS[k].rare===1).concat(shuffle(RARE_GEMS.filter(k=>GEMS[k].rare===2)).slice(0,2)));
   const out=[]; for(let i=0;i<n;i++){ const rare=(forceRare&&i===n-1)||(Math.random()<0.15+0.02*run.floor); out.push(rare&&rares.length?rares.shift():basics.shift()); }
   return shuffle(out);
 }
 const PARTY_START=3, SLOT_COST={3:6,4:10};
-const partyMax=()=>(run.partyMax||PARTY_START)+(run.relics.includes('contract')?1:0);
+const partyMax=()=>(run.partyMax||PARTY_START)+(run.relics.includes('contract')?1:0)+(heroFlag('guildslot')?1:0); // Guildmaster adds a slot
 const slotCost=()=>SLOT_COST[run.partyMax||PARTY_START]||null; // purchases ignore the Contract's bonus slot
 function addHero(id){
   const rowCount=r=>run.heroes.filter(h=>h.row===r).length;

@@ -62,7 +62,7 @@ function renderCamp(){
   const bonusHtml=run.bonus?`<div class="pathbar bonusbar"><div class="eyebrow">Bonus</div>${run.bonus.opts.map(k=>`<div class="pchip k-ev" data-ev="${k}"><div class="pl">${EVENTS[k].name}</div><div class="ps">${EVENTS[k].sub}</div></div>`).join('')}<button class="sm ghost" data-a="skipbonus">Skip</button></div>`:'';
   const goBtn=run.bonus?`<button class="primary" disabled>Choose a bonus first</button>`:run.choices[run.pick].kind==='forge'?`<button class="gold" data-a="forge">Enter the Forge</button>`:`<button class="primary" data-a="fight" ${run.heroes.length?'':'disabled'}>${run.choices[run.pick].kind==='boss'?spr(actBoss(),22,ENEMIES[actBoss()].name)+' ':''}Descend</button>`;
   const sh=run.shop, full=run.heroes.length>=partyMax();
-  const tileH=sh.heroes.map((o,i)=>{ const d=HEROES[o.id]; const can=!o.sold&&run.gold>=heroCost&&!full; return `<div class="tile ${o.sold?'sold':''}" data-oh="${i}">${ic(o.id,'h',32,d.name)}<div class="tl">${d.row} · ${d.hp}/${d.atk}/${d.spd}</div><div class="tc ${can?'gold':'muted'}">${o.sold?'hired':full?'guild full':heroCost+'g'}</div></div>`; }).join('');
+  const tileH=sh.heroes.map((o,i)=>{ const d=HEROES[o.id]; const can=!o.sold&&run.gold>=heroCost()&&!full; return `<div class="tile ${o.sold?'sold':''}" data-oh="${i}">${ic(o.id,'h',32,d.name)}<div class="tl">${d.row} · ${d.hp}/${d.atk}/${d.spd}</div><div class="tc ${can?'gold':'muted'}">${o.sold?'hired':full?'guild full':heroCost+'g'}</div></div>`; }).join('');
   const wantCount=g=>run.heroes.reduce((n,h)=>n+heroSkills(h.id).filter(sk=>!skillActive(h,sk)&&skillActive(withGem(h,g),sk)).length,0);
   // v33 compact gem strip (icon · +N · price). Previous tall tiles kept for easy revert:
   // const tileI=sh.gems.map((o,i)=>{ const d=GEMS[o.id]; const can=!o.sold&&run.gold>=d.cost; const w=o.sold?0:wantCount(o.id); return `<div class="tile ${o.sold?'sold':''} ${d.rare?'rare':''}" data-oi="${i}">${ic(o.id,'g',36,d.name)}<div class="tl">${esc(d.name)}${w?` <span class="good">+${w}</span>`:''}</div><div class="tc ${can?'gold':'muted'}">${o.sold?'bought':d.cost+'g'}</div></div>`; }).join('');
@@ -92,7 +92,7 @@ $('#s-camp').addEventListener('click',e=>{
   if(ds.a==='unsel'){ sel.gem=null; return renderCamp(); }
   if(ds.a==='reroll'){ rollShop(true); return renderCamp(); }
   if(ds.a==='freeze'){ run.frozen=!run.frozen; toast(run.frozen?'Market frozen — this stock stays for the next floor':'Market unfrozen'); return renderCamp(); }
-  if(ds.a==='expand'){ const c=slotCost(); if(!c||run.gold<c) return; run.gold-=c; run.partyMax=(run.partyMax||PARTY_START)+1; toast(`Guild can now hold ${run.partyMax} heroes`); return renderCamp(); }
+  if(ds.a==='expand'){ const c=slotCost(); if(!c||run.gold<c) return; spend(c); run.partyMax=(run.partyMax||PARTY_START)+1; toast(`Guild can now hold ${run.partyMax} heroes`); return renderCamp(); }
   if(ds.a==='sellbag'){ run.bag.splice(sel.gem,1); run.gold+=1; sel.gem=null; return renderCamp(); }
   if(ds.a==='fight'){ if(!run.enc) return; return startBattle(); }
   if(ds.a==='forge') return openForge();

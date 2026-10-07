@@ -312,4 +312,22 @@ All twenty tier 3 classes have effects. Primitives added for them:
 
 Readings made in the hooks, not rulings: the Blood mage's 2 HP cost comes after the attack resolves, as sourceless damage; Rally counts a heal as landing only if it restored HP; the Apothecary's elixir goes to the fastest ally at the bell and is a plain `+2` to that unit's on-hit Poison (so a Mage root adds its +1); Hemorrhage heals every ally for the crit's damage; Crimson Tide hits the enemy she last attacked; Stoke (Fire mage) still checks Burn before the hit lands; Bard's auras include herself; Merchant's hoard bonus reads the bank at the bell plus what the fight has paid.
 
-Bot, 150 runs, starters and tier 3: win 4.0%, average floor 6.9. The engine-only route check (every tier 3 class by every route, four slots, with a Ward Sentinel, floor 8) has Monk, Berserker, Blood mage and Apothecary near 100% and most casters near 0%, which is the first thing the balance pass should look at.
+Bot, 150 runs, starters and tier 3: win 4.0%, average floor 6.9.
+
+### Phase 4, capstones (7 October 2026)
+
+All 33 capstones have effects; every class in the tree now does what its text says. Primitives added:
+
+- **Summons**: `summonAlly(B,name,stats,row,{hooks,apply,flags,eid})` raises a hero-side unit with no hero record (an ally, not a hero). Wilfred takes the Necrodancer's computed stats and, with Perfect Partners, her gem socket hooks; Necromancer Skeletons copy the fallen unit at half max HP with no hooks and wear its sprite (`eid`).
+- **Charm and Turncoat**: `charmUntil` plus a −25% speed buff and −25% damage (both ways); Turncoat flips `side` to `'p'` for the duration and back. Stalwart = elite or boss (`def.elite`/`def.boss`), never charmed, +50% from Wanted.
+- **Revive**: Phoenix and Immovable set `alive` back in `onDeath`; `die` already returns early for that, so Legion (which raises in `onAllyDeath`) sees nothing.
+- **Blind** (`u.blind`): the unit's next attack is a forced miss. **Lock-on** (`u.lock`, Stalk) sits between the brand and the class rule in `pickTarget`. **Execute** (`ac.execute`, already in the engine) for Assassin and Death's Door.
+- **Run-permanent gains** on the hero record: `permAtk` (Bounty hunter) and `souls` (Reaper, +1 max HP each), read by `computeStats` and saved with the run.
+- **Duel won** moved into `die`: when a duellist dies, the survivor's `duel` is cleared and `onDuelWon` fires, so Champion and Bounty hunter re-challenge without the Duelist passive. `onDuelStart` for Bodyguard and Cheat.
+- New hooks: `onEnemyAttack` (Frostbite), `onChillLost` (Leeching Poison), `onAllyDamaged` (Lay on Hands, Herald, Quickstep), `onFoeDamaged` (Voodoo Doll). `ac.noCrit`, `ac.noApply` (Spirit Ward, Immovable), `ac.critScale`/`ac.noForce` (Elemental Rush: each extra attack halves the chance, a guarantee counts as 100%). `attack()` takes `forceCrit`, `critBonus`, `rush`.
+- Battle-wide flags read by the engine: `goldenage` (bank doubles), `jeweller` (basic gem effects ×2 for everyone, done at `createBattle`), `frostbitevenom`, `nodecay` (Venomancer), `firestorm` (floor 20), `icequeen`, `obsidian`, `caustic` (her Poison rolls her crit streak), `ghost` (ignore Shield). `B.spent` (gold spent this run) comes from the camp through `createBattle`'s `ctx`; the camp also reads `guildslot`, `silver` and `fasttalker` from hero flags.
+- Second hits (Double Tap, Razor Waltz) re-run `hit()` with the last attack's parameters at half damage; they can't trigger themselves.
+
+Readings: Many Hands counts living heroes, not summons; "closest" for Champion is a front-row enemy; the Vampire's "full damage" under Blood Moon replaces the half rather than stacking; Bat Swarm is `hp/2` percent recomputed every second and hit; Frostfire doubles by applying the same amount again; Heretic's Blasphemy takes 2 Shield if any, else 1 Armor; Firebomber's Shrapnel rolls one crit for the whole bomb; Blade dancer's stacks cap at 10 each (+50%), which is what "max dodge stacks" means for Untouchable; Cascade chains at most three deep; Supernova sets Burn to exactly 10; Grim Harvest is sourced damage that ignores Armor and Shield.
+
+Bot, 150 runs, full tree: win 16.7%, average floor 7.9. Route check (every capstone by every route, floor 12, over-gemmed): every Monk route and Vampire are at 100%, Blademaster, Blade dancer, Flame dancer (Berserker), Phoenix (Berserker), Runeguard (walls) high; casters, Reaper, Bladestorm and Silver tongue near 0%. Balance pass next. The engine-only route check (every tier 3 class by every route, four slots, with a Ward Sentinel, floor 8) has Monk, Berserker, Blood mage and Apothecary near 100% and most casters near 0%, which is the first thing the balance pass should look at.

@@ -101,7 +101,7 @@ function skillRow(sk,h){
 }
 function offerSheet(kind,i){
   const o=kind==='h'?run.shop.heroes[i]:kind==='g'?run.shop.gems[i]:run.shop.relic; if(!o) return;
-  const d=kind==='h'?HEROES[o.id]:kind==='g'?GEMS[o.id]:RELICS[o.id]; const cost=kind==='h'?heroCost:d.cost;
+  const d=kind==='h'?HEROES[o.id]:kind==='g'?GEMS[o.id]:RELICS[o.id]; const cost=kind==='h'?heroCost():d.cost;
   const full=kind==='h'&&run.heroes.length>=partyMax(); const can=!o.sold&&run.gold>=cost&&!full;
   let body='';
   if(kind==='h'){
@@ -113,7 +113,7 @@ function offerSheet(kind,i){
   modal(`<h2>${ic(o.id,kind,28)}${esc(d.name)}${kind==='r'?' '+tierPill(o.id):kind==='g'?' <span class="tiny muted">gem</span>':''}</h2>${body}
    <div class="row sheetfoot"><button class="grow ghost" data-x="close">Close</button><button class="grow ${can?'gold':''}" data-buy="1" ${can?'':'disabled'}>${o.sold?(kind==='h'?'Hired':'Bought'):full?'Guild full':(kind==='h'?'Hire':'Buy')+' · '+cost+'g'}</button></div>`);
   $('#sheet').onclick=e=>{ if(!e.target.closest('button[data-buy]')) return; $('#sheet').onclick=null; closeModal();
-    if(!can) return; run.gold-=cost; o.sold=true;
+    if(!can) return; spend(cost); o.sold=true;
     if(kind==='h') addHero(o.id); else if(kind==='g'){ run.bag.push(o.id); sel.gem=run.bag.length-1; } else run.relics.push(o.id);
     renderCamp(); };
 }
