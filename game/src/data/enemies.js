@@ -61,9 +61,9 @@ const ENEMIES={
  bonedragon:{name:'Bone Dragon',row:'front',hp:160,atk:8,spd:0.7,armor:1,boss:true,ab:'Every 5th attack breathes on everyone. Heals 20 whenever another enemy dies. Immune to Poison.',flags:{boneproof:1},
   hooks:{onAttack:(u,a)=>{ if(nthAttack(u,5)) a.hitAll=true; }, onAllyDeath:(u,d,B)=>heal(u,20,B)}},
  // --- bosses added v35 (Scout's Camp picks between an act's own bosses) ---
- ratking:{name:'Rat King',row:'front',hp:135,atk:8,spd:0.9,boss:true,ab:'Every 5s, two Rats join the fight. +1 ATK for every Rat alive.',
+ ratking:{name:'Rat King',row:'front',hp:162,atk:9,spd:0.9,boss:true,ab:'Every 5s, two Rats join the fight. +1 ATK for every Rat alive.',
   hooks:{onSecond:(u,B)=>{ if(u.secs%RK_EVERY===0){ for(let k=0;k<RK_N;k++) spawnEnemy(B,'rat','front'); } }, onAttack:(u,a,B)=>{ a.bonus+=B.units.filter(x=>x.alive&&x.eid==='rat').length; }}},
- broodmother:{name:'Broodmother',row:'front',hp:162,atk:8,spd:0.8,boss:true,apply:{poison:2},ab:'Attacks apply 2 Poison. Each time she loses a quarter of her HP, a Spiderling hatches.',
+ broodmother:{name:'Broodmother',row:'front',hp:194,atk:10,spd:0.8,boss:true,apply:{poison:2},ab:'Attacks apply 2 Poison. Each time she loses a quarter of her HP, a Spiderling hatches.',
   hooks:{onDamaged:(u,src,d,info,B)=>{ if(u.hp<=0) return; while((u.hatched||0)<3&&u.hp<=u.maxHp*(0.75-0.25*(u.hatched||0))){ u.hatched=(u.hatched||0)+1; B.fx(u,'HATCH','buff'); for(let k=0;k<BR_N;k++) spawnEnemy(B,'spiderling','front'); } }}},
  vampirelord:{name:'Vampire Lord',row:'front',hp:125,atk:7,spd:0.9,boss:true,ab:'Heals for half the damage he deals. At half HP he becomes a bat swarm: untargetable for 3s while three Bats join the fight.',
   hooks:{onHit:(u,t,d,B)=>{ if(d>0) heal(u,Math.ceil(d/2),B); }, onDamaged:(u,src,d,info,B)=>{ if(!u.batted&&u.hp>0&&u.hp<u.maxHp/2){ u.batted=true; u.veilUntil=B.t+3; B.fx(u,'BAT SWARM','buff'); B.logf(`${u.name} dissolves into bats.`); for(let k=0;k<3;k++) spawnEnemy(B,'bat','back'); } }}},
