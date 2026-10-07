@@ -25,7 +25,22 @@ const SCEN={
   'first-3':{floor:4,gold:10,spent:15,party:()=>mixed(2)}, // the guild holds 3 until a slot is bought: 1 tier 3 + 2 starters, 4 gems
   'first-syn':{floor:4,gold:10,spent:15,party:()=>mixed(2,true)}, // as first-3, but one starter shares an essence with the tier 3 (a parent class)
   'first-syn4':{floor:4,gold:10,spent:15,party:()=>mixed(3,true)},
+  // mid boss (floor 8, ~87 gold earned by then): two tier 3s + two starters with two gems (~60), or a capstone + a tier 3 + two starters (~74)
+  'mid-t3':{floor:8,gold:17,spent:70,party:()=>front1(split(byTier(2),1,1).map(t3).concat(sample(byTier(1),2).map(starter2)))},
+  'mid-cap':{floor:8,gold:17,spent:70,party:()=>front1([cap(pick(byTier(3))),t3(pick(byTier(2)))].concat(sample(byTier(1),2).map(starter2)))},
+  // same shape as mid-t3 (a front tier 3, a back one, two starters) but the damage dealers share one status essence; a support starter holds the party up
+  'mid-syn':{floor:8,gold:17,spent:70,party:()=>{ const s=pick(STATUS); const w=withEss(byTier(2),s); return front1([pick(w.filter(id=>E.CLASSES[id].role==='front').concat(w.filter(id=>E.CLASSES[id].role==='front').length?[]:byTier(2).filter(id=>E.CLASSES[id].role==='front'))),pick(w.filter(id=>E.CLASSES[id].role!=='front'))].map(t3).concat([byTier(1).find(id=>E.CLASSES[id].ess[0]===s),pick(SUPPORT)].map(starter2))); }},
+  // final boss, mixed guilds (~170 earned): two capstones + two tier 3s, random or sharing one status essence
+  'final-mix':{floor:12,gold:50,spent:120,party:()=>front1(sample(byTier(3),2).map(cap).concat(sample(byTier(2),2).map(t3)))},
+  'final-syn':{floor:12,gold:50,spent:120,party:()=>{ const s=pick(STATUS); const c=withEss(byTier(3),s), t=withEss(byTier(2),s); const fr=c.filter(id=>E.CLASSES[id].role==='front'); return front1([fr.length?pick(fr):pick(c),pick(c.filter(id=>E.CLASSES[id].role!=='front'))].map(cap).concat(sample(t,2).map(t3))); }},
 };
+const STATUS=process.env.SYN?[process.env.SYN]:['venom','ember','frost'], // SYN=venom|ember|frost pins the shared status
+  withEss=(pool,s)=>pool.filter(id=>E.CLASSES[id].ess.includes(s)), SUPPORT=byTier(1).filter(id=>['ward','vital'].includes(E.CLASSES[id].ess[0])); // the engine's real synergy: several heroes stacking the same status
+const sample=(pool,n)=>{ const p=pool.slice(), out=[]; while(out.length<n&&p.length) out.push(p.splice(ri(p.length),1)[0]); return out; };
+const starter2=id=>hero(id,1,[LET[need(id)],LET[need(id)]],rowOf(id)); // a starter with two of its own essence: its 2-gem skill is on
+const t3=id=>hero(id,2,bestThird(id),rowOf(id));
+const cap=id=>{ const c=E.CLASSES[id], sk=c.skills.slice().sort((a,b)=>a.need.length-b.need.length)[0]; return hero(id,3,union([need(id),sk.need]),rowOf(id)); };
+const front1=party=>{ if(!party.some(h=>h.row==='front')) party[0].row='front'; return party; }; // someone has to hold the line
 function mixed(nStarters,syn){ const t3=pick(byTier(2)); const ss=[]; const pool=byTier(1); if(syn) ss.push(pick(pool.filter(s=>E.CLASSES[t3].ess.includes(E.CLASSES[s].ess[0])))); while(ss.length<nStarters){ const s=pick(pool); if(!ss.includes(s)) ss.push(s); }
   return [hero(t3,2,union([need(t3)]),rowOf(t3))].concat(ss.map(s=>hero(s,1,union([need(s)]),rowOf(s)))); }
 const B1=+process.env.B1||1, B1IDS=(process.env.B1IDS||'broodmother,goblinking,ratking').split(','); // sweep: act 1 bosses' HP and ATK multiplied in the fight (bake the answer into data/enemies.js)
