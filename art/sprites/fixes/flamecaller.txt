@@ -1,0 +1,16 @@
+.......K.....O..
+......KRK...O.O.
+.....KRORK..OYO.
+....KRRRRRK.OYYO
+...KRRRORRRK.YY.
+..KrRRRRRRRrKOYO
+....KSSSSSK..OYY
+....KSKSKSK..YYY
+.....KSsSK...OYO
+....KKRORKK.KSK.
+...KRKRrrRKKSK..
+...KOKRRrRKOK...
+...KRKRrrRKK....
+...KRKRRrRK.....
+....KROOORK.....
+...KKKKKKKKK....

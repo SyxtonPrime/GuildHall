@@ -243,7 +243,7 @@ Written against `game/guildhall.html` as of 6 October 2026 (engine in `<script i
 - **No effect DSL.** The effects are too varied (duels, charm, summons, targeting rules) for a small interpreter to pay for itself. 244 skills and 61 passives at a few lines each is the existing pattern.
 - **Hero record** becomes `{cls, root, lv, gems, open, row, learned}`: `cls` is the current class id, `root` is Mage, Warrior or Rogue, `learned` is the list of skill ids inherited along the route. Promotion rewrites `cls` and appends the old class's skills to `learned`.
 - **Stats** come from a small table by root and tier until the bench has per-class numbers: root base stats (Mage, Warrior, Rogue) times a tier multiplier, with per-class overrides where a class obviously differs (walls, back-liners). Rows by role.
-- **Sprites** by class name where one exists, otherwise the root's sprite. Gear-socket specs later.
+- **Sprites**: every class has its own sprite and gear-socket spec (7 October 2026); the id is derived from the class name, see `art/sprites/README.md`.
 
 ### Phases
 
