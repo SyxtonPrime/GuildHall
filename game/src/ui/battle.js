@@ -2,7 +2,7 @@
 function startBattle(){
   sel.gem=null; closeModal();
   const enc=run.enc; enc.list.forEach(e=>seen('e',e.id));
-  battle=createBattle(run.heroes,enc,run.relics);
+  battle=createBattle(run.heroes,enc,run.relics,run.gold);
   const flash=(el,cls,ms)=>{ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(()=>el.classList.remove(cls),ms); };
   battle.fx=(u,txt,cls)=>{ if(speed>=99) return; const el=document.getElementById('u'+u.uid); if(!el) return;
     const go=()=>{ const s=document.createElement('span'); s.className='fx '+cls; s.textContent=txt; s.style.left=(35+Math.random()*30)+'%'; el.appendChild(s); setTimeout(()=>s.remove(),900); if(cls==='heal') flash(el,'healed',350); if(cls==='shield'&&txt[0]==='+') flash(el,'shielded',350); };

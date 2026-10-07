@@ -276,3 +276,23 @@ Bot knobs added for the next passes: `CHILLSLOW`, `CHILLSHED`, `FESTER`, `BURNDM
 - **Decided.** Each training opens one slot and promotes if the gems allow; costs stay 5 then 9 gold for now. Starters have two slots, so the third opens at the first training and the fourth at the second.
 - **Decided.** `recipes.json` stays the source of truth; the bench is the editor.
 - The game's source now lives in `game/src/` (split 6 October 2026); the generated files are built by `tools/build.js`.
+
+### Phases 3 and 4, roots and starters (6 October 2026)
+
+`HOOKS` lives in `game/src/engine/hooks.js` (built before `classes.js`); the file's header lists every hook signature. Roots and all eight starters have effects. Primitives added to `battle.js` for them:
+
+- `hitApply` for the statuses an attack applies on hit: it carries `u.applyBonus` (Mage root) and the hit's `ac.applyBonus` (Scald). Area effects and moved stacks use `applyStatus` and get neither.
+- `abilityHeal(src,t,n,B)`: fires `onHealing` (Healer's and Renew's multipliers scale `h.n`), rounds, adds the Mage root's `healBonus`. Gem regeneration and the Warrior root's regeneration now heal without a source, so they fire no on-heal effects; lifesteal still does.
+- Guaranteed dodges: `u.sureDodge` (the next attack) and `u.sureDodgeUntil` (a timer). Neither touches the streak.
+- `onIntercept` (Interpose): an ally may take the hit before the dodge roll.
+- Side-wide hooks per hit, `onAllyTarget` and `onAllyDefend`, for auras (Numbing Cold, Frostburn). They fire on every living unit of that side, the attacker or defender included.
+- Hit damage is now `(ATK + bonus) × mult − reduce`, so Numbing Cold's flat reduction lands after the Frozen halving as the status rules say. `ac.critExtra` adds to the crit multiplier (Swordsman: +0.25 per affliction, +0.25 base).
+- `onFoeDeath` fires on the dead unit's living enemies with `t.stAtDeath` (its statuses at death) for Bitter Harvest, Tainted Coin and Flame Barrier. `onMove` fires after any row change (Acrobat's row bonus).
+- `loseStatus` (ends Ablaze below 10), `tickPoison` callable on its own (Venom Strike), `adjacentOf` (same-row neighbours in card order, for Fan the Flames), `bank(B)` = the run's gold at the bell plus the fight's bounty (`createBattle` takes `gold`).
+- `u.attacks` is counted before `onAttack` fires, so `nthAttack(u,4)` works in every hook; the Quicksilver gem and the enemies that used `attacks%4===3` were moved over.
+- `fireOnce` guards per hook name instead of globally, so a crit's status application still triggers `onApply` hooks (Virulence from a Poisoned Blade crit), while `onApply` cannot re-enter itself.
+- Cold Iron: a defender sets `attacker.keepChill`; the attack's Chill shedding then applies +1 (from the Sentinel) instead of halving. Frozen consumption is unaffected.
+
+Readings taken while writing the hooks, none of them rulings yet: Stoke checks Burn before the hit lands, so the first hit on a fresh enemy does not count; Mend heals the most injured ally even at full HP (overheal effects rely on it); Side Effects moves once per attack, not per target; Backstab's crit carry-over lasts one attack. Deferred until a tier needs them: duel, Charm and Turncoat, summons, revive, lock-on, run-permanent stat gains, enemy Shield and Stalwart, splash hits.
+
+Bot, 150 runs with starters only: win 0.7%, average floor 7.0 (was floor 5.4 with no hooks). Not tuned; balance waits for the full tree.

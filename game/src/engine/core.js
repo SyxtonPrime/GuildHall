@@ -18,6 +18,8 @@ const BURN_DMG=ENV('BURNDMG',1); // Burn deals this × its stacks per tick
 const FROZEN_AT=20, ABLAZE_AT=10, FESTER_AT=ENV('FESTER',15), CHILL_SLOW=ENV('CHILLSLOW',0.025), CHILL_SLOW_MAX=20;
 const isFrozen=u=>(u.st.chill||0)>=FROZEN_AT, isAblaze=u=>!!u.ablaze, isFestering=u=>(u.st.poison||0)>=FESTER_AT;
 const chill5=u=>Math.min(5,u.st.chill||0); // content written against the old 5-stack Chill cap reads Chill through this
+const STATUS_KEYS=['poison','burn','chill'];
+const afflictions=u=>(isFrozen(u)?1:0)+(isAblaze(u)?1:0)+(isFestering(u)?1:0);
 // Crit and dodge chance halve after each success and reset on the first failure, so stacked chance never means a guaranteed streak.
 // Guaranteed crits and dodges (forceCrit / forceDodge) always succeed and leave the streak alone.
 const STREAKS=ENV('STREAK',1), CHILL_SHED=ENV('CHILLSHED',1); // bot knobs: STREAK=0 restores plain rolls, CHILLSHED=0 stops attacking from halving Chill

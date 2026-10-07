@@ -18,7 +18,7 @@ const ENEMIES={
  spiderling:{name:'Spiderling',row:'front',hp:8,atk:2,spd:1.2,minion:true,spr:'spider',apply:{poison:1},ab:'A Broodmother hatchling. Attacks apply 1 Poison.'},
  slimelet:{name:'Slimelet',row:'front',hp:8,atk:2,spd:1.0,minion:true,spr:'slime',ab:'Half a Slime.'},
  kobold:{name:'Kobold',row:'front',hp:20,atk:4,spd:1.0,ab:'Spear: every 3rd attack reaches the back row for ×1.5.',
-  hooks:{onAttack:(u,a)=>{ if(u.attacks%3===2){ a.preferBack=true; a.mult*=1.5; } }}},
+  hooks:{onAttack:(u,a)=>{ if(nthAttack(u,3)){ a.preferBack=true; a.mult*=1.5; } }}},
  sporeling:{name:'Sporeling',row:'front',hp:14,atk:2,spd:0.9,ab:'Bursts on death: every hero gains 3 Poison.',
   hooks:{onDeath:(u,B)=>{ aliveEnemies(u,B).forEach(t=>applyStatus(u,t,'poison',3,B)); }}},
  // --- Act 2: crypt & ruins ---
@@ -47,19 +47,19 @@ const ENEMIES={
   hooks:{onAttack:(u,a)=>{ a.extraTargets=1; }, onAllyDeath:(u)=>{ u.atk+=3; }}},
  // --- elites ---
  ogre:{name:'Ogre',row:'front',hp:100,atk:9,spd:0.5,elite:true,ab:'Every 3rd attack hits your whole front row.',
-  hooks:{onAttack:(u,a)=>{ if(u.attacks%3===2) a.hitRow='front'; }}},
+  hooks:{onAttack:(u,a)=>{ if(nthAttack(u,3)) a.hitRow='front'; }}},
  hydra:{name:'Hydra',row:'front',hp:70,atk:5,spd:1.2,elite:true,ab:'Each attack hits 2 targets.',hooks:{onAttack:(u,a)=>{a.extraTargets=1;}}},
  minotaur:{name:'Minotaur',row:'front',hp:80,atk:7,spd:0.7,elite:true,ab:'Charge: every 4th attack hits your whole front row for ×2. Below half HP it attacks 40% faster.',
-  hooks:{onAttack:(u,a)=>{ if(u.attacks%4===3){ a.hitRow='front'; a.mult*=2; } }, onDamaged:(u)=>{ if(!u.enraged&&u.hp<u.maxHp/2){ u.enraged=true; u.spd*=1.4; } }}},
+  hooks:{onAttack:(u,a)=>{ if(nthAttack(u,4)){ a.hitRow='front'; a.mult*=2; } }, onDamaged:(u)=>{ if(!u.enraged&&u.hp<u.maxHp/2){ u.enraged=true; u.spd*=1.4; } }}},
  // --- bosses ---
  goblinking:{name:'Goblin King',row:'front',hp:130,atk:9,spd:0.9,boss:true,ab:'Every 3s, all enemies gain +15% speed.',
   hooks:{onSecond:(u,B)=>{ if(u.secs%3===0) alliesOf(u,B).forEach(x=>{x.spd*=1.15;}); }}},
  lich:{name:'Lich',row:'back',hp:140,atk:7,spd:0.8,boss:true,apply:{poison:2},ab:'Attacks apply 2 Poison and heal the Lich for damage dealt.',
   hooks:{onHit:(u,t,dmg,B)=>heal(u,dmg,B)}},
  rifttitan:{name:'Stone Titan',row:'front',hp:210,atk:9,spd:0.6,armor:2,boss:true,ab:'+2 ATK every 3s. Every 5th attack hits everyone.',
-  hooks:{onSecond:(u)=>{ if(u.secs%3===0) u.atk+=2; }, onAttack:(u,a)=>{ if(u.attacks%5===4) a.hitAll=true; }}},
+  hooks:{onSecond:(u)=>{ if(u.secs%3===0) u.atk+=2; }, onAttack:(u,a)=>{ if(nthAttack(u,5)) a.hitAll=true; }}},
  bonedragon:{name:'Bone Dragon',row:'front',hp:160,atk:8,spd:0.7,armor:1,boss:true,ab:'Every 5th attack breathes on everyone. Heals 20 whenever another enemy dies. Immune to Poison.',flags:{boneproof:1},
-  hooks:{onAttack:(u,a)=>{ if(u.attacks%5===4) a.hitAll=true; }, onAllyDeath:(u,d,B)=>heal(u,20,B)}},
+  hooks:{onAttack:(u,a)=>{ if(nthAttack(u,5)) a.hitAll=true; }, onAllyDeath:(u,d,B)=>heal(u,20,B)}},
  // --- bosses added v35 (Scout's Camp picks between an act's own bosses) ---
  ratking:{name:'Rat King',row:'front',hp:100,atk:6,spd:0.9,boss:true,ab:'Every 5s, two Rats join the fight. +1 ATK for every Rat alive.',
   hooks:{onSecond:(u,B)=>{ if(u.secs%RK_EVERY===0){ for(let k=0;k<RK_N;k++) spawnEnemy(B,'rat','front'); } }, onAttack:(u,a,B)=>{ a.bonus+=B.units.filter(x=>x.alive&&x.eid==='rat').length; }}},

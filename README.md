@@ -16,7 +16,8 @@ game/
     engine/core.js                     helpers, tuning knobs and the status rules
     data/gems.js, relics.js, enemies.js  gems, relics, enemies and encounters
     data/classes.js                    GENERATED from design/gem-recipe-bench/recipes.json: the class tree and every skill's text
-    engine/classes.js                  the class tree in use: roles and route stats, hiring, training and promotion, and HOOKS
+    engine/hooks.js                    HOOKS: the effect of every class passive and skill, keyed by class name then skill name
+    engine/classes.js                  the class tree in use: roles and route stats, hiring, training and promotion
                                        (each skill's effect, keyed by class name then skill name; empty entries do nothing yet)
     engine/stats.js, engine/battle.js  computeStats, the battle loop, statuses, hooks (DOM-free)
     ui/*.js                            sprites, run state, screens, camp, forge, events, gems, battle view, codex, boot
@@ -60,7 +61,7 @@ Needs Node 18+ for the tools (nothing to install), and Python 3 + Pillow only if
 
 1. Branch off `main` (`git switch -c my-change`).
 2. Edit the files in `game/src/` (open `game/dev.html` in a browser to try changes without building). Class and skill text lives
-   in the gem recipe bench (`design/gem-recipe-bench/recipes.json`); effects live in `HOOKS` in `game/src/engine/classes.js`.
+   in the gem recipe bench (`design/gem-recipe-bench/recipes.json`); effects live in `HOOKS` in `game/src/engine/hooks.js`.
 3. `npm run build` to regenerate `game/guildhall.html`, `game/engine.js` and `game/Guildhall-standalone.html`, then e.g. `node tools/tune.js 1500`
    to check balance.
 4. Commit the source and the generated files together, push, and open a pull request. CI fails the PR if the generated files

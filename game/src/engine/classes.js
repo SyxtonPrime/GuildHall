@@ -31,8 +31,7 @@ const SPR_FOR={Sentinel:'knight',Berserker:'berserker',Swordsman:'duelist',Dueli
  Hearthguard:'ashwalker','Lava strider':'ashwalker','Glacier Warden':'glacier','Blood mage':'bloodmage',Vampire:'bloodmage','Plague doctor':'plaguedoctor',Plaguecaller:'plaguedoctor',
  Bard:'bard','Frost mage':'frostmage',Rimecaller:'frostmage',Cryomancer:'frostmage',Shieldmaiden:'shieldmaiden',Bulwark:'shieldmaiden',Reaper:'reaper',Assassin:'sniper'};
 const ROOT_SPR={Mage:'frostmage',Warrior:'knight',Rogue:'rogue'};
-// Effects. HOOKS[className].passive and HOOKS[className][skillName] take the same shape as the old skill table: {hooks, mod, apply, flag, flags, gold, statusMult}.
-const HOOKS={};
+// Effects live in HOOKS (engine/hooks.js, loaded before this file).
 const CLASSES={};
 for(const id in CLASS_DATA.classes){ const c=CLASS_DATA.classes[id]; const tier=c.ess.length>=3?3:c.ess.length; const H=HOOKS[c.name]||{};
   CLASSES[id]={id,name:c.name,ess:c.ess.slice(),from:(c.from||[]).slice(),passive:c.passive||'',notes:c.notes||'',tier,role:CLASS_ROLE[c.name]||(ROOT_STATS[c.name]||{}).row||'mid',need:needLetters(c.ess),skills:[],def:Object.assign({},H.passive||{})}; }

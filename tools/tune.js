@@ -55,7 +55,7 @@ function sim(depth){
     if(path.kind==='forge'){ forges++; run.mergeAct=E.curAct(run.floor); doForge(run); run.floor++; continue; }
     if(path.kind==='elite') elites++;
     const enc=path.enc;
-    const B=E.createBattle(run.heroes,enc,run.relics); E.runToEnd(B);
+    const B=E.createBattle(run.heroes,enc,run.relics,run.gold); E.runToEnd(B);
     { const ids=new Set(enc.list.map(x=>x.id)); ids.forEach(id=>{ log.seenE[id]=(log.seenE[id]||0)+1; if(B.winner!=='p') log.deathE[id]=(log.deathE[id]||0)+1; }); if(enc.theme){ log.themes[enc.theme]=(log.themes[enc.theme]||0)+1; if(B.winner!=='p') log.deathThemes[enc.theme]=(log.deathThemes[enc.theme]||0)+1; } }
     run.heroes.forEach(h=>{ log.heroes.add(nm(h.id)); E.activeSkills(h).forEach(sk=>log.skills.add(nm(sk.cls)+'·'+sk.name+'·'+sk.need)); h.gems.forEach(g=>{ if(g) log.gems.add(g); }); });
     run.relics.forEach(r=>log.relics.add(r));

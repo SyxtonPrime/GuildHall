@@ -1135,7 +1135,7 @@
    "need": [
     "frost"
    ],
-   "name": "Cold Read.",
+   "name": "Cold Read",
    "effect": "+2.5% crit chance per Chill on the target.",
    "notes": "",
    "status": "idea",
@@ -1210,7 +1210,7 @@
    "need": [
     "vital"
    ],
-   "name": "Second Breath.",
+   "name": "Second Breath",
    "effect": "Front row: each dodge heals you 2. Back row: every 4th attack heals the most injured ally 2.",
    "notes": "",
    "status": "idea",
