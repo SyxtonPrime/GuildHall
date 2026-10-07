@@ -1601,7 +1601,7 @@ function rollShop(charge){
   saveRun();
 }
 const heroFlag=f=>run.heroes.some(h=>computeStats(h,run.relics).flags[f]); // run-level effects of class skills (Silver tongue, Guildmaster, Fast Talker)
-const heroCost=()=>3-(heroFlag('silver')?1:0), lvCost=h=>h.lv===1?5:h.lv===2?9:null; // cost to unlock the next gear slot (also raises the hero's ★)
+const heroCost=()=>5-(heroFlag('silver')?1:0), lvCost=h=>h.lv===1?7:h.lv===2?11:null; // cost to unlock the next gear slot (also raises the hero's ★)
 const spend=n=>{ run.gold-=n; run.spent=(run.spent||0)+n; }; // War Bonds reads gold spent this run
 const openSet=h=>h.open||Array.from({length:SLOTS(h.lv)},(_,k)=>k); // unlocked gear slots; older saves: the first lv+1
 const slotOpen=(h,k)=>openSet(h).includes(k);
@@ -1676,7 +1676,7 @@ function showHelp(){
   <p><b>Icons:</b> heroes and enemies are pixel portraits, diamonds are gems, hexagons are relics, dashed squares are unlocked skills. Color shows the archetype: <span style="color:#9be15d">poison</span>, <span style="color:#ff5c3a">burn</span>, <span style="color:#8fe3ff">chill</span>, <span style="color:#5b8cff">shield</span>, <span style="color:#f0f0f8">crit</span>, <span style="color:#ff7ab8">healing</span>, <span style="color:#c47bff">tempo/dodge</span>, <span style="color:#ffd166">gold</span>. Tap anything for details.</p>
   <p><b>Statuses</b> work the same on heroes and enemies. <span class="pill p">Poison</span> deals its stacks each second (ignoring Armor and Shield), then loses 1; at 15 a unit is <b>Festering</b>: Armor counts as 0 and it can't be healed or gain Shield. <span class="pill b">Burn</span> deals its stacks each second, then halves; a unit that reaches 10 is <b>Ablaze</b> and its Burn never drops below 10. <span class="pill c">Chill</span> slows 2.5% per stack (up to 20); attacking halves it, but at 20 a unit is <b>Frozen</b>: its next attack deals half damage and spends 20 Chill. Two of these at once mark a unit for the fight: <b>Brittle</b> (Frozen + Ablaze: every Chill or Burn applied is +1), <b>Blighted</b> (Ablaze + Festering: +25% status damage), <b>Crippled</b> (Frozen + Festering: attacks 25% slower). All three: <b>Ruined</b>, +50% damage from everything. <span class="pill s">Shield</span> absorbs damage first. Armor reduces each attack by a flat amount (min 1). <b>Streaks:</b> each crit or dodge halves that chance until the next miss, so stacked chance never guarantees a run; no one attacks more than 3 times a second.</p>
   <p><b>Guild size:</b> you start with room for 3 heroes; a 4th slot costs 6g and a 5th 10g (button above the formation).</p>
-  <p><b>Unlocking gear slots:</b> heroes start with their weapon and body sockets open. On the Equip screen, tap <b>Unlock</b> on the locked slot you want (first 5g, second 9g); each unlock also raises the hero a star (HP and ATK +15%, stronger ability).</p>
+  <p><b>Unlocking gear slots:</b> heroes start with their weapon and body sockets open. On the Equip screen, tap <b>Unlock</b> on the locked slot you want (first 7g, second 11g); each unlock also raises the hero a star (HP and ATK +15%, stronger ability).</p>
   <p><b>Gold:</b> win fights, earn interest (1 per 5 gold held, up to 3). Gems cost 3g. Rerolls cost 1g, +1 for each further reroll on the same floor. <b>Freeze</b> keeps the current market stock for the next floor (what you already bought stays gone); it switches itself off once that market opens, and rerolling unfreezes too.</p>
   <p><b>Choose your path.</b> After the first floor, each camp offers a regular fight or an <b>elite</b> fight (harder, free gem on win). Every 4th floor is a boss (mandatory; free relic on win — one of the three is always Legendary).</p>
   <p><b>Bonus events.</b> After the second fight of each act you also get to pick one of two bonuses (or skip): <b>Gem Forge</b> fuses two gems into one <b>composite</b> that keeps every effect of both and counts as all their essences (composites can't be fused again) · <b>Enchanter</b> turns up to two sockets into the other kind (weapon ⇄ armor) · <b>Gem Cutter</b> reshapes up to two gems into others with the same number of essences · <b>Retirement</b> lets a hero leave and pass half their base HP and ATK to another · <b>Scout's Camp</b> lets you choose which of this act's bosses you'll face.</p>
@@ -1692,7 +1692,7 @@ function showStartPick(){
   $('#modal').dataset.lock='1';
   draw();
   $('#sheet').onclick=e=>{ const b=e.target.closest('button[data-pick]'); if(!b) return; run._picked.push(b.dataset.pick); addHero(b.dataset.pick);
-    if(run._picked.length>=2){ delete $('#modal').dataset.lock; $('#sheet').onclick=null; closeModal(); run.startPick=false; delete run._pick; delete run._picked; rollShop(false); renderCamp(); } else draw(); };
+    if(run._picked.length>=2){ delete $('#modal').dataset.lock; $('#sheet').onclick=null; closeModal(); run.startPick=false; delete run._pick; delete run._picked; rollShop(false); saveRun(); startBattle(); } else draw(); }; // straight into the first fight; the market opens after it
 }
 
 // ---------- camp ----------
