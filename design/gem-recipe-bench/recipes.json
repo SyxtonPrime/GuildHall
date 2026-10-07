@@ -306,9 +306,9 @@
    "name": "Blade dancer",
    "notes": "",
    "order": 1791143651757,
-   "passive": "+15% dodge. Each dodge gives +5% crit chance and each crit gives +5% dodge, for the rest of the fight (each up to +30%).",
+   "passive": "+15% dodge. Each dodge gives +5% crit chance and each crit gives +5% dodge, for the rest of the fight.",
    "rename": false,
-   "updated": 1791315008050
+   "updated": 1791339657856
   },
   "c_muu8kfxb9l85": {
    "ess": [
@@ -1638,7 +1638,7 @@
   "r_pvqx4dm4tqmx": {
    "classId": "c_muu8kqk3v3ck",
    "created": 1791251442429,
-   "effect": "+25% dodge against his duel opponent. Dodging him gives +5% crit chance for the rest of the fight (up to +30%).",
+   "effect": "+25% dodge against his duel opponent. Dodging him gives +5% crit chance for the rest of the fight.",
    "name": "Footwork",
    "need": [
     "edge",
@@ -1646,7 +1646,7 @@
    ],
    "notes": "",
    "status": "idea",
-   "updated": 1791335731227
+   "updated": 1791339657856
   },
   "r_al7ukvdz3r0y": {
    "classId": "c_muu8kqk3v3ck",
@@ -4242,7 +4242,7 @@
   "r_5g0d1wbkc3b9": {
    "classId": "c_muub9dnnh0qc",
    "created": 1791315405239,
-   "effect": "For the first 5 seconds of every fight, 100% crit chance and 100% dodge.",
+   "effect": "For the first 5 seconds of every fight, her crits and dodges are guaranteed.",
    "name": "Apostate",
    "need": [
     "edge",
@@ -4254,7 +4254,7 @@
    ],
    "notes": "",
    "status": "idea",
-   "updated": 1791334901253
+   "updated": 1791339657856
   },
   "r_pei3hh2i24wz": {
    "classId": "c_muu9oupl17gi",
