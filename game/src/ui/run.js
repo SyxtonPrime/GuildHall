@@ -44,7 +44,7 @@ function rollShop(charge){
   saveRun();
 }
 const heroFlag=f=>run.heroes.some(h=>computeStats(h,run.relics).flags[f]); // run-level effects of class skills (Silver tongue, Guildmaster, Fast Talker)
-const heroCost=()=>3-(heroFlag('silver')?1:0), lvCost=h=>h.lv===1?5:h.lv===2?9:null; // cost to unlock the next gear slot (also raises the hero's ★)
+const heroCost=()=>5-(heroFlag('silver')?1:0), lvCost=h=>h.lv===1?7:h.lv===2?11:null; // cost to unlock the next gear slot (also raises the hero's ★)
 const spend=n=>{ run.gold-=n; run.spent=(run.spent||0)+n; }; // War Bonds reads gold spent this run
 const openSet=h=>h.open||Array.from({length:SLOTS(h.lv)},(_,k)=>k); // unlocked gear slots; older saves: the first lv+1
 const slotOpen=(h,k)=>openSet(h).includes(k);
@@ -66,7 +66,8 @@ function addHero(id){
 function goldReward(enc,win,killsBy){
   const base=3+enc.act+(enc.kind==='elite'?2:enc.kind==='boss'?4:0);
   let cap=3, gems=0, skills=0;
-  run.heroes.forEach((h,i)=>{ const S=computeStats(h,run.relics), g=S.gold, kk=(killsBy&&killsBy[i])||0, gg=S.giltArmor+S.giltHand*kk; cap+=g.interest; gems+=gg; skills+=-gg+g.win+g.kill*((killsBy&&killsBy[i])||0)+((enc.kind==='elite'||enc.kind==='boss')?g.elite:0); });
+  // Gilt weapons pay 1 per GILT_PER_KILLS kills by their hero; kill gold from skills (g.kill beyond the gems) is per kill
+  run.heroes.forEach((h,i)=>{ const S=computeStats(h,run.relics), g=S.gold, kk=(killsBy&&killsBy[i])||0, gg=S.giltArmor+S.giltHand*Math.floor(kk/GILT_PER_KILLS); cap+=g.interest; gems+=gg; skills+=(g.win-S.giltArmor)+(g.kill-S.giltHand)*kk+((enc.kind==='elite'||enc.kind==='boss')?g.elite:0); });
   const interest=Math.min(cap,Math.floor(run.gold/5));
   const purse=run.relics.includes('coinpurse')?2:0;
   return {base,interest,purse,gems,skills,total:base+interest+purse+gems+skills};
