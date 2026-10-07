@@ -276,7 +276,7 @@
    "name": "Glacier Warden",
    "notes": "",
    "order": 1791144594931,
-   "passive": "Attackers that hit it gain 2 Chill, and enemies attacking it don't halve their Chill.",
+   "passive": "Attackers that hit it gain 3 Chill and don't halve their Chill, gaining 1 more instead. The Chill a Frozen attacker spends on it becomes its Shield.",
    "updated": 1791253549203
   },
   "c_muu8rt2490lr": {

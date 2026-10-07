@@ -80,8 +80,9 @@ const HOOKS={
   Hemorrhage:{hooks:{onTarget:(u,t,ac,B)=>{ ac.critBonus=(ac.critBonus||0)+0.1*afflictions(t); }, onCrit:(u,t,B)=>{ const d=u.lastDealt||0; if(d>0) alliesOf(u,B).forEach(x=>abilityHeal(u,x,d,B)); }}},
   Stockpile:{hooks:{onStart:(u,B)=>{ u.reserve=Math.floor(bank(B)/2); }, onAttack:(u,a,B)=>{ if(u.reserve>=2){ u.reserve-=2; a.mult*=1.5; } }}},
   'Crimson Tide':{hooks:{onHeal:(u,t,r,over,B)=>{ if(over>0&&u.lastTarget&&u.lastTarget.alive) dealDamage(u,u.lastTarget,over,{type:'bleed'},B); }}}},
- 'Glacier Warden':{passive:{hooks:{onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack'&&src&&src.alive&&src.side!==u.side) applyStatus(u,src,'chill',2,B); },
-    onDefend:(u,src,ac,B)=>{ if(src.side!==u.side) src.keepChill={by:u,gain:(src.keepChill||{}).gain||0}; }}},
+ 'Glacier Warden':{passive:{hooks:{onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack'&&src&&src.alive&&src.side!==u.side) applyStatus(u,src,'chill',3,B); },
+    onDefend:(u,src,ac,B)=>{ if(src.side!==u.side) src.keepChill={by:u,gain:Math.max(1,(src.keepChill||{}).gain||0)}; },
+    onFrozenAttack:(u,att,n,B)=>{ if(att.side!==u.side&&att.lastTarget===u) addShield(u,n,B); }}}, // the Chill a Frozen attacker spends on him becomes his Shield
   Avalanche:{hooks:{onAffliction:(u,t,kind,B)=>{ if(kind!=='frozen'||t.side===u.side) return; aliveEnemies(u,B).forEach(o=>{ if(o!==t) applyStatus(u,o,'chill',3,B); }); }}},
   'Branding Blow':{hooks:{onAttack:(u,a,B)=>{ if(nthAttack(u,4)){ addApply(a,'burn',4); a.brand=true; } }, onTarget:(u,t,ac,B)=>{ if(ac.brand){ B.brand={t,until:B.t+2}; B.fx(t,'BRANDED','burn'); } }}},
   Glacier:{hooks:{onDefend:(u,src,ac,B)=>{ ac.reduce=(ac.reduce||0)+Math.min(5,Math.floor((src.st.chill||0)/4)); }}},
