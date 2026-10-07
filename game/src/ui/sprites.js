@@ -76,10 +76,10 @@ function heroSprURI(id,gems){
   for(const p in col){ const [r,cc]=p.split(',').map(Number); x.fillStyle=rgbA(col[p]); x.fillRect(cc,r,1,1); }
   return HSPR_URI[key]=c.toDataURL();
 }
-function hspr(h,size,title){ const u=heroSprURI(h.id,h.gems); if(!u) return ic(h.id,'h',size,title); return `<img class="spr" src="${u}" width="${size}" height="${size}" alt="" title="${esc(title||"")}" draggable="false">`; }
+function hspr(h,size,title){ const u=heroSprURI(sprId(h),h.gems); if(!u) return ic(h.id,'h',size,title); return `<img class="spr" src="${u}" width="${size}" height="${size}" alt="" title="${esc(title||"")}" draggable="false">`; }
 function spr(id,size,title){ const u=SPR_URI[id]||(ENEMIES[id]&&ENEMIES[id].spr&&SPR_URI[ENEMIES[id].spr]); if(!u) return ""; return `<img class="spr" src="${u}" width="${size}" height="${size}" alt="" title="${esc(title||"")}" draggable="false">`; }
 function ic(id,kind,size,title){
-  if(kind==='h'||kind==='e'){ const s=spr(id,size||24,title); if(s) return s; if(kind==='e') return ''; }
+  if(kind==='h'||kind==='e'){ const s=spr(kind==='h'?sprId(id):id,size||24,title); if(s) return s; if(kind==='e') return ''; }
   let g=id,arch;
   if(kind==='h') arch=(HEROES[id].tags||['tank'])[0];
   else if(kind==='g'){ const gd=GEMS[id]; arch=gd.arch; g=GEM_G[id]||'sparkgem'; if(gd.rare){ const cs=gd.ess.map(e=>ARCH_C[GEMS[e].arch]); const n=cs.length; const stops=cs.map((c,i)=>`${c}cc ${Math.round(100*i/n)}% ${Math.round(100*(i+1)/n)}%`).join(','); return `<span class="ico g rare" style="--s:${size||24}px;--c:#fff;background:conic-gradient(from 90deg,${stops})" title="${esc(title||'')}"><svg viewBox="0 0 24 24"><use href="#g-${GLYPH[id]?id:g}"/></svg></span>`; } }
@@ -96,7 +96,7 @@ let meta=Object.assign({unlocked:[],seen:{h:[],i:[],r:[],e:[]},wins:0,runs:0,kil
 // per-depth records: best endless floor, best win streak, current win streak (a run that falls before clearing floor 12 breaks the streak; abandoning a run does too)
 const depthStats=d=>meta.depthStats[d]||(meta.depthStats[d]={bestEndless:0,bestStreak:0,streak:0});
 const seen=(k,id)=>{ if(!meta.seen[k].includes(id)){ meta.seen[k].push(id); save(KEY_META,meta); } };
-const unlockedHeroes=()=>BASE_HEROES.concat(meta.unlocked);
+const unlockedHeroes=()=>STARTERS.slice(); // the market sells starters; everything else is reached by training
 let run=null, sel={gem:null}, battle=null, loop=null;
 let speed=[0.5,1,2,3].includes(meta.speed)?meta.speed:1; // playback multiplier, remembered across runs (Skip is momentary and never saved)
 

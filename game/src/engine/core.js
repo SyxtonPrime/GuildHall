@@ -14,6 +14,7 @@ const ENV=(k,d)=>+((typeof process!=='undefined'&&process.env&&process.env[k])||
 // Two afflictions at once mark a unit for the rest of the fight: Brittle (Frozen + Ablaze: every Chill or Burn application is +1), Blighted
 // (Ablaze + Festering: +25% damage from statuses), Crippled (Frozen + Festering: attacks 25% slower). All three: Ruined (+50% damage from
 // everything, and all three marks). The rules are the same for heroes and enemies.
+const BURN_DMG=ENV('BURNDMG',1); // Burn deals this × its stacks per tick
 const FROZEN_AT=20, ABLAZE_AT=10, FESTER_AT=ENV('FESTER',15), CHILL_SLOW=ENV('CHILLSLOW',0.025), CHILL_SLOW_MAX=20;
 const isFrozen=u=>(u.st.chill||0)>=FROZEN_AT, isAblaze=u=>!!u.ablaze, isFestering=u=>(u.st.poison||0)>=FESTER_AT;
 const chill5=u=>Math.min(5,u.st.chill||0); // content written against the old 5-stack Chill cap reads Chill through this

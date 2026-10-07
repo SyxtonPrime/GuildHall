@@ -50,7 +50,7 @@ function showHelp(){
   <p><b>Choose your path.</b> After the first floor, each camp offers a regular fight or an <b>elite</b> fight (harder, free gem on win). Every 4th floor is a boss (mandatory; free relic on win — one of the three is always Legendary).</p>
   <p><b>Bonus events.</b> After the second fight of each act you also get to pick one of two bonuses (or skip): <b>Gem Forge</b> fuses two gems into one <b>composite</b> that keeps every effect of both and counts as all their essences (composites can't be fused again) · <b>Enchanter</b> turns up to two sockets into the other kind (weapon ⇄ armor) · <b>Gem Cutter</b> reshapes up to two gems into others with the same number of essences · <b>Retirement</b> lets a hero leave and pass half their base HP and ATK to another · <b>Scout's Camp</b> lets you choose which of this act's bosses you'll face.</p>
   <p><b>One loss ends the run.</b> If your whole guild falls, or the fight hits the 60-second limit with enemies still standing, it's over. Clearing floor 12 unlocks the next depth and offers <b>Endless</b>: keep descending through ever-stronger Act 3 floors until your guild falls.</p>
-  <p><b>Discovery:</b> the Codex fills as you meet heroes, gems, relics and enemies. Four heroes are locked behind milestones.</p>
+  <p><b>Classes:</b> the market sells the eight starters, each with a root (Mage, Warrior or Rogue) decided on hire. Training unlocks a slot and promotes the hero to one of its four upgrades, whichever its socketed gems meet; the old class's skills come along. A hero that fits no upgrade can't train. The Codex lists the whole tree.</p>
   </div><button data-x="close" class="primary">Got it</button>`);
 }
 function showStartPick(){

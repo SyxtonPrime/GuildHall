@@ -578,8 +578,8 @@
    "name": "Rogue",
    "notes": "",
    "order": 1791142926821,
-   "passive": "1 gold at end of round",
-   "updated": 1791161425385
+   "passive": "+1 gold at the end of each round.",
+   "updated": 1791343610568
   },
   "c_muu7pm5ad90i": {
    "ess": [],
@@ -587,8 +587,8 @@
    "name": "Mage",
    "notes": "",
    "order": 1791142017886,
-   "passive": "Whenever your attack applies a status, apply 1 more. Whenever you heal, heal 1 more.",
-   "updated": 1791248793278
+   "passive": "Whenever this hero's attack applies a status, apply 1 more. Whenever this hero heals, heal 1 more.",
+   "updated": 1791343610568
   },
   "c_muu81a83luco": {
    "ess": [
@@ -832,8 +832,8 @@
    "name": "Warrior",
    "notes": "",
    "order": 1791142905226,
-   "passive": "Heal 1 every 2 seconds, +1 Armor",
-   "updated": 1791171447909
+   "passive": "Heals 1 every 2 seconds. +1 Armor.",
+   "updated": 1791343610568
   },
   "c_muu7pu09ggnx": {
    "ess": [

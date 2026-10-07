@@ -1,7 +1,7 @@
 // ---------- the Forge: merge two owned gems (loose or slotted) into one ----------
 function openForge(){
   const items=[]; run.bag.forEach((g,i)=>items.push({g,where:'bag',i,owner:'loose'}));
-  run.heroes.forEach((h,hi)=>(h.gems||[]).forEach((g,k)=>{ if(g) items.push({g,where:'slot',hi,k,owner:HEROES[h.id].name+' · '+(((EQUIP[h.id]||{}).l||[])[k]||['Weapon','Body','Head','Off-hand'][k])}); }));
+  run.heroes.forEach((h,hi)=>(h.gems||[]).forEach((g,k)=>{ if(g) items.push({g,where:'slot',hi,k,owner:HEROES[h.id].name+' · '+(((EQUIP[sprId(h)]||{}).l||[])[k]||['Weapon','Body','Head','Off-hand'][k])}); }));
   const fusable=items.filter(it=>!GEMS[it.g].merged); // composites cannot be fused again
   if(fusable.length<2) return toast('You need two gems that are not already composites');
   let chosen=[];

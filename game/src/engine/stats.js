@@ -1,10 +1,10 @@
 // ---------- Stats ----------
 function computeStats(h,relics){
   relics=relics||[];
-  const d=HEROES[h.id], L=h.lv, m=1+0.15*(L-1);
-  let hp=d.hp*m+(h.bonusHp||0)+(h.giftHp||0), atk=d.atk*m+(h.giftAtk||0), spd=d.spd, armor=d.armor||0, crit=(d.crit||0)+(d.critLv||0)*(L-1), dodge=(d.dodge||0)+(d.dodgeLv||0)*(L-1);
-  const apply={}; const base=d.apply?d.apply(L):{}; for(const k in base) apply[k]=(apply[k]||0)+base[k];
-  let statusMult=1, targetLowest=!!d.targetLowest, startShield=0, regen=0;
+  const L=h.lv, m=1+0.15*(L-1), base=classStats(h.root||rootOf(h.id),heroPath(h)); // the route's stats, grown 15% per ★
+  let hp=base.hp*m+(h.bonusHp||0)+(h.giftHp||0), atk=base.atk*m+(h.giftAtk||0), spd=base.spd, armor=base.armor, crit=base.crit, dodge=base.dodge;
+  const apply={};
+  let statusMult=1, targetLowest=false, startShield=0, regen=0;
   const flags={};
   const sc=slotCounts(h,relics.includes('prism')), gh=sc.hand, ga=sc.armor, gold={win:0,kill:0,interest:0,elite:0};
   const retaliate={}; let spikes=0, lifesteal=0, shieldPerAttack=0;
@@ -26,10 +26,10 @@ function computeStats(h,relics){
   if(ga.vital){ hp+=12*ga.vital; regen=ga.vital; }
   if(ga.swift) dodge+=GEM_ARMOR.dodge*ga.swift;
   if(ga.gilt) gold.win+=ga.gilt;
-  const skills=activeSkills(h);
+  const skills=activeSkills(h), passives=heroPassives(h); // class passives along the route stack
   const gemDefs=gemsOf(h).flatMap(gemLeaves).map(g=>GEMS[g]).filter(g=>g.rare);
   let hpMult=1;
-  skills.concat(gemDefs).forEach(it=>{
+  skills.concat(passives,gemDefs).forEach(it=>{
     if(it.flag) flags[it.flag]=1; if(it.flags) it.flags.forEach(f=>flags[f]=1);
     if(it.mod){ hp+=it.mod.hp||0; atk+=it.mod.atk||0; armor+=it.mod.armor||0; crit+=it.mod.crit||0; dodge+=it.mod.dodge||0; if(it.mod.spdMult) spd*=it.mod.spdMult; if(it.mod.hpMult) hpMult*=it.mod.hpMult; }
     if(it.apply) for(const k in it.apply) apply[k]=(apply[k]||0)+it.apply[k];
@@ -45,6 +45,6 @@ function computeStats(h,relics){
   if(relics.includes('huntinghorn')&&h.row==='back') spd*=1.25;
   if(relics.includes('cloak')) dodge+=0.1;
   if(relics.includes('boots')){ spd*=1.2; dodge+=0.1; }
-  return {maxHpRaw:Math.round(hpRaw),maxHp:Math.max(1,Math.round(hp)),atk:Math.round(atk),spd:Math.round(spd*100)/100,armor,crit,dodge,apply,statusMult,targetLowest,flags,startShield,regen,retaliate,spikes,lifesteal,shieldPerAttack,giltHand:gh.gilt||0,giltArmor:ga.gilt||0,skills,gold,gemHooks:gemDefs.map(g=>g.hooks||{})};
+  return {maxHpRaw:Math.round(hpRaw),maxHp:Math.max(1,Math.round(hp)),atk:Math.round(atk),spd:Math.round(spd*100)/100,armor,crit,dodge,apply,statusMult,targetLowest,flags,startShield,regen,retaliate,spikes,lifesteal,shieldPerAttack,giltHand:gh.gilt||0,giltArmor:ga.gilt||0,skills,passives,gold,gemHooks:gemDefs.map(g=>g.hooks||{})};
 }
 

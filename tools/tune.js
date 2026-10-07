@@ -1,11 +1,12 @@
 // Tuning harness: runs the greedy bot many times and logs which heroes / skills / gems / relics correlate with wins.
 const E=require(process.env.ENGINE||'../game/engine.js');
 const ri=n=>Math.floor(Math.random()*n), pick=a=>a[ri(a.length)], shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=ri(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
-const ALL=Object.keys(E.HEROES); // include locked heroes so they get tuned too
+const nm=id=>E.CLASSES[id]?E.CLASSES[id].name:id; // class ids are opaque; report names
+const ALL=E.STARTERS; // the market sells starters; the bot trains them up the tree
 const lvCost=h=>h.lv===1?5:h.lv===2?9:null;
 const ofTier=(t,own)=>Object.keys(E.RELICS).filter(k=>(E.RELICS[k].tier||'common')===t&&!own.includes(k));
 function rollRelic(w,own){ const r=Math.random(); let acc=0,t='common'; for(const k of ['common','rare','legendary']){ acc+=w[k]; if(r<acc){t=k;break;} } const p=ofTier(t,own); if(p.length) return pick(p); const a=Object.keys(E.RELICS).filter(k=>!own.includes(k)); return a.length?pick(a):null; }
-function addHero(run,id){ const d=E.HEROES[id]; const rc=r=>run.heroes.filter(h=>h.row===r).length; let row=E.defaultRow(id); if(rc(row)>=(E.ROW_MAX||4)) row=row==='front'?'back':'front'; run.heroes.push({id,lv:1,gems:[],row,kills:0}); }
+function addHero(run,id){ const rc=r=>run.heroes.filter(h=>h.row===r).length; let row=E.defaultRow(id); if(rc(row)>=(E.ROW_MAX||4)) row=row==='front'?'back':'front'; run.heroes.push(E.newHero(id,row)); }
 function newSkills(h,g){ const hh=Object.assign({},h,{gems:h.gems.filter(Boolean).concat([g])}); return E.activeSkills(hh).length-E.activeSkills(h).length; }
 const nGems=h=>h.gems.filter(Boolean).length;
 const openIdx=h=>[0,1,2,3].slice(0,E.SLOTS(h.lv)).filter(k=>!h.gems[k]);
@@ -24,7 +25,8 @@ function shopPhase(run){
   const scored=gems.map(g=>({g,sc:run.heroes.reduce((m,h)=>Math.max(m,openIdx(h).length?newSkills(h,g):0),0)})).sort((a,b)=>b.sc-a.sc);
   let bought=0; for(const x of scored){ const c=E.GEMS[x.g].cost; if(run.gold>=c&&bought<Math.max(1,gcap)&&(x.sc>0||Math.random()<0.5)){ run.gold-=c; run.bag.push(x.g); bought++; } }
   placeGems(run);
-  for(let k=0;k<2;k++){ const c=shuffle(run.heroes.filter(h=>lvCost(h)&&run.gold>=lvCost(h))); if(c.length&&(run.heroes.length>=3||run.floor>3)){ const h=c[0]; run.gold-=lvCost(h); h.lv++; } }
+  // training: only heroes whose gems meet an upgrade can train; several fits pick at random
+  for(let k=0;k<2;k++){ const c=shuffle(run.heroes.filter(h=>lvCost(h)&&run.gold>=lvCost(h)&&E.upgradeOptions(h).length)); if(c.length&&(run.heroes.length>=3||run.floor>3)){ const h=c[0]; run.gold-=lvCost(h); E.trainHero(h,undefined,pick); } }
   placeGems(run);
 }
 // forge: fuse two loose gems if possible, else two gems on the hero holding the most, result back into that socket
@@ -55,9 +57,9 @@ function sim(depth){
     const enc=path.enc;
     const B=E.createBattle(run.heroes,enc,run.relics); E.runToEnd(B);
     { const ids=new Set(enc.list.map(x=>x.id)); ids.forEach(id=>{ log.seenE[id]=(log.seenE[id]||0)+1; if(B.winner!=='p') log.deathE[id]=(log.deathE[id]||0)+1; }); if(enc.theme){ log.themes[enc.theme]=(log.themes[enc.theme]||0)+1; if(B.winner!=='p') log.deathThemes[enc.theme]=(log.deathThemes[enc.theme]||0)+1; } }
-    run.heroes.forEach(h=>{ log.heroes.add(h.id); E.activeSkills(h).forEach(sk=>log.skills.add(h.id+'·'+sk.name+'·'+sk.need)); h.gems.forEach(g=>{ if(g) log.gems.add(g); }); });
+    run.heroes.forEach(h=>{ log.heroes.add(nm(h.id)); E.activeSkills(h).forEach(sk=>log.skills.add(nm(sk.cls)+'·'+sk.name+'·'+sk.need)); h.gems.forEach(g=>{ if(g) log.gems.add(g); }); });
     run.relics.forEach(r=>log.relics.add(r));
-    B.units.filter(u=>u.hero).forEach(u=>{ const id=u.hero.id; log.heroFights[id]=(log.heroFights[id]||0)+1; log.heroDealt[id]=(log.heroDealt[id]||0)+u.stats.dealt; log.heroTaken[id]=(log.heroTaken[id]||0)+u.stats.taken; });
+    B.units.filter(u=>u.hero).forEach(u=>{ const id=nm(u.hero.id); log.heroFights[id]=(log.heroFights[id]||0)+1; log.heroDealt[id]=(log.heroDealt[id]||0)+u.stats.dealt; log.heroTaken[id]=(log.heroTaken[id]||0)+u.stats.taken; });
     log.fights++;
     if(B.winner!=='p') return run.endless?Object.assign(log,{won:true,floor:13,endFloor:run.floor,forges,elites}):Object.assign(log,{won:false,floor:run.floor,forges,elites});
     let cap=3,extra=0; run.heroes.forEach(h=>{ const g=E.computeStats(h,run.relics).gold; cap+=g.interest; const u=B.units.find(x=>x.hero===h); extra+=g.win+g.kill*(u?u.stats.kills:0)+((enc.kind!=='fight')?g.elite:0); });

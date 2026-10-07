@@ -16,7 +16,7 @@ const actKey=f=>Math.ceil(f/4); // act, or endless block
 function actBoss(){ run.bosses=run.bosses||{}; const k=actKey(run.floor); if(!run.bosses[k]) run.bosses[k]=rollActBoss(run.floor); return run.bosses[k]; }
 function offerPaths(){ run.choices=genChoices(run.floor,run.depth,{boss:actBoss()}); run.pick=run.choices.findIndex(c=>c.enc); if(run.pick<0) run.pick=0; run.enc=run.choices[run.pick].enc||null; }
 function pickPath(i){ run.pick=i; run.enc=run.choices[i].enc||null; }
-function loadRun(){ const r=load(KEY_RUN,null); if(!r) return null; restoreMergedGems(r.merged); if(!r.choices){ r.choices=[{kind:r.enc?r.enc.kind:'fight',enc:r.enc}]; r.pick=0; } if(r.mergeAct===undefined){ r.mergeAct=0; r.merged=r.merged||[]; r.mergeN=r.mergeN||0; } if(r.choices.some(c=>c.kind==='forge')){ r.choices=r.choices.filter(c=>c.kind!=='forge'); r.pick=0; r.enc=r.choices[0].enc; } return r; }
+function loadRun(){ const r=load(KEY_RUN,null); if(!r) return null; if(r.heroes.some(h=>!CLASSES[h.id])) return null; // a save from before the class tree restoreMergedGems(r.merged); if(!r.choices){ r.choices=[{kind:r.enc?r.enc.kind:'fight',enc:r.enc}]; r.pick=0; } if(r.mergeAct===undefined){ r.mergeAct=0; r.merged=r.merged||[]; r.mergeN=r.mergeN||0; } if(r.choices.some(c=>c.kind==='forge')){ r.choices=r.choices.filter(c=>c.kind!=='forge'); r.pick=0; r.enc=r.choices[0].enc; } return r; }
 const rerollCost=()=>Math.max(0,1+(run.rr||0)-(run.relics.includes('scales')?1:0));
 const gemFx=(g,active)=>{ const d=GEMS[g]; if(!d.hand) return esc(d.desc); const row=(k,lab)=>`<div class="gfx ${active&&active!==k?'off':''}"><span class="gk ${k}">${lab}</span> ${esc(d[k])}</div>`; return row('hand','Weapon')+row('armor','Armor'); };
 // rare gem body: bonus/drawback, plus (with Prismatic Lens, 3+ essences) every essence's socket effects
@@ -46,7 +46,8 @@ function rollShop(charge){
 const heroCost=3, lvCost=h=>h.lv===1?5:h.lv===2?9:null; // cost to unlock the next gear slot (also raises the hero's ★)
 const openSet=h=>h.open||Array.from({length:SLOTS(h.lv)},(_,k)=>k); // unlocked gear slots; older saves: the first lv+1
 const slotOpen=(h,k)=>openSet(h).includes(k);
-function unlockSlot(h,k){ const c=lvCost(h); if(!c||run.gold<c||slotOpen(h,k)) return false; run.gold-=c; h.open=openSet(h).concat(k).sort(); h.lv++; return true; }
+// Training: pays, opens the slot and promotes. 'noupgrade' when the hero's gems meet none of its upgrades; several fits leave run.promo for the UI to resolve.
+function unlockSlot(h,k){ const c=lvCost(h); if(!c||run.gold<c||slotOpen(h,k)) return false; if(!upgradeOptions(h).length) return 'noupgrade'; run.gold-=c; h.open=openSet(h); const opts=trainHero(h,k); if(opts.length>1) run.promo={hi:run.heroes.indexOf(h),opts}; return true; }
 function rollGems(n,forceRare){
   const basics=shuffle(BASIC_GEMS), rares=shuffle(RARE_GEMS.filter(k=>GEMS[k].rare===1).concat(shuffle(RARE_GEMS.filter(k=>GEMS[k].rare===2)).slice(0,2)));
   const out=[]; for(let i=0;i<n;i++){ const rare=(forceRare&&i===n-1)||(Math.random()<0.15+0.02*run.floor); out.push(rare&&rares.length?rares.shift():basics.shift()); }
@@ -56,9 +57,9 @@ const PARTY_START=3, SLOT_COST={3:6,4:10};
 const partyMax=()=>(run.partyMax||PARTY_START)+(run.relics.includes('contract')?1:0);
 const slotCost=()=>SLOT_COST[run.partyMax||PARTY_START]||null; // purchases ignore the Contract's bonus slot
 function addHero(id){
-  const d=HEROES[id]; const rowCount=r=>run.heroes.filter(h=>h.row===r).length;
+  const rowCount=r=>run.heroes.filter(h=>h.row===r).length;
   let row=defaultRow(id); if(rowCount(row)>=ROW_MAX) row=row==='front'?'back':'front';
-  run.heroes.push({id,lv:1,gems:[],open:[0,1],row,kills:0});
+  run.heroes.push(newHero(id,row));
 }
 function goldReward(enc,win,killsBy){
   const base=3+enc.act+(enc.kind==='elite'?2:enc.kind==='boss'?4:0);

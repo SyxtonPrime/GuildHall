@@ -9,7 +9,7 @@ const EVENTS={
 const rollEvents=()=>shuffle(Object.keys(EVENTS).filter(k=>EVENTS[k].ok())).slice(0,2);
 function finishBonus(){ run.bonus=null; sel.gem=null; saveRun(); renderCamp(); }
 const lockModal=()=>{ $('#modal').dataset.lock='1'; }, unlockModal=()=>{ $('#sheet').onclick=null; delete $('#modal').dataset.lock; closeModal(); };
-const slotName=(h,k)=>(((EQUIP[h.id]||{}).l||[])[k])||['Weapon','Body','Head','Off-hand'][k];
+const slotName=(h,k)=>(((EQUIP[sprId(h)]||{}).l||[])[k])||['Weapon','Body','Head','Off-hand'][k];
 // every gem the guild owns, loose or socketed
 function ownedGems(){ const items=[]; run.bag.forEach((g,i)=>items.push({g,where:'bag',i,owner:'loose'})); run.heroes.forEach((h,hi)=>(h.gems||[]).forEach((g,k)=>{ if(g) items.push({g,where:'slot',hi,k,owner:HEROES[h.id].name+' · '+slotName(h,k)}); })); return items; }
 
@@ -105,9 +105,9 @@ function offerSheet(kind,i){
   const full=kind==='h'&&run.heroes.length>=partyMax(); const can=!o.sold&&run.gold>=cost&&!full;
   let body='';
   if(kind==='h'){
-    body=`<div class="small num">${d.row} row · HP ${d.hp} · ATK ${d.atk} · SPD ${d.spd}${d.armor?' · ARM '+d.armor:''}${d.crit?' · CRIT '+Math.round(d.crit*100)+'%':''}${d.dodge?' · DODGE '+Math.round(d.dodge*100)+'%':''}</div><div class="small">${esc(d.ab(1))}</div><div class="eyebrow" style="margin-top:6px">Skills (unlocked by gems)</div><div class="stack" style="gap:4px">${heroSkills(o.id).map(sk=>skillRow(sk,null)).join('')}</div>`; }
+    body=`<div class="small num">${d.row} row · HP ${d.hp} · ATK ${d.atk} · SPD ${d.spd}${d.armor?' · ARM '+d.armor:''}</div><div class="tiny muted">Root: ${CLASSES[o.id].from.map(f=>CLASSES[f].name).join(' or ')} (decided on hire) · trains into ${upgradesOf(o.id).map(u=>CLASSES[u].name).join(', ')}</div><div class="small">${esc(d.ab(1))}</div><div class="eyebrow" style="margin-top:6px">Skills (unlocked by gems)</div><div class="stack" style="gap:4px">${heroSkills(o.id).map(sk=>skillRow(sk,null)).join('')}</div>`; }
   else if(kind==='g'){
-    const uses=[]; run.heroes.forEach(h=>heroSkills(h.id).forEach(sk=>{ if(!skillActive(h,sk)&&skillActive(withGem(h,o.id),sk)) uses.push(`${HEROES[h.id].name}: <b>${esc(sk.name)}</b>`); }));
+    const uses=[]; run.heroes.forEach(h=>heroSkills(h).forEach(sk=>{ if(!skillActive(h,sk)&&skillActive(withGem(h,o.id),sk)) uses.push(`${HEROES[h.id].name}: <b>${esc(sk.name)}</b>`); }));
     body=`${d.rare?`<div class="row" style="gap:4px;margin-bottom:4px"><span class="pill g">rare</span>${d.ess.map(e=>ic(e,'g',18,GEMS[e].name)).join('')}</div>`:''}<div class="small">${d.rare?rareFx(o.id,null):gemFx(o.id)}</div>${uses.length?`<div class="small good" style="margin-top:4px">Would unlock now · ${uses.join(' · ')}</div>`:`<div class="tiny muted" style="margin-top:4px">No skill in your guild is one ${esc(d.name)} away right now, but it still gives its passive.</div>`}`; }
   else body=`<div class="small">${esc(d.desc)}</div>`;
   modal(`<h2>${ic(o.id,kind,28)}${esc(d.name)}${kind==='r'?' '+tierPill(o.id):kind==='g'?' <span class="tiny muted">gem</span>':''}</h2>${body}
@@ -117,11 +117,21 @@ function offerSheet(kind,i){
     if(kind==='h') addHero(o.id); else if(kind==='g'){ run.bag.push(o.id); sel.gem=run.bag.length-1; } else run.relics.push(o.id);
     renderCamp(); };
 }
+// the route so far, and what training could make of the hero next (lit recipes are met by its gems)
+function routeLine(h){ const path=heroPath(h).map(id=>esc(CLASSES[id].name)).join(' → '); const ups=upgradesOf(h.id);
+  const next=ups.length?`<div class="tiny muted" style="margin-top:2px">Trains into: ${ups.map(id=>`<span class="row" style="display:inline-flex;gap:3px;margin-right:6px">${recipeHtml({need:CLASSES[id].need},h,14)}${esc(CLASSES[id].name)}</span>`).join('')}</div>`:'<div class="tiny muted" style="margin-top:2px">A capstone: trains no further.</div>';
+  return `<div class="tiny muted">${path}</div>${next}`; }
+// several upgrades fit: the player chooses, and the choice is permanent
+function promoModal(){ const p=run.promo; if(!p) return; const h=run.heroes[p.hi];
+  modal(`<h2>${esc(HEROES[h.id].name)} is ready to advance</h2><div class="muted small">Choose a class. The choice is permanent, and ${esc(HEROES[h.id].name)}'s skills come along.</div>
+   <div class="choice">${p.opts.map(id=>{ const c=CLASSES[id]; return `<button data-promo="${id}"><span class="row">${ic(id,'h',24)} ${esc(c.name)} <span class="tiny muted">${c.role} · ${c.ess.map(e=>GEMS[e].name).join(' + ')}</span></span><span class="d">${esc(c.passive)}</span></button>`; }).join('')}</div>`); lockModal();
+  $('#sheet').onclick=e=>{ const b=e.target.closest('button[data-promo]'); if(!b) return; $('#sheet').onclick=null; const was=HEROES[h.id].name; promote(h,b.dataset.promo); delete run.promo; unlockModal(); closeModal(); toast(`${was} becomes ${HEROES[h.id].name}`); saveRun(); renderGems(p.hi); }; }
 function heroSheet(i){
   const h=run.heroes[i], d=HEROES[h.id], s=computeStats(h,run.relics), lc=lvCost(h);
   const other=h.row==='front'?'back':'front'; const otherFull=run.heroes.filter(x=>x.row===other).length>=ROW_MAX;
   modal(`<h2>${hspr(h,32,d.name)}${esc(d.name)} <span class="stars gold small">${'★'.repeat(h.lv)}</span></h2>
    <div class="small muted">${esc(d.ab(h.lv))}</div>
+   ${routeLine(h)}
    <div class="small num">HP ${s.maxHp} · ATK ${s.atk} · SPD ${s.spd} · ARM ${s.armor}${s.crit?' · CRIT '+Math.round(s.crit*100)+'%':''}${s.dodge?' · DODGE '+Math.round(s.dodge*100)+'%':''} · kills ${h.kills||0}${h.bonusHp?` · <span class="good">+${h.bonusHp} HP from kills</span>`:''}${h.giftHp?` · <span class="good">inherited +${h.giftHp} HP +${h.giftAtk} ATK</span>`:''}</div>
    <div class="row" style="gap:4px">${openSet(h).map(k=>{ const g=(h.gems||[])[k]; return g?ic(g,'g',22,GEMS[g].name):'<span class="ph" style="display:inline-block;width:22px;height:22px;border:1px dashed var(--line2);border-radius:24%"></span>'; }).join('')}<span class="tiny muted" style="margin-left:6px">${s.skills.length?s.skills.map(x=>esc(x.name)).join(', '):'no skills yet'}</span></div>
    <div class="actions">
@@ -140,12 +150,12 @@ function heroSheet(i){
 
 function gemSheet(id,where,k){
   const d=GEMS[id], h=where==='camp'?null:run.heroes[gemIdx];
-  const unlocks=!h?[]:heroSkills(h.id).filter(sk=>!skillActive(h,sk)&&skillActive(withGem(h,id),sk)).map(sk=>sk.name);
-  const loses=where==='slot'?heroSkills(h.id).filter(sk=>skillActive(h,sk)&&!skillActive(Object.assign({},h,{gems:h.gems.map((g,i)=>i===k?null:g)}),sk)).map(sk=>sk.name):[];
+  const unlocks=!h?[]:heroSkills(h).filter(sk=>!skillActive(h,sk)&&skillActive(withGem(h,id),sk)).map(sk=>sk.name);
+  const loses=where==='slot'?heroSkills(h).filter(sk=>skillActive(h,sk)&&!skillActive(Object.assign({},h,{gems:h.gems.map((g,i)=>i===k?null:g)}),sk)).map(sk=>sk.name):[];
   modal(`<h2>${ic(id,'g',30)}${esc(d.name)} ${d.merged?'<span class="pill g">composite</span>':d.rare?'<span class="pill g">rare</span>':'<span class="tiny muted">gem</span>'}</h2>
    <div class="row" style="gap:4px;flex-wrap:wrap"><span class="tiny muted">Essence${d.ess.length>1?'s':''}:</span>${d.ess.map(e=>`<span class="pill" style="color:${ARCH_C[GEMS[e].arch]};border-color:${ARCH_C[GEMS[e].arch]}">${ic(e,'g',12)} ${GEMS[e].name}</span>`).join('')}</div>
    <div class="small">${d.merged?`<div class="tiny muted">Composite gem · counts as every essence above for recipes · cannot be fused again. Parts:</div>${gemLeaves(id).map(l=>`<div class="row" style="gap:6px;margin-top:4px;align-items:flex-start">${ic(l,'g',18,GEMS[l].name)}<div><b>${esc(GEMS[l].name)}</b> ${GEMS[l].rare?rareFx(l,where==='slot'?slotKind(k,h):null):gemFx(l,where==='slot'?slotKind(k,h):null)}</div></div>`).join('')}`:d.rare?rareFx(id,where==='slot'?slotKind(k,h):null):gemFx(id,where==='slot'?slotKind(k,h):null)}</div>
-   ${where==='camp'?`<div class="tiny muted">Would unlock: ${run.heroes.map(hh=>{ const u=heroSkills(hh.id).filter(sk=>!skillActive(hh,sk)&&skillActive(withGem(hh,id),sk)).map(sk=>sk.name); return u.length?esc(HEROES[hh.id].name)+' → '+u.map(esc).join(', '):null; }).filter(Boolean).join(' · ')||'nothing new right now'}</div>`:where==='bag'?(unlocks.length?`<div class="small good">Slotting it on ${esc(HEROES[h.id].name)} unlocks: ${unlocks.map(esc).join(', ')}</div>`:`<div class="tiny muted">Unlocks no new skill on ${esc(HEROES[h.id].name)} right now.</div>`):(loses.length?`<div class="small acc">Removing it deactivates: ${loses.map(esc).join(', ')}</div>`:'')}
+   ${where==='camp'?`<div class="tiny muted">Would unlock: ${run.heroes.map(hh=>{ const u=heroSkills(hh).filter(sk=>!skillActive(hh,sk)&&skillActive(withGem(hh,id),sk)).map(sk=>sk.name); return u.length?esc(HEROES[hh.id].name)+' → '+u.map(esc).join(', '):null; }).filter(Boolean).join(' · ')||'nothing new right now'}</div>`:where==='bag'?(unlocks.length?`<div class="small good">Slotting it on ${esc(HEROES[h.id].name)} unlocks: ${unlocks.map(esc).join(', ')}</div>`:`<div class="tiny muted">Unlocks no new skill on ${esc(HEROES[h.id].name)} right now.</div>`):(loses.length?`<div class="small acc">Removing it deactivates: ${loses.map(esc).join(', ')}</div>`:'')}
    <div class="row"><button class="grow ghost" data-x="close">Close</button>${where==='camp'?'':where==='bag'?`<button class="grow gold" data-gs="slot" ${freeSlots(h)>0?'':'disabled'}>${freeSlots(h)>0?'Slot it':'No free slot'}</button>`:`<button class="grow" data-gs="unslot">Return to loose gems</button>`}</div>`);
   $('#sheet').onclick=e=>{ const b=e.target.closest('button[data-gs]'); if(!b) return; $('#sheet').onclick=null; closeModal();
     if(b.dataset.gs==='slot'){ const o=openSlots(h); if(o.length>1){ gemPick=k; return renderGems(gemIdx,true); } if(tryPut(h,o[0],run.bag[k])) run.bag.splice(k,1); } else { const g=tryTake(h,k); if(g) run.bag.push(g); } gemPick=null;

@@ -74,10 +74,9 @@ function endBattle(){
   const g=goldReward(enc,win,killsBy); g.bounty=battle.bounty||0; g.total=Math.max(0,g.total+g.bounty); if(win) run.gold+=g.total;
   meta.bestFloor=Math.max(meta.bestFloor,run.floor);
   const unlocks=[];
-  const tryUnlock=(id,cond)=>{ if(cond&&!meta.unlocked.includes(id)&&HEROES[id].locked){ meta.unlocked.push(id); unlocks.push(HEROES[id].name); } };
-  tryUnlock('plaguedoctor',win&&run.floor===4); tryUnlock('bard',run.floor>=8&&win); tryUnlock('reaper',meta.kills>=150);
+  const tryUnlock=()=>{}; // milestone heroes are gone: every class is reached by training
   const victory=win&&run.floor===FLOORS; const dead=!win;
-  if(victory){ run.cleared=true; meta.wins++; meta.maxDepth=Math.max(meta.maxDepth,run.depth+1); tryUnlock('frostmage',true); }
+  if(victory){ run.cleared=true; meta.wins++; meta.maxDepth=Math.max(meta.maxDepth,run.depth+1); }
   if(run.floor>FLOORS) meta.bestEndless=Math.max(meta.bestEndless||0,run.floor);
   { const ds=depthStats(run.depth);
     if(run.floor>FLOORS) ds.bestEndless=Math.max(ds.bestEndless,run.floor);
