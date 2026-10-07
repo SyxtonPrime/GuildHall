@@ -61,6 +61,6 @@ function showStartPick(){
   $('#modal').dataset.lock='1';
   draw();
   $('#sheet').onclick=e=>{ const b=e.target.closest('button[data-pick]'); if(!b) return; run._picked.push(b.dataset.pick); addHero(b.dataset.pick);
-    if(run._picked.length>=2){ delete $('#modal').dataset.lock; $('#sheet').onclick=null; closeModal(); run.startPick=false; delete run._pick; delete run._picked; rollShop(false); renderCamp(); } else draw(); };
+    if(run._picked.length>=2){ delete $('#modal').dataset.lock; $('#sheet').onclick=null; closeModal(); run.startPick=false; delete run._pick; delete run._picked; rollShop(false); saveRun(); startBattle(); } else draw(); }; // straight into the first fight; the market opens after it
 }
 
