@@ -9,7 +9,7 @@ const GEMS={
  edge:{name:'Edge',arch:'crit',letter:'K',cost:3,hand:'+15% crit chance',armor:'Spiked: attackers that hit this hero take 2 damage'},
  vital:{name:'Vital',arch:'heal',letter:'H',cost:3,hand:'Each hit heals this hero 2',armor:'+12 HP · heal 1 every 2 seconds'},
  swift:{name:'Swift',arch:'speed',letter:'S',cost:3,hand:'+15% attack speed',armor:'+8% dodge'},
- gilt:{name:'Gilt',arch:'gold',letter:'G',cost:3,hand:'+1 gold for each enemy this hero kills (up to 2 a fight)',armor:'+1 gold after every won fight'},
+ gilt:{name:'Gilt',arch:'gold',letter:'G',cost:3,hand:'+1 gold for every 2 enemies this hero kills in a fight',armor:'+1 gold after every won fight'},
  // rare: two essences + a bonus effect
  bloodstone:{name:'Bloodstone',rare:1,ess:['venom','vital'],cost:5,desc:'Venom + Vital. Whenever this hero\'s Poison damages an enemy, heal 1',hooks:{onPoisonDamage:(u,t,d,B)=>{ if(t.poisonSrc===u) heal(u,1,B,u); }}},
  hearthstone:{name:'Hearthstone',rare:1,ess:['ember','ward'],cost:5,desc:'Ember + Ward. When this hero\'s Shield absorbs a hit, the attacker gains 1 Burn',hooks:{onShieldAbsorb:(u,src,ab,B)=>applyStatus(u,src,'burn',1,B)}},
@@ -44,7 +44,7 @@ function gemsOf(h){ return (h.gems||[]).filter(Boolean); } // h.gems[k] = gem in
 function gemCounts(h){ const c={}; gemsOf(h).forEach(g=>gemEss(g).forEach(e=>c[e]=(c[e]||0)+1)); return c; } // essences, for recipes
 function essenceCounts(h){ const c={}; gemsOf(h).forEach(g=>{ const d=GEMS[g]; (!d.rare?[g]:d.ess.length>=3?d.ess:[]).forEach(e=>c[e]=(c[e]||0)+1); }); return c; } // Prismatic Lens: 3-essence gems grant every essence's passive
 // Gear slots: 0 weapon & 3 off-hand = 'hand' (offensive passive), 1 body & 2 head = 'armor' (defensive passive)
-const GEM_HAND={wardShield:1,vitalHeal:2}, GEM_ARMOR={spikes:2,dodge:0.08}, GILT_KILL_CAP=2; // a Gilt weapon pays for at most this many kills a fight
+const GEM_HAND={wardShield:1,vitalHeal:2}, GEM_ARMOR={spikes:2,dodge:0.08}, GILT_PER_KILLS=2; // a Gilt weapon pays 1 gold per this many kills by its hero in a fight
 const HAND_SLOTS=[0,3], slotKind=(k,h)=>(HAND_SLOTS.includes(k)!==!!(h&&h.flip&&h.flip.includes(k)))?'hand':'armor'; // h.flip: sockets the Enchanter has turned to the other kind
 function slotCounts(h,prism){ const c={hand:{},armor:{}}; (h.gems||[]).forEach((g,k)=>{ if(!g) return; const t=c[slotKind(k,h)]; gemLeaves(g).forEach(l=>{ const d=GEMS[l]; const es=!d.rare?[l]:(prism&&d.ess.length>=3?d.ess:[]); es.forEach(e=>t[e]=(t[e]||0)+1); }); }); return c; }
 function basicCounts(h){ const c={}; gemsOf(h).forEach(g=>{ if(!GEMS[g].rare) c[g]=(c[g]||0)+1; }); return c; } // passives come only from basic gems
