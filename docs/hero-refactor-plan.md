@@ -296,3 +296,20 @@ Bot knobs added for the next passes: `CHILLSLOW`, `CHILLSHED`, `FESTER`, `BURNDM
 Readings taken while writing the hooks, none of them rulings yet: Stoke checks Burn before the hit lands, so the first hit on a fresh enemy does not count; Mend heals the most injured ally even at full HP (overheal effects rely on it); Side Effects moves once per attack, not per target; Backstab's crit carry-over lasts one attack. Deferred until a tier needs them: duel, Charm and Turncoat, summons, revive, lock-on, run-permanent stat gains, enemy Shield and Stalwart, splash hits.
 
 Bot, 150 runs with starters only: win 0.7%, average floor 7.0 (was floor 5.4 with no hooks). Not tuned; balance waits for the full tree.
+
+### Phase 4, tier 3 (7 October 2026)
+
+All twenty tier 3 classes have effects. Primitives added for them:
+
+- **The duel** (`startDuel`, `opposite`): `u.duel` is first in targeting priority on both sides; `dealDamage` halves attack damage on a duellist from anyone but the opponent. "Opposite" is the enemy in the Duelist's row at his position, else one from that row, else anyone. The duel is won when the opponent dies while the Duelist lives (`onDuelWon`), by anyone's hand.
+- **Targeting priority** in `pickTarget`: duel, then `B.brand` (Branding Blow, heroes only, 2 s), then the unit's one-off `nextTarget` (Frostblade), then `u.targetRule` (Rimecaller's most Chill, Grave Tonic's Festering; set in `onStart`, so the last class along the route to set one wins), then the old rules.
+- **Extra attacks**: `attack(u,B,forced,{mult,followUp,counter})`. Windrunner follow-ups and Monk counters go through it, advance the attack count, and a follow-up never triggers another (`inFollow`). `a.hitTargetRow` (Shield Slam) and `a.adjacent` (Firewind) widen a single attack.
+- **Timed buffs**: `addBuff(u,tag,key,n,dur,B,stack)` for `spd` (fraction), `dodge` and `crit` (chance), read in `effSpd` and the dodge and crit rolls. A tag refreshes unless it stacks (Rally stacks; Two Step, Crescendo, Overture refresh). `dur` Infinity with `dropBuff` for Eager, Berserker stacks, Glacial Rush, Stoked.
+- New hooks: `onIncoming` (before the dodge roll, for dodge bonuses: Footwork, Flow, Composure, Hot Feet), `onAllyCrit`, `onAllyDodge`, `onAllyKill` (Shared Contract re-fires the Mercenary's own `onKill`), `onAffliction(x,t,kind)` on every living unit when something becomes Frozen, Ablaze or Festering, `onAllyShieldBreak`, `onFrozenAttack` (Deep Winter), `onDuelWon`.
+- `ac.critFlat` (Bounty Blade), `ac.divert` (Holy Shield: the hit is ×0.8 and a quarter of what lands goes to the cursed enemy), `keepChill` is now `{by,gain}` so Glacier Warden (gain 0) and Cold Iron (gain 1) compose.
+- The Elementalist's mirror lives in `hitApply` (flag `mirror`), copying the on-hit amount after the Mage's +1; area applications aren't mirrored. Kiln sets `noBurnDecay` on the target for one tick. Quarantine is a battle flag read in `heal`. Ashen Guard is a flag read in `dealDamage` (Burn ×2 while the target has Shield; she gains what the Shield absorbed). Fast Talker is a flag read by the camp's reroll price.
+- `u.B` (a back-reference to the battle) and `u.lastTarget`, `u.lastDealt` for hooks that need them.
+
+Readings made in the hooks, not rulings: the Blood mage's 2 HP cost comes after the attack resolves, as sourceless damage; Rally counts a heal as landing only if it restored HP; the Apothecary's elixir goes to the fastest ally at the bell and is a plain `+2` to that unit's on-hit Poison (so a Mage root adds its +1); Hemorrhage heals every ally for the crit's damage; Crimson Tide hits the enemy she last attacked; Stoke (Fire mage) still checks Burn before the hit lands; Bard's auras include herself; Merchant's hoard bonus reads the bank at the bell plus what the fight has paid.
+
+Bot, 150 runs, starters and tier 3: win 4.0%, average floor 6.9. The engine-only route check (every tier 3 class by every route, four slots, with a Ward Sentinel, floor 8) has Monk, Berserker, Blood mage and Apothecary near 100% and most casters near 0%, which is the first thing the balance pass should look at.

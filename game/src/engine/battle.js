@@ -1,6 +1,6 @@
 // ---------- Battle ----------
 function baseUnit(def,side,row,s,B){
-  return {uid:B.uid++,def,name:def.name,side,row,alive:true,hp:s.maxHp,maxHp:s.maxHp,maxHp0:s.maxHp,atk:s.atk,spd:s.spd,armor:s.armor,crit:s.crit||0,dodge:s.dodge||0,
+  return {uid:B.uid++,B,def,name:def.name,side,row,alive:true,hp:s.maxHp,maxHp:s.maxHp,maxHp0:s.maxHp,atk:s.atk,spd:s.spd,armor:s.armor,crit:s.crit||0,dodge:s.dodge||0,
     shield:0,st:{},kw:{},ablaze:false,critStreak:0,dodgeStreak:0,flags:{},tmpMult:1,timer:0.35+Math.random()*0.3,stTimer:Math.random()*0.2,secs:0,attacks:0,chain:0,L:1,apply:{},hooks:[],statusMult:1,targetLowest:false,hitAll:false,hitAllMult:1,
     stats:{dealt:0,taken:0,healed:0,kills:0}};
 }
@@ -26,8 +26,20 @@ function createBattle(heroes,enc,relics,gold){
 const rowRoom=(B,side,row)=>B.units.filter(x=>x.side===side&&x.alive&&x.row===row).length<ROW_MAX;
 function moveUnit(u,row,B){ if(u.row===row||!rowRoom(B,u.side,row)) return false; u.row=row; B.move(u); fire(u,'onMove',B); return true; }
 // neighbours in the same row (card order), for "adjacent" effects
-function adjacentOf(t,B){ const row=B.units.filter(x=>x.side===t.side&&x.alive&&x.row===t.row); const i=row.indexOf(t); return [row[i-1],row[i+1]].filter(Boolean); }
+function adjacentOf(t,B){ const row=B.units.filter(x=>x.side===t.side&&x.row===t.row&&(x.alive||x===t)); const i=row.indexOf(t); return [row[i-1],row[i+1]].filter(Boolean); } // works for a unit that just died
+const wasFrozen=t=>t.alive?isFrozen(t):(t.stAtDeath&&t.stAtDeath.chill||0)>=FROZEN_AT, wasChilled=t=>(t.alive?t.st.chill:t.stAtDeath&&t.stAtDeath.chill)>0;
 const bank=B=>B.gold+B.bounty;
+// Timed buffs: {tag,key,n,until}. key is 'spd' (attack speed, +n as a fraction), 'dodge' or 'crit' (+n chance). A tag given again refreshes
+// unless stack is set; dur Infinity lasts until dropBuff. Expired buffs are pruned when read.
+function addBuff(u,tag,key,n,dur,B,stack){ u.buffs=u.buffs||[]; const until=B.t+dur; if(!stack){ const b=u.buffs.find(b=>b.tag===tag); if(b){ b.n=n; b.until=until; return; } } u.buffs.push({tag,key,n,until}); }
+function buffSum(u,key){ if(!u.buffs) return 0; const t=u.B.t; let s=0; for(let i=u.buffs.length-1;i>=0;i--){ const b=u.buffs[i]; if(b.until<=t){ u.buffs.splice(i,1); continue; } if(b.key===key) s+=b.n; } return s; }
+function dropBuff(u,tag){ if(u.buffs) u.buffs=u.buffs.filter(b=>b.tag!==tag); }
+// a plain hit from a skill (Shatter, Shield Slam, Deflect): no crit, no on-hit status, no attack counters
+const splash=(u,t,n,B)=>dealDamage(u,t,n,{type:'attack',splash:true},B);
+// the Duelist's opposite number: the enemy in his row at his position, else one from that row, else anyone
+function opposite(u,B){ const mine=B.units.filter(x=>x.side===u.side&&x.alive&&x.row===u.row), theirs=B.units.filter(x=>x.side!==u.side&&x.alive&&x.row===u.row); const i=mine.indexOf(u);
+  return theirs[i]||(theirs.length?pick(theirs):null)||randomEnemy(u,B); }
+function startDuel(u,t,B){ if(!t||!t.alive) return false; u.duel=t; t.duel=u; B.fx(u,'DUEL','buff'); B.fx(t,'DUEL','buff'); B.logf(`${u.name} challenges ${t.name} to a duel.`); return true; }
 // Necromancer's Grimoire: slain enemies rise on the hero side (half an enemy Skeleton of this floor, no relic hooks)
 function raiseSkeleton(B){
   if(B.over) return;
@@ -80,15 +92,15 @@ function lowestAlly(u,B){ const a=alliesOf(u,B).filter(x=>x.alive); if(!a.length
 function randomEnemy(u,B,not){ const f=aliveEnemies(u,B).filter(x=>x!==not); return f.length?pick(f):null; }
 // hard caps so stacking buffs can never run away: attack speed at 3 attacks/s, kill-chains at one per possible kill (crit and dodge use streaks instead, see core)
 const SPD_CAP=3, KILL_CHAIN_MAX=ROW_MAX*2;
-const effSpd=u=>Math.min(SPD_CAP,u.spd*(1-CHILL_SLOW*Math.min(CHILL_SLOW_MAX,u.st.chill||0))*(u.kw.crippled?0.75:1));
+const effSpd=u=>Math.min(SPD_CAP,u.spd*(1+buffSum(u,'spd'))*(1-CHILL_SLOW*Math.min(CHILL_SLOW_MAX,u.st.chill||0))*(u.kw.crippled?0.75:1));
 function addShield(u,n,B,echo){ if(!u||!u.alive||n<=0) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.flags.shieldMult2) n*=2; u.shield+=n; B.fx(u,`+${n}`,'shield'); fireOnce(u,'onShieldGain',B,n);
   // Twin Aegis: copy to another random hero (the copy never copies itself)
   if(!echo&&u.hero&&B.relics.includes('twinaegis')){ const o=B.units.filter(x=>x!==u&&x.hero&&x.alive); if(o.length) addShield(pick(o),n,B,true); } }
-function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; B.fx(u,`+${r}`,'heal'); } if(n-r>0&&u.hero&&B.relics.includes('chalice')) addShield(u,Math.round(n-r),B); if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
+function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.side==='e'&&u.st.poison>0&&B.flags.quarantine) n=Math.floor(n/2); const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; B.fx(u,`+${r}`,'heal'); } if(n-r>0&&u.hero&&B.relics.includes('chalice')) addShield(u,Math.round(n-r),B); if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
 // a heal performed by a class ability: onHealing hooks scale it (Healer's bonuses), then the Mage root's +1; gem regeneration and lifesteal skip this
 function abilityHeal(src,t,n,B){ if(!t||!t.alive||n<=0) return; const h={n}; fire(src,'onHealing',t,h,B); heal(t,Math.round(h.n)+(src.healBonus||0),B,src); }
 // on-hit status: the attack's own applications, which get the Mage root's +1 and per-hit bonuses (u.hitBonus is set while a hit resolves)
-const hitApply=(u,t,k,n,B)=>applyStatus(u,t,k,n+(u.hitBonus||0),B);
+const hitApply=(u,t,k,n,B)=>{ const m=n+(u.hitBonus||0); applyStatus(u,t,k,m,B); if(u.flags.mirror&&t.alive&&(k==='burn'||k==='chill')) applyStatus(u,t,k==='burn'?'chill':'burn',m,B); }; // mirror: the Elementalist copies the amount after the Mage's +1
 const addApply=(a,k,n)=>{ a.extraApply=Object.assign({},a.extraApply); a.extraApply[k]=(a.extraApply[k]||0)+n; };
 // removing status (cleanses, moves): Burn below the threshold ends Ablaze
 function loseStatus(u,k,n,B){ u.st[k]=Math.max(0,(u.st[k]||0)-n); if(k==='burn'&&u.st.burn<ABLAZE_AT) u.ablaze=false; }
@@ -96,7 +108,13 @@ function loseStatus(u,k,n,B){ u.st[k]=Math.max(0,(u.st[k]||0)-n); if(k==='burn'&
 function sureDodge(t,B){ if(t.sureDodge){ t.sureDodge=0; return true; } return t.sureDodgeUntil>B.t; }
 // an ally may take a hit meant for t (Interpose): the first onIntercept hook that returns a living unit wins
 function intercept(u,t,B){ for(const x of alliesOf(t,B)){ if(!x.alive||x===t) continue; for(const h of x.hooks){ if(h.onIntercept){ const r=h.onIntercept(x,t,u,B); if(r&&r.alive) return r; } } } return t; }
+// Priority: the duel; a forced target (Branding Blow, heroes only); the unit's one-off next target (Frostblade); its class rule (u.targetRule,
+// the last class to set one wins); then the old rules and random.
 function pickTarget(u,foes,a,B){
+  if(u.duel&&u.duel.alive&&foes.includes(u.duel)) return u.duel;
+  if(u.side==='p'&&B.brand&&B.brand.t.alive&&B.brand.until>B.t&&foes.includes(B.brand.t)) return B.brand.t;
+  if(u.nextTarget){ const t=u.nextTarget; u.nextTarget=null; if(t.alive&&foes.includes(t)) return t; }
+  if(u.targetRule){ const t=u.targetRule(u,foes,B); if(t&&t.alive&&foes.includes(t)) return t; }
   if(u.side==='e'&&B&&B.relics.includes('boots')&&!u.targetLowest&&!a.targetLowest&&!a.preferBack) return pick(foes); // Skirmisher's Boots: the back row is exposed
   if(a.preferBack){ const b=foes.filter(f=>f.row==='back'); if(b.length) return pick(b); }
   if(u.targetLowest||a.targetLowest) return foes.reduce((m,x)=>x.hp<m.hp?x:m);
@@ -105,21 +123,28 @@ function pickTarget(u,foes,a,B){
 // u.attacks counts this attack before onAttack fires, so "every 4th attack" is nthAttack(u,4) in any hook. Extra attacks (follow-ups, counters)
 // come through here too and advance the count; splash hits don't, they are plain dealDamage calls.
 const nthAttack=(u,n)=>u.attacks%n===0;
-function attack(u,B,forced){
+// opts: {mult, followUp, counter} for extra attacks (Windrunner, Monk), which go to `forced` and skip the unit's targeting rule.
+// a.hitTargetRow hits everyone in the chosen target's row; a.adjacent adds one of the target's neighbours.
+function attack(u,B,forced,opts){
   if(!u.alive||B.over) return;
+  opts=opts||{};
   u.attacks++; u.keepChill=null;
-  const a={mult:u.tmpMult||1,bonus:0,extraTargets:0,forceCrit:!!u.tmpCrit};
+  const a={mult:(u.tmpMult||1)*(opts.mult||1),bonus:0,extraTargets:0,forceCrit:!!u.tmpCrit,followUp:!!opts.followUp,counter:!!opts.counter};
   fire(u,'onAttack',a,B);
   const fz=Math.floor((u.st.chill||0)/FROZEN_AT); if(fz) a.mult/=Math.pow(2,fz); // Frozen: half damage per 20 Chill, consumed after the attack
-  let foes=aliveEnemies(u,B).filter(f=>!(f.veilUntil>B.t)); if(!foes.length) return;
+  let foes=aliveEnemies(u,B).filter(f=>!(f.veilUntil>B.t)); if(!foes.length&&!(forced&&forced.alive)) return;
   let targets;
   if(forced&&forced.alive) targets=[forced];
   else if(u.hitAll||a.hitAll){ targets=foes.slice(); if(u.hitAll) a.mult*=u.hitAllMult; }
   else if(a.hitRow){ targets=foes.filter(f=>f.row===a.hitRow); if(!targets.length) targets=[pickTarget(u,foes,a,B)]; }
-  else { targets=[pickTarget(u,foes,a,B)]; for(let i=0;i<a.extraTargets;i++){ const o=foes.filter(f=>!targets.includes(f)); if(o.length) targets.push(pick(o)); } }
+  else { const t0=pickTarget(u,foes,a,B); targets=a.hitTargetRow?foes.filter(f=>f.row===t0.row):[t0]; for(let i=0;i<a.extraTargets;i++){ const o=foes.filter(f=>!targets.includes(f)); if(o.length) targets.push(pick(o)); } }
+  if(a.adjacent){ const adj=adjacentOf(targets[0],B).filter(x=>!targets.includes(x)); if(adj.length) targets.push(pick(adj)); }
+  u.lastTarget=targets[0];
   targets.forEach(t=>hit(u,t,a,B));
-  // attacking sheds Chill: the Frozen amount, or half; a defender's Cold Iron (u.keepChill) turns the halving into +1 instead
-  if(fz) u.st.chill-=fz*FROZEN_AT; else if(u.keepChill&&u.keepChill.alive) applyStatus(u.keepChill,u,'chill',1,B); else if(u.st.chill>0&&CHILL_SHED) u.st.chill=Math.floor(u.st.chill/2);
+  // attacking sheds Chill: the Frozen amount, or half; a defender's keepChill ({by,gain}: Cold Iron, Glacier Warden) stops the halving and may add gain
+  if(fz){ u.st.chill-=fz*FROZEN_AT; B.units.forEach(x=>{ if(x.alive) fire(x,'onFrozenAttack',u,fz*FROZEN_AT,B); }); }
+  else if(u.keepChill){ if(u.keepChill.gain>0&&u.keepChill.by.alive) applyStatus(u.keepChill.by,u,'chill',u.keepChill.gain,B); }
+  else if(u.st.chill>0&&CHILL_SHED) u.st.chill=Math.floor(u.st.chill/2);
   fire(u,'onAttackEnd',targets[0],B);
 }
 // One hit. ac is this hit's copy of the attack: mult and bonus (before the multiplier), reduce (flat, after it), critBonus (chance), critExtra
@@ -129,22 +154,26 @@ function hit(u,t,a,B){
   if(!t.alive||!u.alive) return;
   t=intercept(u,t,B);
   const ac=Object.assign({mult:1,bonus:0},a);
-  if(sureDodge(t,B)||ac.forceDodge||streakRoll(t.dodge,t,'dodgeStreak')){ B.anim(u,t,{type:'miss'}); B.fx(t,'miss','miss'); B.logf(`${t.name} dodges ${u.name}.`); fire(t,'onDodge',u,B); return; }
+  fire(t,'onIncoming',u,ac,B); // before the dodge roll: ac.dodgeBonus
+  if(sureDodge(t,B)||ac.forceDodge||streakRoll(t.dodge+(ac.dodgeBonus||0)+buffSum(t,'dodge'),t,'dodgeStreak')){ B.anim(u,t,{type:'miss'}); B.fx(t,'miss','miss'); B.logf(`${t.name} dodges ${u.name}.`); fire(t,'onDodge',u,B); alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyDodge',t,u,B); }); return; }
   fire(u,'onTarget',t,ac,B);
   fire(t,'onDefend',u,ac,B);
   for(const x of B.units){ if(!x.alive) continue; if(x.side===u.side) fire(x,'onAllyTarget',u,t,ac,B); else fire(x,'onAllyDefend',t,u,ac,B); } // side-wide auras, the attacker and defender included
   if(t.st.chill>0&&u.side==='p'){ if(B.relics.includes('glacialcore')) ac.bonus+=chill5(t); if(B.flags.wintersgrip) ac.mult*=1.15; if(isFrozen(t)&&B.flags.abszero) ac.mult*=1.5; }
   let dmg=Math.max(1,Math.max(1,u.atk+ac.bonus)*ac.mult-(ac.reduce||0)), crit=false;
-  if(ac.forceCrit||streakRoll(u.crit+(ac.critBonus||0),u,'critStreak')){ dmg*=(u.flags.crit3?3:2)+(ac.critExtra||0); crit=true; }
+  if(ac.forceCrit||streakRoll(u.crit+(ac.critBonus||0)+buffSum(u,'crit'),u,'critStreak')){ dmg=dmg*((u.flags.crit3?3:2)+(ac.critExtra||0))+(ac.critFlat||0); crit=true; }
   u.lastCrit=crit;
   let dealt;
   u.lastExec=!!ac.execute;
   if(ac.execute) dealt=dealDamage(u,t,t.hp+t.shield,{type:'attack',ignoreArmor:true,ignoreShield:true,crit:true,exec:true},B);
   else dealt=dealDamage(u,t,dmg,{type:'attack',crit,ignoreArmor:!!u.flags.pierce},B);
+  u.lastDealt=dealt;
+  if(ac.divert&&ac.divert.t.alive&&dealt>0) dealDamage(ac.divert.src,ac.divert.t,Math.round(dealt*ac.divert.frac),{type:'attack',ignoreArmor:true},B); // Holy Shield: part of the blow lands on the cursed enemy
   u.inHit=true; u.hitBonus=(u.applyBonus||0)+(ac.applyBonus||0);
   for(const k in u.apply){ if(u.apply[k]>0&&t.alive) hitApply(u,t,k,u.apply[k],B); }
   if(ac.extraApply&&t.alive) for(const k in ac.extraApply) hitApply(u,t,k,ac.extraApply[k],B);
   if(crit&&t.alive) fireOnce(u,'onCrit',B,t);
+  if(crit) alliesOf(u,B).forEach(x=>{ if(x.alive) fire(x,'onAllyCrit',u,t,B); });
   if(crit&&t.alive){ if(u.flags.critPoison) hitApply(u,t,'poison',2,B); if(u.flags.critPoison3) hitApply(u,t,'poison',3,B); if(u.flags.critChill) hitApply(u,t,'chill',2,B); if(u.flags.critBurn) hitApply(u,t,'burn',3,B); }
   if(crit&&u.side==='p'&&B.relics.includes('luckycoin')) heal(u,3,B);
   if(u.side==='p'&&B.flags.sanguine&&dealt>0) heal(u,Math.ceil(dealt*0.2),B);
@@ -166,11 +195,12 @@ function applyStatus(src,t,k,n,B){
 }
 // raw stack gain plus the threshold bookkeeping; applyStatus wraps this with sources, multipliers and hooks
 function gainStatus(t,k,n,B){
-  const was=t.st[k]||0; t.st[k]=was+n;
-  if(k==='burn'&&!t.ablaze&&t.st.burn>=ABLAZE_AT){ t.ablaze=true; B.fx(t,'ABLAZE','burn'); B.logf(`${t.name} is ablaze.`); }
-  if(k==='chill'&&was<FROZEN_AT&&t.st.chill>=FROZEN_AT){ B.fx(t,'FROZEN','buff'); B.logf(`${t.name} is frozen.`); }
-  if(k==='poison'&&was<FESTER_AT&&t.st.poison>=FESTER_AT){ B.fx(t,'FESTERING','poison'); B.logf(`${t.name} is festering.`); }
+  const was=t.st[k]||0; t.st[k]=was+n; let kind=null;
+  if(k==='burn'&&!t.ablaze&&t.st.burn>=ABLAZE_AT){ t.ablaze=true; kind='ablaze'; B.fx(t,'ABLAZE','burn'); B.logf(`${t.name} is ablaze.`); }
+  if(k==='chill'&&was<FROZEN_AT&&t.st.chill>=FROZEN_AT){ kind='frozen'; B.fx(t,'FROZEN','buff'); B.logf(`${t.name} is frozen.`); }
+  if(k==='poison'&&was<FESTER_AT&&t.st.poison>=FESTER_AT){ kind='festering'; B.fx(t,'FESTERING','poison'); B.logf(`${t.name} is festering.`); }
   checkMarks(t,B);
+  if(kind) B.units.forEach(x=>{ if(x.alive) fire(x,'onAffliction',t,kind,B); }); // everyone hears it; hooks check the side
 }
 // two afflictions at once mark the unit for the rest of the fight (see core); Ruined carries all three marks
 function checkMarks(t,B){
@@ -184,9 +214,13 @@ function dealDamage(src,t,amount,info,B){
   if(t.kw.blighted&&(info.type==='poison'||info.type==='burn')) amount*=1.25;
   if(info.type==='attack'&&src) B.anim(src,t,info);
   if(t.side==='e'&&B.relics.includes('resonance')&&['poison','burn','chill'].filter(k=>t.st[k]>0).length>=3) amount*=1.3;
+  if(info.type==='attack'&&src&&t.duel&&t.duel.alive&&src!==t.duel) amount*=0.5; // a duellist takes half from anyone but the opponent
+  if(info.type==='burn'&&src&&src.flags.ashen&&t.shield>0) amount*=2; // Ashen Guard: Burn doubles against Shield
   let dmg=Math.max(0,Math.round(amount));
   if(!info.ignoreArmor&&dmg>0&&!isFestering(t)) dmg=Math.max(1,dmg-t.armor); // Festering: Armor counts as 0
-  if((!info.ignoreShield||t.flags.shieldAll)&&t.shield>0&&dmg>0){ const ab=Math.min(t.shield,dmg); t.shield-=ab; dmg-=ab; if(ab){ B.fx(t,`-${ab}`,'shield'); if(info.type==='attack'&&src&&src.alive){ fire(t,'onShieldAbsorb',src,ab,B); if(t.side==='p'&&B.relics.includes('mirrorward')) dealDamage(t,src,ab,{type:'thorns',ignoreArmor:true},B); } } }
+  if((!info.ignoreShield||t.flags.shieldAll)&&t.shield>0&&dmg>0){ const ab=Math.min(t.shield,dmg); t.shield-=ab; dmg-=ab; if(ab){ B.fx(t,`-${ab}`,'shield'); if(info.type==='attack'&&src&&src.alive){ fire(t,'onShieldAbsorb',src,ab,B); if(t.side==='p'&&B.relics.includes('mirrorward')) dealDamage(t,src,ab,{type:'thorns',ignoreArmor:true},B); }
+    if(info.type==='burn'&&src&&src.alive&&src.flags.ashen) addShield(src,ab,B);
+    if(t.shield<=0) alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyShieldBreak',t,src,B); }); } }
   t.hp-=dmg; t.stats.taken+=dmg; if(src) src.stats.dealt+=dmg;
   if((dmg>0||!info.ignoreShield)&&!info.silent) B.fx(t,info.exec?'EXECUTE':String(dmg),info.crit?'crit':info.type);
   if(info.type==='attack') B.logf(`${src?src.name:'?'} hits ${t.name} for ${dmg}${info.crit?' (crit)':''}.`);
@@ -208,7 +242,7 @@ function die(t,killer,B){
   if(t.alive) return;
   B.logf(`${t.name} falls.`);
   if(t.summon) B.vanish(t); // summons leave no card behind
-  if(killer&&killer.alive){ killer.stats.kills++; fire(killer,'onKill',t,B); }
+  if(killer&&killer.alive){ killer.stats.kills++; fire(killer,'onKill',t,B); alliesOf(killer,B).forEach(x=>{ if(x!==killer&&x.alive) fire(x,'onAllyKill',killer,t,B); }); }
   alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyDeath',t,B); });
   aliveEnemies(t,B).forEach(x=>fire(x,'onFoeDeath',t,B));
   if(t.side==='e'&&killer&&killer.side==='p'&&B.relics.includes('grimoire')) raiseSkeleton(B);
@@ -226,7 +260,9 @@ function tickStatus(u,B){
   tickPoison(u,B);
   if(!u.alive) return;
   if(st.burn>0){ const src=u.burnSrc; let m=(src&&src.side==='p'&&B.relics.includes('kindling'))?2:1; if(src&&src.flags.flask&&st.poison>0) m*=1.5; if(src&&src.side==='p'&&st.chill>0&&B.relics.includes('steam')) m*=2;
-    const d=dealDamage(src,u,st.burn*BURN_DMG*m,{type:'burn',ignoreArmor:true},B); st.burn=(src&&src.flags.slowBurn)?st.burn-1:Math.floor(st.burn/2); if(u.ablaze) st.burn=Math.max(ABLAZE_AT,st.burn); // Ablaze holds the floor
+    const d=dealDamage(src,u,st.burn*BURN_DMG*m,{type:'burn',ignoreArmor:true},B);
+    if(u.noBurnDecay) u.noBurnDecay=false; else st.burn=(src&&src.flags.slowBurn)?st.burn-1:Math.floor(st.burn/2); // Kiln skips one decay
+    if(u.ablaze) st.burn=Math.max(ABLAZE_AT,st.burn); // Ablaze holds the floor
     if(d>0&&src){ B.units.forEach(x=>{ if(x.side===src.side&&x.alive) fire(x,'onBurnDamage',u,d,B); }); if(src.side==='p'&&B.relics.includes('wildfire')){ const o=randomEnemy(src,B,u); if(o){ gainStatus(o,'burn',1,B); o.burnSrc=src; } } } }
 }
 function checkEnd(B){

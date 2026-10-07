@@ -332,7 +332,123 @@ const HOOKS={
   Protector:{hooks:{onAllyHit:(u,t,B)=>{ if(t!==u) addShield(u,2,B); }}},
   'Cold Iron':{hooks:{onDefend:(u,src,ac,B)=>{ if(u.shield>0&&src.side!==u.side) src.keepChill=u; }}},
   Interpose:{hooks:{onIntercept:(u,t,src,B)=>{ if(src.side===u.side) return null; t.interposedBy=t.interposedBy||{}; if(t.interposedBy[u.uid]) return null; t.interposedBy[u.uid]=1; B.fx(u,'INTERPOSE','buff'); return u; }}}},
+ // tier 3
+ Windrunner:{passive:{hooks:{onAllyCrit:(u,a,t,B)=>{ if(a===u||u.inFollow||!t.alive) return; if(a.row!==u.row&&!u.flags.gale) return; u.inFollow=true; try{ attack(u,B,t,{mult:u.flags.gale?1:0.5,followUp:true}); } finally{ u.inFollow=false; } }}}, // a follow-up never triggers another
+  'Piercing Hits':{flag:'pierce'},
+  'Cutting Wind':{hooks:{onAttack:(u,a,B)=>{ if(a.followUp) addApply(a,'chill',3); }}},
+  Firewind:{hooks:{onAttack:(u,a,B)=>{ if(a.followUp){ a.adjacent=true; addApply(a,'burn',2); } }}},
+  Gale:{flag:'gale'}},
+ Mercenary:{passive:{hooks:{onAttack:(u,a,B)=>{ a.mult*=1+0.2*(u.merKills||0); }, onKill:(u,t,B)=>{ u.merKills=(u.merKills||0)+1; }}},
+  'Shared Contract':{hooks:{onAllyKill:(u,killer,t,B)=>fire(u,'onKill',t,B)}},
+  Eager:{hooks:{onStart:(u,B)=>addBuff(u,'eager','spd',0.2,Infinity,B), onKill:(u,t,B)=>dropBuff(u,'eager')}},
+  'Second Wind':{hooks:{onKill:(u,t,B)=>abilityHeal(u,u,Math.round((u.maxHp-u.hp)/4),B)}},
+  'Mark for Death':{hooks:{onTarget:(u,t,ac,B)=>{ if(t.hp<t.maxHp/4) ac.mult*=1.5; }}}},
+ 'Blood mage':{passive:{hooks:{onHit:(u,t,d,B)=>{ if(d>0) abilityHeal(u,lowestAlly(u,B),d*(u.flags.sanguine&&isFestering(t)?2:1),B); },
+    onAttackEnd:(u,t,B)=>{ if(!(t&&u.flags.sanguine&&isFestering(t))) dealDamage(null,u,2,{type:'cost',ignoreArmor:true,ignoreShield:true},B); }}},
+  Sanguine:{flag:'sanguine'},
+  Hemorrhage:{hooks:{onTarget:(u,t,ac,B)=>{ ac.critBonus=(ac.critBonus||0)+0.1*afflictions(t); }, onCrit:(u,t,B)=>{ const d=u.lastDealt||0; if(d>0) alliesOf(u,B).forEach(x=>abilityHeal(u,x,d,B)); }}},
+  Stockpile:{hooks:{onStart:(u,B)=>{ u.reserve=Math.floor(bank(B)/2); }, onAttack:(u,a,B)=>{ if(u.reserve>=2){ u.reserve-=2; a.mult*=1.5; } }}},
+  'Crimson Tide':{hooks:{onHeal:(u,t,r,over,B)=>{ if(over>0&&u.lastTarget&&u.lastTarget.alive) dealDamage(u,u.lastTarget,over,{type:'bleed'},B); }}}},
+ 'Glacier Warden':{passive:{hooks:{onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack'&&src&&src.alive&&src.side!==u.side) applyStatus(u,src,'chill',2,B); },
+    onDefend:(u,src,ac,B)=>{ if(src.side!==u.side) src.keepChill={by:u,gain:(src.keepChill||{}).gain||0}; }}},
+  Avalanche:{hooks:{onAffliction:(u,t,kind,B)=>{ if(kind!=='frozen'||t.side===u.side) return; aliveEnemies(u,B).forEach(o=>{ if(o!==t) applyStatus(u,o,'chill',3,B); }); }}},
+  'Branding Blow':{hooks:{onAttack:(u,a,B)=>{ if(nthAttack(u,4)){ addApply(a,'burn',4); a.brand=true; } }, onTarget:(u,t,ac,B)=>{ if(ac.brand){ B.brand={t,until:B.t+2}; B.fx(t,'BRANDED','burn'); } }}},
+  Glacier:{hooks:{onDefend:(u,src,ac,B)=>{ ac.reduce=(ac.reduce||0)+Math.min(5,Math.floor((src.st.chill||0)/4)); }}},
+  'Rime Rot':{hooks:{onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack'&&src&&src.alive&&isFrozen(src)) applyStatus(u,src,'poison',5,B); }}}},
+ Frostblade:{passive:{hooks:{onCrit:(u,t,B)=>hitApply(u,t,'chill',4,B), onAffliction:(u,t,kind,B)=>{ if(kind==='frozen'&&t.side!==u.side) u.nextTarget=t; }}},
+  'Rime Edge':{hooks:{onTarget:(u,t,ac,B)=>{ if(isFrozen(t)) ac.critExtra=(ac.critExtra||0)+1; }}}, // ×3 instead of ×2
+  'Cold Blood':{hooks:{onTarget:(u,t,ac,B)=>{ if(t.kw.crippled) ac.mult*=2; }, onHit:(u,t,d,B)=>{ if(d>0) abilityHeal(u,u,Math.round(d/4),B); }}},
+  Whetstone:{hooks:{onCrit:(u,t,B)=>{ if(!u.whet){ u.whet=1; hitApply(u,t,'chill',20,B); } }}},
+  'Glacial Rush':{hooks:{onAttack:(u,a,B)=>{ let n=0; aliveEnemies(u,B).forEach(e=>{ if(isFrozen(e)) n+=0.1; else if(e.st.chill>0) n+=0.05; }); addBuff(u,'rush','spd',Math.min(0.3,n),Infinity,B); }}}},
+ Monk:{passive:{mod:{dodge:0.15},hooks:{onDodge:(u,src,B)=>{ if(src.alive&&!u.inCounter){ u.inCounter=true; try{ attack(u,B,src,{counter:true}); } finally{ u.inCounter=false; } } }}},
+  Flow:{hooks:{onIncoming:(u,src,ac,B)=>{ ac.dodgeBonus=(ac.dodgeBonus||0)+0.1*(u.flow||0); }, onDodge:(u,src,B)=>{ u.flow=0; abilityHeal(u,u,Math.round(u.maxHp/10),B); }, onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack') u.flow=(u.flow||0)+1; }}},
+  'Pressure Point':{hooks:{onAttack:(u,a,B)=>{ if(a.counter) a.forceCrit=true; }}},
+  Deflect:{hooks:{onDodge:(u,src,B)=>{ const adj=adjacentOf(src,B).filter(x=>x.alive); if(adj.length) splash(u,pick(adj),Math.round(src.atk/2),B); }}},
+  Composure:{hooks:{onStart:(u,B)=>{ u.composure=0.2; }, onIncoming:(u,src,ac,B)=>{ ac.dodgeBonus=(ac.dodgeBonus||0)+(u.composure||0); }, onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack') u.composure=Math.max(0,(u.composure||0)-0.05); }}}},
+ Merchant:{passive:{gold:{win:1},hooks:{onAllyTarget:(u,a,t,ac,B)=>{ ac.mult*=1+Math.min(u.flags.deeppockets?0.5:0.25,0.05*Math.floor(bank(B)/10)); }}},
+  'Hired Guards':{hooks:{onStart:(u,B)=>{ const n=Math.min(10,Math.floor(bank(B)/4)); if(n>0) alliesOf(u,B).forEach(x=>addShield(x,n,B)); }}},
+  'Fast Talker':{flag:'fasttalker'}, // read by the camp's reroll price
+  'Danger Money':{hooks:{onAllyTarget:(u,a,t,ac,B)=>{ if(t.def.elite||t.def.boss) ac.mult*=1.25; }}},
+  'Deep Pockets':{flag:'deeppockets',gold:{interest:1}}},
+ Flamecaller:{passive:{hooks:{onAttack:(u,a,B)=>{ if(nthAttack(u,4)) aliveEnemies(u,B).forEach(t=>applyStatus(u,t,'burn',3,B)); }}},
+  Stoked:{hooks:{onSecond:(u,B)=>stoked(u,B), onAttack:(u,a,B)=>stoked(u,B)}},
+  'Ashen Guard':{flag:'ashen'}, // dealDamage: Burn doubles against Shield and she gains what it absorbs
+  Cauterize:{hooks:{onAffliction:(u,t,kind,B)=>{ if(kind==='ablaze'&&t.side!==u.side) alliesOf(u,B).forEach(x=>abilityHeal(u,x,3,B)); }}},
+  Wildfire:{hooks:{onApply:(u,k,t,n,B)=>{ if(k!=='burn'||!isAblaze(t)||t.side===u.side) return; const h=Math.round(n/2); if(h>0) adjacentOf(t,B).forEach(o=>{ if(o.alive) applyStatus(u,o,'burn',h,B); }); }}}},
+ Plaguecaller:{passive:{hooks:{onFoeDeath:(u,t,B)=>{ const p=t.stAtDeath.poison||0, es=aliveEnemies(u,B); if(!p||!es.length) return; const low=es.reduce((m,x)=>x.hp<m.hp?x:m), g=u.flags.pandemic?1.25:1;
+    applyStatus(u,low,'poison',Math.round(p*g),B); if(u.flags.pyre&&t.stAtDeath.burn>0) applyStatus(u,low,'burn',Math.round(t.stAtDeath.burn*g),B); B.fx(low,'INHERITED','poison'); }}},
+  'Funeral Pyre':{flag:'pyre'},
+  'Grave Tonic':{hooks:{onStart:(u,B)=>{ u.targetRule=(u,foes)=>{ const f=foes.filter(isFestering); return f.length?pick(f):null; }; },
+    onFoeDeath:(u,t,B)=>{ const p=t.stAtDeath.poison||0; if(p<FESTER_AT) return; const al=alliesOf(u,B).filter(x=>x.alive), n=Math.floor(p/al.length); if(n>0) al.forEach(x=>abilityHeal(u,x,n,B)); }}},
+  Pandemic:{flag:'pandemic'},
+  'Pre-dosed':{hooks:{onStart:(u,B)=>{ const n=Math.min(6,Math.floor(bank(B)/3)), es=aliveEnemies(u,B); if(n>0&&es.length) applyStatus(u,es.reduce((m,x)=>x.hp<m.hp?x:m),'poison',n,B); }}}},
+ Elementalist:{passive:{flag:'mirror'}, // hitApply copies each on-hit Burn as Chill and vice versa
+  'Flash Point':{hooks:{onAffliction:(u,t,kind,B)=>{ if(t.side===u.side) return; if(kind==='frozen') applyStatus(u,t,'burn',5,B); if(kind==='ablaze') applyStatus(u,t,'chill',10,B); }}},
+  'Give and Take':{hooks:{onCrit:(u,t,B)=>aliveEnemies(u,B).forEach(e=>applyStatus(u,e,'burn',2,B)), onDodge:(u,src,B)=>applyStatus(u,src,'chill',2,B)}},
+  Conduction:{hooks:{onApply:(u,k,t,n,B)=>{ if(k!=='burn'&&k!=='chill') return; u.conduct=(u.conduct||0)+n; const s=Math.floor(u.conduct/5); if(s>0){ u.conduct-=s*5; addShield(u,s,B); } }}},
+  'Triple Point':{hooks:{onTarget:(u,t,ac,B)=>{ if(t.st.burn>0&&t.st.chill>0) addApply(ac,'poison',2); }}}},
+ Cutthroat:{passive:{hooks:{onStart:(u,B)=>{ u.veilUntil=B.t+2; }, onKill:(u,t,B)=>{ u.veilUntil=B.t+2; B.fx(u,'VANISH','buff'); }}},
+  Ambush:{hooks:{onAttack:(u,a,B)=>{ if(u.veilUntil>B.t) a.forceCrit=true; }}},
+  'Slip Away':{hooks:{onAffliction:(u,t,kind,B)=>{ if(t.side!==u.side&&(kind==='frozen'||kind==='festering')){ u.veilUntil=B.t+2; B.fx(u,'VANISH','buff'); } }, onTarget:(u,t,ac,B)=>{ if(t.kw.crippled) ac.mult*=1.5; }}},
+  'Caustic Flare':{hooks:{onCrit:(u,t,B)=>{ const n=Math.floor((t.st.poison||0)/4); if(n>0) hitApply(u,t,'burn',n,B); }}},
+  'Bounty Blade':{hooks:{onTarget:(u,t,ac,B)=>{ ac.critFlat=(ac.critFlat||0)+Math.floor((t.st.poison||0)/2); }}}},
+ Cleric:{passive:{hooks:{onAllyShieldBreak:(u,t,src,B)=>abilityHeal(u,t,5,B), onHeal:(u,t,r,over,B)=>{ if(over>0) addShield(t,over,B); }}},
+  Consecrate:{hooks:{onStart:(u,B)=>alliesOf(u,B).forEach(x=>addShield(x,Math.floor(x.maxHp/10),B))}},
+  Rally:{hooks:{onHeal:(u,t,r,over,B)=>{ if(t!==u&&r>0) addBuff(t,'rally','spd',0.15,3,B,true); }}}, // lands = healed something
+  'Holy Shield':{hooks:{onAttackEnd:(u,t,B)=>{ if(t&&t.alive){ u.cursed=t; B.fx(t,'CURSED','buff'); } },
+    onAllyDefend:(u,t,src,ac,B)=>{ const c=u.cursed; if(c&&c.alive&&!ac.divert){ ac.mult*=0.8; ac.divert={t:c,frac:0.25,src:u}; u.cursed=null; } }}}, // a fifth of the blow, as a quarter of the reduced hit
+  'Holy Fire':{hooks:{onAllyShieldBreak:(u,t,src,B)=>{ if(src&&src.alive&&src.side!==u.side) applyStatus(u,src,'burn',3,B); }}}},
+ Berserker:{passive:{hooks:{onHit:(u,t,d,B)=>rage(u,B), onAttack:(u,a,B)=>{ if((u.rage||0)>=10) addApply(a,'burn',u.trance?4:2); }}},
+  Bloodrush:{hooks:{onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack') rage(u,B); }}},
+  Reckless:{hooks:{onTarget:(u,t,ac,B)=>{ ac.critBonus=(ac.critBonus||0)+Math.min(0.2,0.02*(u.rage||0))*(u.trance?2:1); }}},
+  'Battle Trance':{hooks:{onSecond:(u,B)=>trance(u,B), onDamaged:(u,src,d,info,B)=>trance(u,B), onHit:(u,t,d,B)=>{ if(u.trance&&d>0) abilityHeal(u,u,Math.round(d/5),B); }}},
+  Unstoppable:{hooks:{onDefend:(u,src,ac,B)=>{ if((u.rage||0)>=10) ac.mult*=0.8; }}}},
+ Shieldmaiden:{passive:{hooks:{onTarget:(u,t,ac,B)=>{ ac.bonus+=Math.floor(u.shield/4)*(ac.slam?2:1); }}},
+  'Spiked Shield':{hooks:{onShieldAbsorb:(u,src,ab,B)=>{ const n=Math.round(ab/4); if(n>0) dealDamage(u,src,n,{type:'thorns',ignoreArmor:true},B); }}},
+  'Frost Rim':{hooks:{onShieldAbsorb:(u,src,ab,B)=>{ if(u.shield<=0) applyStatus(u,src,'chill',5,B); }}},
+  Phalanx:{hooks:{onShieldGain:(u,n,B)=>adjacentOf(u,B).forEach(x=>addShield(x,1,B))}}, // onShieldGain can't re-enter, so neighbours don't echo
+  'Shield Slam':{hooks:{onAttack:(u,a,B)=>{ if(nthAttack(u,4)){ a.slam=true; a.hitTargetRow=true; } }}}},
+ 'Plague doctor':{passive:{hooks:{onSecond:(u,B)=>{ let n=0; aliveEnemies(u,B).forEach(e=>{ if(isFestering(e)) n+=2; else if(e.st.poison>0) n+=1; }); if(n>0) abilityHeal(u,lowestAlly(u,B),n,B); }}},
+  Quarantine:{flag:'quarantine'}, // heal(): Poisoned enemies get half
+  Rounds:{hooks:{onTarget:(u,t,ac,B)=>{ if(u.roundsAt===u.attacks) return; u.roundsAt=u.attacks; const tot=x=>STATUS_KEYS.reduce((s,k)=>s+(x.st[k]||0),0), al=alliesOf(u,B).filter(x=>x.alive&&tot(x)>0); if(!al.length) return;
+    const a=al.reduce((m,x)=>tot(x)>tot(m)?x:m); STATUS_KEYS.forEach(k=>{ const m=a.st[k]||0; if(m>0){ loseStatus(a,k,m,B); applyStatus(u,t,k,m,B); } }); }}},
+  Miasma:{hooks:{onSecond:(u,B)=>{ if(u.secs%4===0) aliveEnemies(u,B).forEach(e=>applyStatus(u,e,'poison',1,B)); }}},
+  Sickbed:{hooks:{onAllyDefend:(u,t,src,ac,B)=>{ if(isFestering(src)) ac.mult*=0.8; }}}},
+ Duelist:{passive:{hooks:{onStart:(u,B)=>startDuel(u,opposite(u,B),B), onFoeDeath:(u,t,B)=>{ if(t===u.duel&&!u.duelWon){ u.duelWon=true; B.logf(`${u.name} wins the duel.`); fire(u,'onDuelWon',t,B); } }}},
+  Footwork:{hooks:{onIncoming:(u,src,ac,B)=>{ if(src===u.duel) ac.dodgeBonus=(ac.dodgeBonus||0)+0.25; }, onDodge:(u,src,B)=>{ if(src===u.duel) u.footwork=Math.min(0.3,(u.footwork||0)+0.05); }, onTarget:(u,t,ac,B)=>{ ac.critBonus=(ac.critBonus||0)+(u.footwork||0); }}},
+  Parry:{hooks:{onHit:(u,t,d,B)=>addShield(u,2,B), onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack'&&(u.parry||0)<10){ u.parry=(u.parry||0)+2; u.atk+=2; } }}},
+  Wager:{hooks:{onStart:(u,B)=>{ const s=Math.min(5,bank(B)); if(s>0){ u.stake=s; B.bounty-=s; B.logf(`${u.name} stakes ${s} gold.`); } }, onDuelWon:(u,t,B)=>{ if(u.stake&&!u.paid){ u.paid=1; B.bounty+=u.stake*2; B.fx(u,`+${u.stake*2} gold`,'buff'); } }}},
+  'Finishing Lunge':{hooks:{onTarget:(u,t,ac,B)=>{ if((t===u.duel||t.def.elite||t.def.boss)&&t.hp<t.maxHp/4) ac.forceCrit=true; }}}},
+ Apothecary:{passive:{hooks:{onStart:(u,B)=>{ const al=alliesOf(u,B).filter(x=>x.alive&&x!==u).sort((a,b)=>effSpd(b)-effSpd(a)), n=2+(u.flags.reagents?1+Math.min(5,Math.floor(bank(B)/10)):0);
+    const give=x=>{ x.elixir=u; x.apply.poison=(x.apply.poison||0)+n; B.fx(x,'ELIXIR','poison'); if(u.flags.oil){ x.crit+=0.15; x.spd*=1.25; } if(u.flags.reagents) x.hooks.push({onHit:(x,t,d,B)=>{ if(isFestering(t)) abilityHeal(u,x,2,B); }}); };
+    if(al.length) give(al[0]); if(u.flags.seconddose) give(u); }}},
+  'Second Dose':{flag:'seconddose'},
+  'Whetting Oil':{flag:'oil'},
+  Concentrate:{hooks:{onTarget:(u,t,ac,B)=>{ if(t.st.poison>0) addApply(ac,'poison',3); }}},
+  'Rare Reagents':{flag:'reagents'}},
+ Bard:{passive:{hooks:{onStart:(u,B)=>alliesOf(u,B).forEach(x=>addBuff(x,'bard'+u.uid,'spd',0.1,Infinity,B))}},
+  Overture:{hooks:{onStart:(u,B)=>alliesOf(u,B).forEach(x=>addBuff(x,'overture','spd',0.25,3,B)), onFoeDeath:(u,t,B)=>{ if(B.t<3){ B.bounty+=2; B.fx(t,'+2 gold','buff'); } }}},
+  'Two Step':{hooks:{onAllyCrit:(u,a,t,B)=>alliesOf(u,B).forEach(x=>addBuff(x,'twostep-d','dodge',0.15,2,B)), onAllyDodge:(u,a,src,B)=>alliesOf(u,B).forEach(x=>addBuff(x,'twostep-c','crit',0.15,2,B))}},
+  Crescendo:{hooks:{onFoeDeath:(u,t,B)=>alliesOf(u,B).forEach(x=>addBuff(x,'crescendo','spd',0.2,3,B))}},
+  Ballad:{hooks:{onAllyCrit:(u,a,t,B)=>abilityHeal(u,a,2,B), onAllyDodge:(u,a,src,B)=>abilityHeal(u,a,2,B)}}},
+ Rimecaller:{passive:{hooks:{onStart:(u,B)=>{ u.targetRule=(u,foes)=>{ const m=foes.reduce((m,x)=>(x.st.chill||0)>(m.st.chill||0)?x:m); return (m.st.chill||0)>0?m:null; }; }, onAttack:(u,a,B)=>{ if(nthAttack(u,4)) addApply(a,'chill',5); }}},
+  Frostguard:{hooks:{onAffliction:(u,t,kind,B)=>{ if(kind==='frozen'&&t.side!==u.side) addShield(u,6,B); }}},
+  Shatter:{hooks:{onHit:(u,t,d,B)=>{ if(d>0&&wasFrozen(t)) adjacentOf(t,B).forEach(o=>{ if(o.alive) splash(u,o,Math.round(d/2),B); }); }}},
+  'Deep Winter':{hooks:{onFrozenAttack:(u,att,n,B)=>{ if(att.side===u.side) return; const o=aliveEnemies(u,B).filter(x=>x!==att).sort((a,b)=>(b.st.chill||0)-(a.st.chill||0))[0]; if(o) applyStatus(u,o,'chill',Math.floor(n/2),B); }}},
+  Splinter:{hooks:{onTarget:(u,t,ac,B)=>{ u.splinter=t.st.chill>0; }, onHit:(u,t,d,B)=>{ if(!u.splinter) return; const n=u.lastCrit?2:1; aliveEnemies(u,B).forEach(o=>{ if(o!==t) applyStatus(u,o,'chill',n,B); }); }}}},
+ Hearthguard:{passive:{hooks:{onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack'&&src&&src.alive&&src.side!==u.side) applyStatus(u,src,'burn',2,B); },
+    onBurnDamage:(u,t,d,B)=>{ if(u.hgSec!==u.secs){ u.hgSec=u.secs; u.hgN=0; } if(u.hgN<5){ u.hgN++; addShield(u,1,B); } }}},
+  Hearthfire:{hooks:{onShieldAbsorb:(u,src,ab,B)=>{ if(u.shield<=0) applyStatus(u,src,'burn',5,B); }}},
+  'Hot Feet':{hooks:{onIncoming:(u,src,ac,B)=>{ ac.dodgeBonus=(ac.dodgeBonus||0)+Math.min(0.3,0.05*aliveEnemies(u,B).filter(e=>e.st.burn>0).length); }}},
+  Kiln:{hooks:{onHit:(u,t,d,B)=>{ t.noBurnDecay=true; }}},
+  Ashes:{hooks:{onShieldAbsorb:(u,src,ab,B)=>{ if(u.shield<=0){ const n=aliveEnemies(u,B).filter(e=>e.st.burn>0).length; if(n) abilityHeal(u,u,n,B); } }}}},
 };
+// Berserker's stacks: +5% attack speed each (10 at most), doubled in Battle Trance below a quarter HP
+function rage(u,B){ u.rage=Math.min(10,(u.rage||0)+1); rageBuff(u,B); }
+function rageBuff(u,B){ addBuff(u,'rage','spd',0.05*(u.rage||0)*(u.trance?2:1),Infinity,B); }
+function trance(u,B){ const t=u.hp<u.maxHp/4; if(t!==!!u.trance){ u.trance=t; rageBuff(u,B); if(t) B.fx(u,'TRANCE','buff'); } }
+// Flamecaller's Stoked: +25% attack speed while every enemy burns, +50% while every enemy is Ablaze
+function stoked(u,B){ const es=aliveEnemies(u,B); let n=0; if(es.length&&es.every(e=>e.st.burn>0)) n=es.every(isAblaze)?0.5:0.25; addBuff(u,'stoked','spd',n,Infinity,B); }
 // ---------- Classes (the hero tree) ----------
 // CLASS_DATA is the gem recipe bench's snapshot (design/gem-recipe-bench/recipes.json), inlined by tools/build.js. Roots (Mage, Warrior,
 // Rogue) have no essences and are never hired; starters have one essence, tier 3 two, capstones three or four. A hero is {id: its current
@@ -451,7 +567,7 @@ function computeStats(h,relics){
 
 // ---------- Battle ----------
 function baseUnit(def,side,row,s,B){
-  return {uid:B.uid++,def,name:def.name,side,row,alive:true,hp:s.maxHp,maxHp:s.maxHp,maxHp0:s.maxHp,atk:s.atk,spd:s.spd,armor:s.armor,crit:s.crit||0,dodge:s.dodge||0,
+  return {uid:B.uid++,B,def,name:def.name,side,row,alive:true,hp:s.maxHp,maxHp:s.maxHp,maxHp0:s.maxHp,atk:s.atk,spd:s.spd,armor:s.armor,crit:s.crit||0,dodge:s.dodge||0,
     shield:0,st:{},kw:{},ablaze:false,critStreak:0,dodgeStreak:0,flags:{},tmpMult:1,timer:0.35+Math.random()*0.3,stTimer:Math.random()*0.2,secs:0,attacks:0,chain:0,L:1,apply:{},hooks:[],statusMult:1,targetLowest:false,hitAll:false,hitAllMult:1,
     stats:{dealt:0,taken:0,healed:0,kills:0}};
 }
@@ -477,8 +593,20 @@ function createBattle(heroes,enc,relics,gold){
 const rowRoom=(B,side,row)=>B.units.filter(x=>x.side===side&&x.alive&&x.row===row).length<ROW_MAX;
 function moveUnit(u,row,B){ if(u.row===row||!rowRoom(B,u.side,row)) return false; u.row=row; B.move(u); fire(u,'onMove',B); return true; }
 // neighbours in the same row (card order), for "adjacent" effects
-function adjacentOf(t,B){ const row=B.units.filter(x=>x.side===t.side&&x.alive&&x.row===t.row); const i=row.indexOf(t); return [row[i-1],row[i+1]].filter(Boolean); }
+function adjacentOf(t,B){ const row=B.units.filter(x=>x.side===t.side&&x.row===t.row&&(x.alive||x===t)); const i=row.indexOf(t); return [row[i-1],row[i+1]].filter(Boolean); } // works for a unit that just died
+const wasFrozen=t=>t.alive?isFrozen(t):(t.stAtDeath&&t.stAtDeath.chill||0)>=FROZEN_AT, wasChilled=t=>(t.alive?t.st.chill:t.stAtDeath&&t.stAtDeath.chill)>0;
 const bank=B=>B.gold+B.bounty;
+// Timed buffs: {tag,key,n,until}. key is 'spd' (attack speed, +n as a fraction), 'dodge' or 'crit' (+n chance). A tag given again refreshes
+// unless stack is set; dur Infinity lasts until dropBuff. Expired buffs are pruned when read.
+function addBuff(u,tag,key,n,dur,B,stack){ u.buffs=u.buffs||[]; const until=B.t+dur; if(!stack){ const b=u.buffs.find(b=>b.tag===tag); if(b){ b.n=n; b.until=until; return; } } u.buffs.push({tag,key,n,until}); }
+function buffSum(u,key){ if(!u.buffs) return 0; const t=u.B.t; let s=0; for(let i=u.buffs.length-1;i>=0;i--){ const b=u.buffs[i]; if(b.until<=t){ u.buffs.splice(i,1); continue; } if(b.key===key) s+=b.n; } return s; }
+function dropBuff(u,tag){ if(u.buffs) u.buffs=u.buffs.filter(b=>b.tag!==tag); }
+// a plain hit from a skill (Shatter, Shield Slam, Deflect): no crit, no on-hit status, no attack counters
+const splash=(u,t,n,B)=>dealDamage(u,t,n,{type:'attack',splash:true},B);
+// the Duelist's opposite number: the enemy in his row at his position, else one from that row, else anyone
+function opposite(u,B){ const mine=B.units.filter(x=>x.side===u.side&&x.alive&&x.row===u.row), theirs=B.units.filter(x=>x.side!==u.side&&x.alive&&x.row===u.row); const i=mine.indexOf(u);
+  return theirs[i]||(theirs.length?pick(theirs):null)||randomEnemy(u,B); }
+function startDuel(u,t,B){ if(!t||!t.alive) return false; u.duel=t; t.duel=u; B.fx(u,'DUEL','buff'); B.fx(t,'DUEL','buff'); B.logf(`${u.name} challenges ${t.name} to a duel.`); return true; }
 // Necromancer's Grimoire: slain enemies rise on the hero side (half an enemy Skeleton of this floor, no relic hooks)
 function raiseSkeleton(B){
   if(B.over) return;
@@ -531,15 +659,15 @@ function lowestAlly(u,B){ const a=alliesOf(u,B).filter(x=>x.alive); if(!a.length
 function randomEnemy(u,B,not){ const f=aliveEnemies(u,B).filter(x=>x!==not); return f.length?pick(f):null; }
 // hard caps so stacking buffs can never run away: attack speed at 3 attacks/s, kill-chains at one per possible kill (crit and dodge use streaks instead, see core)
 const SPD_CAP=3, KILL_CHAIN_MAX=ROW_MAX*2;
-const effSpd=u=>Math.min(SPD_CAP,u.spd*(1-CHILL_SLOW*Math.min(CHILL_SLOW_MAX,u.st.chill||0))*(u.kw.crippled?0.75:1));
+const effSpd=u=>Math.min(SPD_CAP,u.spd*(1+buffSum(u,'spd'))*(1-CHILL_SLOW*Math.min(CHILL_SLOW_MAX,u.st.chill||0))*(u.kw.crippled?0.75:1));
 function addShield(u,n,B,echo){ if(!u||!u.alive||n<=0) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.flags.shieldMult2) n*=2; u.shield+=n; B.fx(u,`+${n}`,'shield'); fireOnce(u,'onShieldGain',B,n);
   // Twin Aegis: copy to another random hero (the copy never copies itself)
   if(!echo&&u.hero&&B.relics.includes('twinaegis')){ const o=B.units.filter(x=>x!==u&&x.hero&&x.alive); if(o.length) addShield(pick(o),n,B,true); } }
-function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; B.fx(u,`+${r}`,'heal'); } if(n-r>0&&u.hero&&B.relics.includes('chalice')) addShield(u,Math.round(n-r),B); if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
+function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.side==='e'&&u.st.poison>0&&B.flags.quarantine) n=Math.floor(n/2); const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; B.fx(u,`+${r}`,'heal'); } if(n-r>0&&u.hero&&B.relics.includes('chalice')) addShield(u,Math.round(n-r),B); if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
 // a heal performed by a class ability: onHealing hooks scale it (Healer's bonuses), then the Mage root's +1; gem regeneration and lifesteal skip this
 function abilityHeal(src,t,n,B){ if(!t||!t.alive||n<=0) return; const h={n}; fire(src,'onHealing',t,h,B); heal(t,Math.round(h.n)+(src.healBonus||0),B,src); }
 // on-hit status: the attack's own applications, which get the Mage root's +1 and per-hit bonuses (u.hitBonus is set while a hit resolves)
-const hitApply=(u,t,k,n,B)=>applyStatus(u,t,k,n+(u.hitBonus||0),B);
+const hitApply=(u,t,k,n,B)=>{ const m=n+(u.hitBonus||0); applyStatus(u,t,k,m,B); if(u.flags.mirror&&t.alive&&(k==='burn'||k==='chill')) applyStatus(u,t,k==='burn'?'chill':'burn',m,B); }; // mirror: the Elementalist copies the amount after the Mage's +1
 const addApply=(a,k,n)=>{ a.extraApply=Object.assign({},a.extraApply); a.extraApply[k]=(a.extraApply[k]||0)+n; };
 // removing status (cleanses, moves): Burn below the threshold ends Ablaze
 function loseStatus(u,k,n,B){ u.st[k]=Math.max(0,(u.st[k]||0)-n); if(k==='burn'&&u.st.burn<ABLAZE_AT) u.ablaze=false; }
@@ -547,7 +675,13 @@ function loseStatus(u,k,n,B){ u.st[k]=Math.max(0,(u.st[k]||0)-n); if(k==='burn'&
 function sureDodge(t,B){ if(t.sureDodge){ t.sureDodge=0; return true; } return t.sureDodgeUntil>B.t; }
 // an ally may take a hit meant for t (Interpose): the first onIntercept hook that returns a living unit wins
 function intercept(u,t,B){ for(const x of alliesOf(t,B)){ if(!x.alive||x===t) continue; for(const h of x.hooks){ if(h.onIntercept){ const r=h.onIntercept(x,t,u,B); if(r&&r.alive) return r; } } } return t; }
+// Priority: the duel; a forced target (Branding Blow, heroes only); the unit's one-off next target (Frostblade); its class rule (u.targetRule,
+// the last class to set one wins); then the old rules and random.
 function pickTarget(u,foes,a,B){
+  if(u.duel&&u.duel.alive&&foes.includes(u.duel)) return u.duel;
+  if(u.side==='p'&&B.brand&&B.brand.t.alive&&B.brand.until>B.t&&foes.includes(B.brand.t)) return B.brand.t;
+  if(u.nextTarget){ const t=u.nextTarget; u.nextTarget=null; if(t.alive&&foes.includes(t)) return t; }
+  if(u.targetRule){ const t=u.targetRule(u,foes,B); if(t&&t.alive&&foes.includes(t)) return t; }
   if(u.side==='e'&&B&&B.relics.includes('boots')&&!u.targetLowest&&!a.targetLowest&&!a.preferBack) return pick(foes); // Skirmisher's Boots: the back row is exposed
   if(a.preferBack){ const b=foes.filter(f=>f.row==='back'); if(b.length) return pick(b); }
   if(u.targetLowest||a.targetLowest) return foes.reduce((m,x)=>x.hp<m.hp?x:m);
@@ -556,21 +690,28 @@ function pickTarget(u,foes,a,B){
 // u.attacks counts this attack before onAttack fires, so "every 4th attack" is nthAttack(u,4) in any hook. Extra attacks (follow-ups, counters)
 // come through here too and advance the count; splash hits don't, they are plain dealDamage calls.
 const nthAttack=(u,n)=>u.attacks%n===0;
-function attack(u,B,forced){
+// opts: {mult, followUp, counter} for extra attacks (Windrunner, Monk), which go to `forced` and skip the unit's targeting rule.
+// a.hitTargetRow hits everyone in the chosen target's row; a.adjacent adds one of the target's neighbours.
+function attack(u,B,forced,opts){
   if(!u.alive||B.over) return;
+  opts=opts||{};
   u.attacks++; u.keepChill=null;
-  const a={mult:u.tmpMult||1,bonus:0,extraTargets:0,forceCrit:!!u.tmpCrit};
+  const a={mult:(u.tmpMult||1)*(opts.mult||1),bonus:0,extraTargets:0,forceCrit:!!u.tmpCrit,followUp:!!opts.followUp,counter:!!opts.counter};
   fire(u,'onAttack',a,B);
   const fz=Math.floor((u.st.chill||0)/FROZEN_AT); if(fz) a.mult/=Math.pow(2,fz); // Frozen: half damage per 20 Chill, consumed after the attack
-  let foes=aliveEnemies(u,B).filter(f=>!(f.veilUntil>B.t)); if(!foes.length) return;
+  let foes=aliveEnemies(u,B).filter(f=>!(f.veilUntil>B.t)); if(!foes.length&&!(forced&&forced.alive)) return;
   let targets;
   if(forced&&forced.alive) targets=[forced];
   else if(u.hitAll||a.hitAll){ targets=foes.slice(); if(u.hitAll) a.mult*=u.hitAllMult; }
   else if(a.hitRow){ targets=foes.filter(f=>f.row===a.hitRow); if(!targets.length) targets=[pickTarget(u,foes,a,B)]; }
-  else { targets=[pickTarget(u,foes,a,B)]; for(let i=0;i<a.extraTargets;i++){ const o=foes.filter(f=>!targets.includes(f)); if(o.length) targets.push(pick(o)); } }
+  else { const t0=pickTarget(u,foes,a,B); targets=a.hitTargetRow?foes.filter(f=>f.row===t0.row):[t0]; for(let i=0;i<a.extraTargets;i++){ const o=foes.filter(f=>!targets.includes(f)); if(o.length) targets.push(pick(o)); } }
+  if(a.adjacent){ const adj=adjacentOf(targets[0],B).filter(x=>!targets.includes(x)); if(adj.length) targets.push(pick(adj)); }
+  u.lastTarget=targets[0];
   targets.forEach(t=>hit(u,t,a,B));
-  // attacking sheds Chill: the Frozen amount, or half; a defender's Cold Iron (u.keepChill) turns the halving into +1 instead
-  if(fz) u.st.chill-=fz*FROZEN_AT; else if(u.keepChill&&u.keepChill.alive) applyStatus(u.keepChill,u,'chill',1,B); else if(u.st.chill>0&&CHILL_SHED) u.st.chill=Math.floor(u.st.chill/2);
+  // attacking sheds Chill: the Frozen amount, or half; a defender's keepChill ({by,gain}: Cold Iron, Glacier Warden) stops the halving and may add gain
+  if(fz){ u.st.chill-=fz*FROZEN_AT; B.units.forEach(x=>{ if(x.alive) fire(x,'onFrozenAttack',u,fz*FROZEN_AT,B); }); }
+  else if(u.keepChill){ if(u.keepChill.gain>0&&u.keepChill.by.alive) applyStatus(u.keepChill.by,u,'chill',u.keepChill.gain,B); }
+  else if(u.st.chill>0&&CHILL_SHED) u.st.chill=Math.floor(u.st.chill/2);
   fire(u,'onAttackEnd',targets[0],B);
 }
 // One hit. ac is this hit's copy of the attack: mult and bonus (before the multiplier), reduce (flat, after it), critBonus (chance), critExtra
@@ -580,22 +721,26 @@ function hit(u,t,a,B){
   if(!t.alive||!u.alive) return;
   t=intercept(u,t,B);
   const ac=Object.assign({mult:1,bonus:0},a);
-  if(sureDodge(t,B)||ac.forceDodge||streakRoll(t.dodge,t,'dodgeStreak')){ B.anim(u,t,{type:'miss'}); B.fx(t,'miss','miss'); B.logf(`${t.name} dodges ${u.name}.`); fire(t,'onDodge',u,B); return; }
+  fire(t,'onIncoming',u,ac,B); // before the dodge roll: ac.dodgeBonus
+  if(sureDodge(t,B)||ac.forceDodge||streakRoll(t.dodge+(ac.dodgeBonus||0)+buffSum(t,'dodge'),t,'dodgeStreak')){ B.anim(u,t,{type:'miss'}); B.fx(t,'miss','miss'); B.logf(`${t.name} dodges ${u.name}.`); fire(t,'onDodge',u,B); alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyDodge',t,u,B); }); return; }
   fire(u,'onTarget',t,ac,B);
   fire(t,'onDefend',u,ac,B);
   for(const x of B.units){ if(!x.alive) continue; if(x.side===u.side) fire(x,'onAllyTarget',u,t,ac,B); else fire(x,'onAllyDefend',t,u,ac,B); } // side-wide auras, the attacker and defender included
   if(t.st.chill>0&&u.side==='p'){ if(B.relics.includes('glacialcore')) ac.bonus+=chill5(t); if(B.flags.wintersgrip) ac.mult*=1.15; if(isFrozen(t)&&B.flags.abszero) ac.mult*=1.5; }
   let dmg=Math.max(1,Math.max(1,u.atk+ac.bonus)*ac.mult-(ac.reduce||0)), crit=false;
-  if(ac.forceCrit||streakRoll(u.crit+(ac.critBonus||0),u,'critStreak')){ dmg*=(u.flags.crit3?3:2)+(ac.critExtra||0); crit=true; }
+  if(ac.forceCrit||streakRoll(u.crit+(ac.critBonus||0)+buffSum(u,'crit'),u,'critStreak')){ dmg=dmg*((u.flags.crit3?3:2)+(ac.critExtra||0))+(ac.critFlat||0); crit=true; }
   u.lastCrit=crit;
   let dealt;
   u.lastExec=!!ac.execute;
   if(ac.execute) dealt=dealDamage(u,t,t.hp+t.shield,{type:'attack',ignoreArmor:true,ignoreShield:true,crit:true,exec:true},B);
   else dealt=dealDamage(u,t,dmg,{type:'attack',crit,ignoreArmor:!!u.flags.pierce},B);
+  u.lastDealt=dealt;
+  if(ac.divert&&ac.divert.t.alive&&dealt>0) dealDamage(ac.divert.src,ac.divert.t,Math.round(dealt*ac.divert.frac),{type:'attack',ignoreArmor:true},B); // Holy Shield: part of the blow lands on the cursed enemy
   u.inHit=true; u.hitBonus=(u.applyBonus||0)+(ac.applyBonus||0);
   for(const k in u.apply){ if(u.apply[k]>0&&t.alive) hitApply(u,t,k,u.apply[k],B); }
   if(ac.extraApply&&t.alive) for(const k in ac.extraApply) hitApply(u,t,k,ac.extraApply[k],B);
   if(crit&&t.alive) fireOnce(u,'onCrit',B,t);
+  if(crit) alliesOf(u,B).forEach(x=>{ if(x.alive) fire(x,'onAllyCrit',u,t,B); });
   if(crit&&t.alive){ if(u.flags.critPoison) hitApply(u,t,'poison',2,B); if(u.flags.critPoison3) hitApply(u,t,'poison',3,B); if(u.flags.critChill) hitApply(u,t,'chill',2,B); if(u.flags.critBurn) hitApply(u,t,'burn',3,B); }
   if(crit&&u.side==='p'&&B.relics.includes('luckycoin')) heal(u,3,B);
   if(u.side==='p'&&B.flags.sanguine&&dealt>0) heal(u,Math.ceil(dealt*0.2),B);
@@ -617,11 +762,12 @@ function applyStatus(src,t,k,n,B){
 }
 // raw stack gain plus the threshold bookkeeping; applyStatus wraps this with sources, multipliers and hooks
 function gainStatus(t,k,n,B){
-  const was=t.st[k]||0; t.st[k]=was+n;
-  if(k==='burn'&&!t.ablaze&&t.st.burn>=ABLAZE_AT){ t.ablaze=true; B.fx(t,'ABLAZE','burn'); B.logf(`${t.name} is ablaze.`); }
-  if(k==='chill'&&was<FROZEN_AT&&t.st.chill>=FROZEN_AT){ B.fx(t,'FROZEN','buff'); B.logf(`${t.name} is frozen.`); }
-  if(k==='poison'&&was<FESTER_AT&&t.st.poison>=FESTER_AT){ B.fx(t,'FESTERING','poison'); B.logf(`${t.name} is festering.`); }
+  const was=t.st[k]||0; t.st[k]=was+n; let kind=null;
+  if(k==='burn'&&!t.ablaze&&t.st.burn>=ABLAZE_AT){ t.ablaze=true; kind='ablaze'; B.fx(t,'ABLAZE','burn'); B.logf(`${t.name} is ablaze.`); }
+  if(k==='chill'&&was<FROZEN_AT&&t.st.chill>=FROZEN_AT){ kind='frozen'; B.fx(t,'FROZEN','buff'); B.logf(`${t.name} is frozen.`); }
+  if(k==='poison'&&was<FESTER_AT&&t.st.poison>=FESTER_AT){ kind='festering'; B.fx(t,'FESTERING','poison'); B.logf(`${t.name} is festering.`); }
   checkMarks(t,B);
+  if(kind) B.units.forEach(x=>{ if(x.alive) fire(x,'onAffliction',t,kind,B); }); // everyone hears it; hooks check the side
 }
 // two afflictions at once mark the unit for the rest of the fight (see core); Ruined carries all three marks
 function checkMarks(t,B){
@@ -635,9 +781,13 @@ function dealDamage(src,t,amount,info,B){
   if(t.kw.blighted&&(info.type==='poison'||info.type==='burn')) amount*=1.25;
   if(info.type==='attack'&&src) B.anim(src,t,info);
   if(t.side==='e'&&B.relics.includes('resonance')&&['poison','burn','chill'].filter(k=>t.st[k]>0).length>=3) amount*=1.3;
+  if(info.type==='attack'&&src&&t.duel&&t.duel.alive&&src!==t.duel) amount*=0.5; // a duellist takes half from anyone but the opponent
+  if(info.type==='burn'&&src&&src.flags.ashen&&t.shield>0) amount*=2; // Ashen Guard: Burn doubles against Shield
   let dmg=Math.max(0,Math.round(amount));
   if(!info.ignoreArmor&&dmg>0&&!isFestering(t)) dmg=Math.max(1,dmg-t.armor); // Festering: Armor counts as 0
-  if((!info.ignoreShield||t.flags.shieldAll)&&t.shield>0&&dmg>0){ const ab=Math.min(t.shield,dmg); t.shield-=ab; dmg-=ab; if(ab){ B.fx(t,`-${ab}`,'shield'); if(info.type==='attack'&&src&&src.alive){ fire(t,'onShieldAbsorb',src,ab,B); if(t.side==='p'&&B.relics.includes('mirrorward')) dealDamage(t,src,ab,{type:'thorns',ignoreArmor:true},B); } } }
+  if((!info.ignoreShield||t.flags.shieldAll)&&t.shield>0&&dmg>0){ const ab=Math.min(t.shield,dmg); t.shield-=ab; dmg-=ab; if(ab){ B.fx(t,`-${ab}`,'shield'); if(info.type==='attack'&&src&&src.alive){ fire(t,'onShieldAbsorb',src,ab,B); if(t.side==='p'&&B.relics.includes('mirrorward')) dealDamage(t,src,ab,{type:'thorns',ignoreArmor:true},B); }
+    if(info.type==='burn'&&src&&src.alive&&src.flags.ashen) addShield(src,ab,B);
+    if(t.shield<=0) alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyShieldBreak',t,src,B); }); } }
   t.hp-=dmg; t.stats.taken+=dmg; if(src) src.stats.dealt+=dmg;
   if((dmg>0||!info.ignoreShield)&&!info.silent) B.fx(t,info.exec?'EXECUTE':String(dmg),info.crit?'crit':info.type);
   if(info.type==='attack') B.logf(`${src?src.name:'?'} hits ${t.name} for ${dmg}${info.crit?' (crit)':''}.`);
@@ -659,7 +809,7 @@ function die(t,killer,B){
   if(t.alive) return;
   B.logf(`${t.name} falls.`);
   if(t.summon) B.vanish(t); // summons leave no card behind
-  if(killer&&killer.alive){ killer.stats.kills++; fire(killer,'onKill',t,B); }
+  if(killer&&killer.alive){ killer.stats.kills++; fire(killer,'onKill',t,B); alliesOf(killer,B).forEach(x=>{ if(x!==killer&&x.alive) fire(x,'onAllyKill',killer,t,B); }); }
   alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyDeath',t,B); });
   aliveEnemies(t,B).forEach(x=>fire(x,'onFoeDeath',t,B));
   if(t.side==='e'&&killer&&killer.side==='p'&&B.relics.includes('grimoire')) raiseSkeleton(B);
@@ -677,7 +827,9 @@ function tickStatus(u,B){
   tickPoison(u,B);
   if(!u.alive) return;
   if(st.burn>0){ const src=u.burnSrc; let m=(src&&src.side==='p'&&B.relics.includes('kindling'))?2:1; if(src&&src.flags.flask&&st.poison>0) m*=1.5; if(src&&src.side==='p'&&st.chill>0&&B.relics.includes('steam')) m*=2;
-    const d=dealDamage(src,u,st.burn*BURN_DMG*m,{type:'burn',ignoreArmor:true},B); st.burn=(src&&src.flags.slowBurn)?st.burn-1:Math.floor(st.burn/2); if(u.ablaze) st.burn=Math.max(ABLAZE_AT,st.burn); // Ablaze holds the floor
+    const d=dealDamage(src,u,st.burn*BURN_DMG*m,{type:'burn',ignoreArmor:true},B);
+    if(u.noBurnDecay) u.noBurnDecay=false; else st.burn=(src&&src.flags.slowBurn)?st.burn-1:Math.floor(st.burn/2); // Kiln skips one decay
+    if(u.ablaze) st.burn=Math.max(ABLAZE_AT,st.burn); // Ablaze holds the floor
     if(d>0&&src){ B.units.forEach(x=>{ if(x.side===src.side&&x.alive) fire(x,'onBurnDamage',u,d,B); }); if(src.side==='p'&&B.relics.includes('wildfire')){ const o=randomEnemy(src,B,u); if(o){ gainStatus(o,'burn',1,B); o.burnSrc=src; } } } }
 }
 function checkEnd(B){
