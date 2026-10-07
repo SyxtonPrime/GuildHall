@@ -26,11 +26,11 @@ const SCEN={
 };
 function mixed(nStarters){ const t3=pick(byTier(2)); const ss=[]; const pool=byTier(1); while(ss.length<nStarters){ const s=pick(pool); if(!ss.includes(s)) ss.push(s); }
   return [hero(t3,2,union([need(t3)]),rowOf(t3))].concat(ss.map(s=>hero(s,1,union([need(s)]),rowOf(s)))); }
-const B1=+process.env.B1||1; // sweep: act 1 bosses' HP and ATK multiplied in the fight (bake the answer into data/enemies.js)
+const B1=+process.env.B1||1, DEPTH=+process.env.DEPTH||0; // DEPTH: ascension (every enemy ×(1+0.1·depth)) // sweep: act 1 bosses' HP and ATK multiplied in the fight (bake the answer into data/enemies.js)
 const which=process.argv[2]||'all', N=+process.argv[3]||400;
 for(const name of (which==='all'?Object.keys(SCEN):[which])){
   const S=SCEN[name]; let wins=0; const byHero={}, byBoss={};
-  for(let i=0;i<N;i++){ const party=S.party(); const enc=E.genEncounter(S.floor,0,'boss'); const B=E.createBattle(party,enc,[],S.gold,{spent:S.spent}); if(S.floor<=4&&B1!==1) B.units.filter(x=>x.side==='e'&&x.def.boss).forEach(x=>{ x.maxHp=x.hp=Math.round(x.hp*B1); x.atk=Math.round(x.atk*B1); }); E.runToEnd(B); const w=B.winner==='p'; if(w) wins++;
+  for(let i=0;i<N;i++){ const party=S.party(); const enc=E.genEncounter(S.floor,DEPTH,'boss'); const B=E.createBattle(party,enc,[],S.gold,{spent:S.spent}); if(S.floor<=4&&B1!==1) B.units.filter(x=>x.side==='e'&&x.def.boss).forEach(x=>{ x.maxHp=x.hp=Math.round(x.hp*B1); x.atk=Math.round(x.atk*B1); }); E.runToEnd(B); const w=B.winner==='p'; if(w) wins++;
     party.forEach(h=>{ const k=E.CLASSES[h.id].name; const o=byHero[k]=byHero[k]||{n:0,w:0}; o.n++; if(w) o.w++; }); const b=enc.list[0].id; const o=byBoss[b]=byBoss[b]||{n:0,w:0}; o.n++; if(w) o.w++; }
   const pct=o=>(100*o.w/o.n).toFixed(0).padStart(3)+'%';
   console.log(`\n== ${name}: floor ${S.floor} boss, ${N} comps, won ${(100*wins/N).toFixed(1)}%`);
