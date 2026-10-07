@@ -66,7 +66,8 @@ function addHero(id){
 function goldReward(enc,win,killsBy){
   const base=3+enc.act+(enc.kind==='elite'?2:enc.kind==='boss'?4:0);
   let cap=3, gems=0, skills=0;
-  run.heroes.forEach((h,i)=>{ const S=computeStats(h,run.relics), g=S.gold, kk=(killsBy&&killsBy[i])||0, gg=S.giltArmor+S.giltHand*kk; cap+=g.interest; gems+=gg; skills+=-gg+g.win+g.kill*((killsBy&&killsBy[i])||0)+((enc.kind==='elite'||enc.kind==='boss')?g.elite:0); });
+  // Gilt weapons pay 1 per GILT_PER_KILLS kills by their hero; kill gold from skills (g.kill beyond the gems) is per kill
+  run.heroes.forEach((h,i)=>{ const S=computeStats(h,run.relics), g=S.gold, kk=(killsBy&&killsBy[i])||0, gg=S.giltArmor+S.giltHand*Math.floor(kk/GILT_PER_KILLS); cap+=g.interest; gems+=gg; skills+=(g.win-S.giltArmor)+(g.kill-S.giltHand)*kk+((enc.kind==='elite'||enc.kind==='boss')?g.elite:0); });
   const interest=Math.min(cap,Math.floor(run.gold/5));
   const purse=run.relics.includes('coinpurse')?2:0;
   return {base,interest,purse,gems,skills,total:base+interest+purse+gems+skills};
