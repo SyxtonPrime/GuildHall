@@ -52,7 +52,7 @@ const ENEMIES={
  minotaur:{name:'Minotaur',row:'front',hp:80,atk:7,spd:0.7,elite:true,ab:'Charge: every 4th attack hits your whole front row for ×2. Below half HP it attacks 40% faster.',
   hooks:{onAttack:(u,a)=>{ if(nthAttack(u,4)){ a.hitRow='front'; a.mult*=2; } }, onDamaged:(u)=>{ if(!u.enraged&&u.hp<u.maxHp/2){ u.enraged=true; u.spd*=1.4; } }}},
  // --- bosses ---
- goblinking:{name:'Goblin King',row:'front',hp:130,atk:9,spd:0.9,boss:true,ab:'Every 3s, all enemies gain +15% speed.',
+ goblinking:{name:'Goblin King',row:'front',hp:175,atk:12,spd:0.9,boss:true,ab:'Every 3s, all enemies gain +15% speed.',
   hooks:{onSecond:(u,B)=>{ if(u.secs%3===0) alliesOf(u,B).forEach(x=>{x.spd*=1.15;}); }}},
  lich:{name:'Lich',row:'back',hp:140,atk:7,spd:0.8,boss:true,apply:{poison:2},ab:'Attacks apply 2 Poison and heal the Lich for damage dealt.',
   hooks:{onHit:(u,t,dmg,B)=>heal(u,dmg,B)}},
@@ -61,9 +61,9 @@ const ENEMIES={
  bonedragon:{name:'Bone Dragon',row:'front',hp:160,atk:8,spd:0.7,armor:1,boss:true,ab:'Every 5th attack breathes on everyone. Heals 20 whenever another enemy dies. Immune to Poison.',flags:{boneproof:1},
   hooks:{onAttack:(u,a)=>{ if(nthAttack(u,5)) a.hitAll=true; }, onAllyDeath:(u,d,B)=>heal(u,20,B)}},
  // --- bosses added v35 (Scout's Camp picks between an act's own bosses) ---
- ratking:{name:'Rat King',row:'front',hp:100,atk:6,spd:0.9,boss:true,ab:'Every 5s, two Rats join the fight. +1 ATK for every Rat alive.',
+ ratking:{name:'Rat King',row:'front',hp:135,atk:8,spd:0.9,boss:true,ab:'Every 5s, two Rats join the fight. +1 ATK for every Rat alive.',
   hooks:{onSecond:(u,B)=>{ if(u.secs%RK_EVERY===0){ for(let k=0;k<RK_N;k++) spawnEnemy(B,'rat','front'); } }, onAttack:(u,a,B)=>{ a.bonus+=B.units.filter(x=>x.alive&&x.eid==='rat').length; }}},
- broodmother:{name:'Broodmother',row:'front',hp:120,atk:6,spd:0.8,boss:true,apply:{poison:2},ab:'Attacks apply 2 Poison. Each time she loses a quarter of her HP, a Spiderling hatches.',
+ broodmother:{name:'Broodmother',row:'front',hp:162,atk:8,spd:0.8,boss:true,apply:{poison:2},ab:'Attacks apply 2 Poison. Each time she loses a quarter of her HP, a Spiderling hatches.',
   hooks:{onDamaged:(u,src,d,info,B)=>{ if(u.hp<=0) return; while((u.hatched||0)<3&&u.hp<=u.maxHp*(0.75-0.25*(u.hatched||0))){ u.hatched=(u.hatched||0)+1; B.fx(u,'HATCH','buff'); for(let k=0;k<BR_N;k++) spawnEnemy(B,'spiderling','front'); } }}},
  vampirelord:{name:'Vampire Lord',row:'front',hp:125,atk:6,spd:0.9,boss:true,ab:'Heals for half the damage he deals. At half HP he becomes a bat swarm: untargetable for 3s while three Bats join the fight.',
   hooks:{onHit:(u,t,d,B)=>{ if(d>0) heal(u,Math.ceil(d/2),B); }, onDamaged:(u,src,d,info,B)=>{ if(!u.batted&&u.hp>0&&u.hp<u.maxHp/2){ u.batted=true; u.veilUntil=B.t+3; B.fx(u,'BAT SWARM','buff'); B.logf(`${u.name} dissolves into bats.`); for(let k=0;k<3;k++) spawnEnemy(B,'bat','back'); } }}},
@@ -111,7 +111,8 @@ const BANSHEE_CHILL=6, PIT_BURN=2, RK_EVERY=5, RK_N=2, BR_N=1; // v35 boss numbe
 const ACT_GROWTH=[ENV('G1',1.10),ENV('G2',1.12),ENV('G3',1.13)], ENDLESS_GROWTH=ENV('GE',1.20), ACT3_BOOST=ENV('ACT3',1.12);
 const floorGrowth=f=>f>FLOORS?ENDLESS_GROWTH:ACT_GROWTH[actOf(f-1)-1]; // an act's faster rate starts after its first floor, so entering the act is no cliff
 const enemyMult=(floor,depth)=>{ let m=0.7; for(let f=2;f<=floor;f++) m*=floorGrowth(f); return m*(1+0.10*depth)*(floor>=9?ACT3_BOOST:1); };
-const ENEMY_HP=2.1, ENEMY_ATK=1.25;
+const ENEMY_HP=ENV('EHP',2.1), ENEMY_ATK=ENV('EATK',1.25);
+const BOSS_HP=ENV('BOSSHP',1), BOSS_ATK=ENV('BOSSATK',1); // bosses on top of the floor multiplier (tools/boss-check.js sweeps these)
 
 const bossPool=floor=>BOSSES[floor>FLOORS?((Math.ceil(floor/4)-1)%3)+1:actOf(floor)];
 const rollActBoss=floor=>pick(bossPool(floor)); // decided when an act (or endless block) begins
