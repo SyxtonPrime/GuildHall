@@ -485,7 +485,7 @@ const ENEMIES={
   hooks:{onHit:(u,t,dmg,B)=>heal(u,dmg,B)}},
  rifttitan:{name:'Stone Titan',row:'front',hp:210,atk:9,spd:0.6,armor:2,boss:true,ab:'+2 ATK every 3s. Every 5th attack hits everyone.',
   hooks:{onSecond:(u)=>{ if(u.secs%3===0) u.atk+=2; }, onAttack:(u,a)=>{ if(nthAttack(u,5)) a.hitAll=true; }}},
- bonedragon:{name:'Bone Dragon',row:'front',hp:160,atk:8,spd:0.7,armor:1,boss:true,ab:'Every 5th attack breathes on everyone. Heals 20 whenever another enemy dies. Immune to Poison.',flags:{boneproof:1},
+ bonedragon:{name:'Bone Dragon',row:'front',hp:160,atk:8,spd:0.7,armor:1,boss:true,ab:'Every 5th attack breathes on everyone. Heals 20 whenever another enemy dies. Takes half damage from Poison.',flags:{poisonResist:1},
   hooks:{onAttack:(u,a)=>{ if(nthAttack(u,5)) a.hitAll=true; }, onAllyDeath:(u,d,B)=>heal(u,20,B)}},
  // --- bosses added v35 (Scout's Camp picks between an act's own bosses) ---
  ratking:{name:'Rat King',row:'front',hp:135,atk:8,spd:0.9,boss:true,ab:'Every 5s, two Rats join the fight. +1 ATK for every Rat alive.',
@@ -1259,7 +1259,7 @@ function hit(u,t,a,B){
   alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyHit',t,B); });
 }
 function applyStatus(src,t,k,n,B){
-  if((t.flags.stone&&(k==='poison'||k==='burn'))||(t.flags.fireproof&&k==='burn')||(t.flags.boneproof&&k==='poison')
+  if((t.flags.stone&&(k==='poison'||k==='burn'))||(t.flags.fireproof&&k==='burn')
     ||(t.flags.obsidian&&t.shield>=10&&(k==='chill'||k==='poison'))||(t.side==='p'&&t.shield>0&&B.flags.icequeen&&(k==='chill'||k==='burn'))){ B.fx(t,'immune','miss'); return; } // Obsidian, Ice Queen
   n=n*(src.statusMult||1);
   if(k==='poison'&&src.side==='p'&&B.relics.includes('plaguebanner')) n+=1;
@@ -1290,6 +1290,7 @@ function dealDamage(src,t,amount,info,B){
   if(!t.alive) return 0;
   if(t.kw.ruined) amount*=1.5;
   if(t.kw.blighted&&(info.type==='poison'||info.type==='burn')) amount*=1.25;
+  if(info.type==='poison'&&t.flags.poisonResist) amount*=0.5; // Bone Dragon: resistant, not immune
   if(info.type==='attack'&&src) B.anim(src,t,info);
   if(t.side==='e'&&B.relics.includes('resonance')&&['poison','burn','chill'].filter(k=>t.st[k]>0).length>=3) amount*=1.3;
   if(info.type==='attack'&&src&&t.duel&&t.duel.alive&&src!==t.duel) amount*=0.5; // a duellist takes half from anyone but the opponent

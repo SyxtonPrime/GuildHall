@@ -203,7 +203,7 @@ function hit(u,t,a,B){
   alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyHit',t,B); });
 }
 function applyStatus(src,t,k,n,B){
-  if((t.flags.stone&&(k==='poison'||k==='burn'))||(t.flags.fireproof&&k==='burn')||(t.flags.boneproof&&k==='poison')
+  if((t.flags.stone&&(k==='poison'||k==='burn'))||(t.flags.fireproof&&k==='burn')
     ||(t.flags.obsidian&&t.shield>=10&&(k==='chill'||k==='poison'))||(t.side==='p'&&t.shield>0&&B.flags.icequeen&&(k==='chill'||k==='burn'))){ B.fx(t,'immune','miss'); return; } // Obsidian, Ice Queen
   n=n*(src.statusMult||1);
   if(k==='poison'&&src.side==='p'&&B.relics.includes('plaguebanner')) n+=1;
@@ -234,6 +234,7 @@ function dealDamage(src,t,amount,info,B){
   if(!t.alive) return 0;
   if(t.kw.ruined) amount*=1.5;
   if(t.kw.blighted&&(info.type==='poison'||info.type==='burn')) amount*=1.25;
+  if(info.type==='poison'&&t.flags.poisonResist) amount*=0.5; // Bone Dragon: resistant, not immune
   if(info.type==='attack'&&src) B.anim(src,t,info);
   if(t.side==='e'&&B.relics.includes('resonance')&&['poison','burn','chill'].filter(k=>t.st[k]>0).length>=3) amount*=1.3;
   if(info.type==='attack'&&src&&t.duel&&t.duel.alive&&src!==t.duel) amount*=0.5; // a duellist takes half from anyone but the opponent
