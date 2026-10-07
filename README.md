@@ -35,7 +35,8 @@ tools/                        Node tools (no dependencies).
   floor-check.js              Engine-only check: random fixed parties against one floor's encounters (`[floor] [trials]`),
                               for comparing rule changes without the bot's decisions in the way. Env: ENGINE, PARTY, GEMS.
   boss-check.js               Boss benchmark: random comps of a given shape against an act's bosses, with per-boss and per-class
-                              win rates (`[final-caps|final-t3|first-mixed|first-3|all] [comps]`). Env: BOSSHP, BOSSATK, EHP, EATK, B1.
+                              win rates (`[final-caps|final-t3|first-mixed|first-3|first-syn|first-syn4|all] [comps]`).
+                              Env: BOSSHP, BOSSATK, EHP, EATK (engine knobs), B1 and B1IDS (boost chosen act 1 bosses in the tool).
   gjs-run.js                  Runs any of the node tools under gjs when node isn't installed: `gjs tools/gjs-run.js tools/tune.js 300`.
 tests/                        Playwright screenshot/flow scripts (need `npm i playwright` + a Chromium).
                               Each loads ../game/guildhall.html; run them from tests/ (`mkdir -p out` first). Screenshots
