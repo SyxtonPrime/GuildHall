@@ -1,6 +1,6 @@
 # Guildhall
 
-A phone-portrait autobattler roguelike in a single HTML file. Hire a guild, socket gems into their gear to unlock skills, and descend 12 floors (plus endless).
+A phone-portrait autobattler roguelike, built into a single HTML file. Hire a guild, socket gems into their gear to unlock skills, and descend 12 floors (plus endless).
 
 Play it: https://syxtonprime.github.io/GuildHall/ (redeploys on every push to `main`).
 
@@ -10,18 +10,24 @@ Snapshot: v35.1 with the art chat's boss sprites (artifact version 1791123116-fe
 
 ```
 game/
-  guildhall.html              The game, and the only file you edit. Engine in <script id="engine">, UI in <script id="ui">,
-                              sprites as text grids in SPR. Opens directly in a browser.
+  src/                        The source, and the only files you edit. Classic scripts sharing one scope, concatenated
+                              in the order tools/build.js lists them:
+    head.html, style.css, app.html     page head, stylesheet, markup
+    engine/core.js                     helpers and tuning knobs
+    data/*.js                          heroes, traits, fusions, gems, relics, enemies and encounters
+    engine/stats.js, engine/battle.js  computeStats, the battle loop, statuses, hooks (DOM-free)
+    ui/*.js                            sprites, run state, screens, camp, forge, events, gems, battle view, codex, boot
+  dev.html                    Generated: loads game/src directly, for working without a build step.
+  guildhall.html              Generated: the single-file game. Opens directly in a browser. Don't edit by hand.
   Guildhall-standalone.html   Generated: same body under a phone-friendly <head>. Don't edit by hand.
   engine.js                   Generated: the DOM-free engine script, for the node tools. Don't edit by hand.
 tools/                        Node tools (no dependencies).
-  build.js                    Rebuilds the two generated files from game/guildhall.html. Run after every edit to the game.
+  build.js                    Builds the generated files from game/src. Run after every edit to the game.
   tune.js                     Balance bot: `node tune.js <runs> [depth]`. Prints win rate, per-enemy/hero/relic/gem/skill
                               tables and deaths by floor. Env: ELITE_P, NOEVENT, ENDLESS=1 (play on past floor 12),
                               BOSS=<id> (force a boss), G1 G2 G3 GE ACT3 (difficulty curve), NAIVE, FORCE_RELIC, EVEN.
   slotab.js, arena.js         Weapon/armor essence A/B and head-to-head arena checks.
   chain.js                    Checks the dodge/speed caps and attack-chain rules.
-  extract-engine.js           Older engine-only version of build.js.
 tests/                        Playwright screenshot/flow scripts (need `npm i playwright` + a Chromium).
                               Each loads ../game/guildhall.html; run them from tests/ (`mkdir -p out` first). Screenshots
                               are gitignored.
@@ -47,15 +53,14 @@ docs/
 Needs Node 18+ for the tools (nothing to install), and Python 3 + Pillow only if you touch the art.
 
 1. Branch off `main` (`git switch -c my-change`).
-2. Edit `game/guildhall.html`.
-3. `npm run build` to regenerate `game/engine.js` and `game/Guildhall-standalone.html`, then e.g. `node tools/tune.js 1500`
+2. Edit the files in `game/src/` (open `game/dev.html` in a browser to try changes without building).
+3. `npm run build` to regenerate `game/guildhall.html`, `game/engine.js` and `game/Guildhall-standalone.html`, then e.g. `node tools/tune.js 1500`
    to check balance.
 4. Commit the source and the generated files together, push, and open a pull request. CI fails the PR if the generated files
    are stale (`npm run check` does the same locally).
 
-Nearly everything lives in one HTML file, so two people editing the same region will conflict. Keep branches short-lived,
-pull `main` before starting, and say which system you're in. If a merge conflicts in the generated files, resolve
-`guildhall.html` only and re-run `npm run build`.
+Keep branches short-lived, pull `main` before starting, and say which system you're in. If a merge conflicts in the
+generated files, resolve `game/src/` only and re-run `npm run build`.
 
 Art changes: edit `art/sprites/fixes/<id>.txt`, run `python3 render.py` in `art/sprites/`, then copy the grid into `SPR` in
 the game (and `python3 equip.py export` for `EQUIP`).
