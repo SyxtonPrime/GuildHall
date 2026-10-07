@@ -276,7 +276,7 @@
    "name": "Glacier Warden",
    "notes": "",
    "order": 1791144594931,
-   "passive": "Attackers that hit it gain 2 Chill, and enemies attacking it don't halve their Chill.",
+   "passive": "Attackers that hit it gain 3 Chill. Any Chill an enemy sheds by attacking it becomes its Shield.",
    "updated": 1791253549203
   },
   "c_muu8rt2490lr": {
@@ -485,7 +485,7 @@
    "name": "Thief",
    "notes": "",
    "order": 1791142944979,
-   "passive": "The first hit on each monster steals 1 gold. (Max 3 per fight)",
+   "passive": "The first hit on each monster steals 1 gold: up to 2 a fight, 3 as a tier 3, 4 as a capstone.",
    "updated": 1791222996544
   },
   "c_muu8m2w3w2sq": {

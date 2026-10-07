@@ -3,7 +3,7 @@ const E=require(process.env.ENGINE||'../game/engine.js');
 const ri=n=>Math.floor(Math.random()*n), pick=a=>a[ri(a.length)], shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=ri(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
 const nm=id=>E.CLASSES[id]?E.CLASSES[id].name:id; // class ids are opaque; report names
 const ALL=E.STARTERS; // the market sells starters; the bot trains them up the tree
-const lvCost=h=>h.lv===1?5:h.lv===2?9:null;
+const lvCost=h=>h.lv===1?7:h.lv===2?11:null;
 const ofTier=(t,own)=>Object.keys(E.RELICS).filter(k=>(E.RELICS[k].tier||'common')===t&&!own.includes(k));
 function rollRelic(w,own){ const r=Math.random(); let acc=0,t='common'; for(const k of ['common','rare','legendary']){ acc+=w[k]; if(r<acc){t=k;break;} } const p=ofTier(t,own); if(p.length) return pick(p); const a=Object.keys(E.RELICS).filter(k=>!own.includes(k)); return a.length?pick(a):null; }
 function addHero(run,id){ const rc=r=>run.heroes.filter(h=>h.row===r).length; let row=E.defaultRow(id); if(rc(row)>=(E.ROW_MAX||4)) row=row==='front'?'back':'front'; run.heroes.push(E.newHero(id,row)); }
@@ -18,8 +18,8 @@ function shopPhase(run){
   const gems=[0,1,2].map(()=>Math.random()<0.15+0.02*run.floor?pick(E.RARE_GEMS):pick(E.BASIC_GEMS));
   const relic=(process.env.EVEN&&run.floor%2)?null:rollRelic({common:0.65,rare:0.30,legendary:0.05},run.relics);
   run.pm=run.pm||3; const SC={3:6,4:10}; const cap=run.pm+(run.relics.includes('contract')?1:0);
-  for(let k=0;k<2;k++){ if(run.heroes.length>=run.pm&&SC[run.pm]&&run.gold>=SC[run.pm]+3&&(run.floor>=3||Math.random()<0.3)){ run.gold-=SC[run.pm]; run.pm++; } }
-  let hired=0; while(run.heroes.length<cap&&run.gold>=3&&hired<heroes.length&&(run.heroes.length<3||run.floor<=6||Math.random()<0.4)){ run.gold-=3; addHero(run,heroes[hired++]); }
+  for(let k=0;k<2;k++){ if(run.heroes.length>=run.pm&&SC[run.pm]&&run.gold>=SC[run.pm]+5&&(run.floor>=3||Math.random()<0.3)){ run.gold-=SC[run.pm]; run.pm++; } }
+  let hired=0; while(run.heroes.length<cap&&run.gold>=5&&hired<heroes.length&&(run.heroes.length<3||run.floor<=6||Math.random()<0.4)){ run.gold-=5; addHero(run,heroes[hired++]); }
   if(relic&&!process.env.FORCE_RELIC&&run.gold>=E.RELICS[relic].cost+3&&Math.random()<0.5){ run.gold-=E.RELICS[relic].cost; run.relics.push(relic); }
   const gcap=run.heroes.reduce((n,h)=>n+openIdx(h).length,0)-run.bag.length;
   const scored=gems.map(g=>({g,sc:run.heroes.reduce((m,h)=>Math.max(m,openIdx(h).length?newSkills(h,g):0),0)})).sort((a,b)=>b.sc-a.sc);
@@ -47,7 +47,9 @@ function sim(depth){
     const owned=run.bag.filter(g=>!E.GEMS[g].merged).length+run.heroes.reduce((n,h)=>n+h.gems.filter(g=>g&&!E.GEMS[g].merged).length,0);
     const ch=E.genChoices(run.floor,depth,{boss:process.env.BOSS&&E.bossPool(run.floor).includes(process.env.BOSS)?process.env.BOSS:undefined});
     if(run.bonus){ run.bonus=false; if(owned>=2&&process.env.NOEVENT===undefined){ forges++; doForge(run); } }
+    const bf=[4,8,12].includes(run.floor)?'atBoss'+run.floor:null; if(bf&&!log[bf]) log[bf]={gold:run.gold,earned:run.earned||0}; // what each boss sees: gold in hand before that floor's market, and income so far
     shopPhase(run);
+    if(bf&&log[bf].heroes===undefined) Object.assign(log[bf],{after:run.gold,heroes:run.heroes.length,t3:run.heroes.filter(h=>E.CLASSES[h.id].tier===2).length,caps:run.heroes.filter(h=>E.CLASSES[h.id].tier===3).length,gems:run.heroes.reduce((n,h)=>n+h.gems.filter(Boolean).length,0),bag:run.bag.length});
     // path choice: forge when it frees a socket (≥4 gems owned), elite ELITE_P of the time, else fight
     let path=ch.find(c=>c.kind==='fight')||ch[0];
     const fo=ch.find(c=>c.kind==='forge'), el=ch.find(c=>c.kind==='elite');
@@ -62,8 +64,8 @@ function sim(depth){
     B.units.filter(u=>u.hero).forEach(u=>{ const id=nm(u.hero.id); log.heroFights[id]=(log.heroFights[id]||0)+1; log.heroDealt[id]=(log.heroDealt[id]||0)+u.stats.dealt; log.heroTaken[id]=(log.heroTaken[id]||0)+u.stats.taken; });
     log.fights++;
     if(B.winner!=='p') return run.endless?Object.assign(log,{won:true,floor:13,endFloor:run.floor,forges,elites}):Object.assign(log,{won:false,floor:run.floor,forges,elites});
-    let cap=3,extra=0; run.heroes.forEach(h=>{ const g=E.computeStats(h,run.relics).gold; cap+=g.interest; const u=B.units.find(x=>x.hero===h); extra+=g.win+g.kill*(u?u.stats.kills:0)+((enc.kind!=='fight')?g.elite:0); });
-    run.gold+=3+enc.act+(enc.kind==='elite'?2:enc.kind==='boss'?4:0)+Math.min(cap,Math.floor(run.gold/5))+(run.relics.includes('coinpurse')?2:0)+extra+(B.bounty||0);
+    let cap=3,extra=0; run.heroes.forEach(h=>{ const S=E.computeStats(h,run.relics), g=S.gold; cap+=g.interest; const u=B.units.find(x=>x.hero===h), k=u?u.stats.kills:0; extra+=g.win+(g.kill-S.giltHand)*k+S.giltHand*Math.floor(k/E.GILT_PER_KILLS)+((enc.kind!=='fight')?g.elite:0); }); // Gilt weapons pay per 2 kills, as in the camp
+    { const inc=3+enc.act+(enc.kind==='elite'?2:enc.kind==='boss'?4:0)+Math.min(cap,Math.floor(run.gold/5))+(run.relics.includes('coinpurse')?2:0)+extra+(B.bounty||0); run.gold+=inc; run.earned=(run.earned||0)+inc; }
     if(enc.kind==='elite') run.bag.push(pick(E.RARE_GEMS));
     if(enc.kind==='boss'){ const pool=[]; const own=()=>run.relics.concat(pool); const L=ofTier('legendary',own()); if(L.length) pool.push(pick(L)); while(pool.length<3){ const r=rollRelic({common:0.45,rare:0.45,legendary:0.10},own()); if(!r) break; pool.push(r); } const FR=process.env.FORCE_RELIC; let r=FR&&!run._forced?(run._forced=1,FR==='none'?null:FR):pick(pool); if(r&&!run.relics.includes(r)) run.relics.push(r); }
     run.floor++; if(run.floor%4===3) run.bonus=true;
@@ -75,6 +77,8 @@ function sim(depth){
 const N=+process.argv[2]||2000, depth=+process.argv[3]||0;
 const runs=[]; for(let i=0;i<N;i++) runs.push(sim(depth));
 const base=runs.filter(r=>r.won).length/N, baseFloor=runs.reduce((a,r)=>a+r.floor,0)/N;
+for(const f of [4,8,12]){ const ab=runs.map(r=>r['atBoss'+f]).filter(Boolean); if(ab.length){ const av=k=>(ab.reduce((a,x)=>a+x[k],0)/ab.length).toFixed(1); const sorted=ab.map(x=>x.gold).sort((a,b)=>a-b), q=p=>sorted[Math.floor(p*(sorted.length-1))];
+  console.log(`at the floor ${f} boss (${ab.length} runs got there): gold in hand ${av('gold')} (quartiles ${q(0.25)}/${q(0.5)}/${q(0.75)}), earned since the start ${av('earned')} (+12 to begin), after that market ${av('after')} · heroes ${av('heroes')}, tier 3 ${av('t3')}, capstones ${av('caps')}, gems socketed ${av('gems')}, in the bag ${av('bag')}`); } }
 console.log(`runs ${N} depth ${depth}: win ${(100*base).toFixed(1)}%  avg floor ${baseFloor.toFixed(2)}  forges/run ${(runs.reduce((a,r)=>a+(r.forges||0),0)/N).toFixed(2)}  elites/run ${(runs.reduce((a,r)=>a+(r.elites||0),0)/N).toFixed(2)}  win|forged ${(100*runs.filter(r=>r.forges).filter(r=>r.won).length/Math.max(1,runs.filter(r=>r.forges).length)).toFixed(1)}%  win|no forge ${(100*runs.filter(r=>!r.forges).filter(r=>r.won).length/Math.max(1,runs.filter(r=>!r.forges).length)).toFixed(1)}%`);
 function table(title,key,minN,extraCols){
   const st={}; runs.forEach(r=>{ r[key].forEach(k=>{ const o=st[k]=st[k]||{n:0,w:0,f:0}; o.n++; if(r.won) o.w++; o.f+=r.floor; }); });

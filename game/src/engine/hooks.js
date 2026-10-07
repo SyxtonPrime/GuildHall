@@ -52,7 +52,7 @@ const HOOKS={
   'Side Effects':{hooks:{onTarget:(u,t,ac,B)=>{ if(u.sideFxAt===u.attacks) return; u.sideFxAt=u.attacks; const c=alliesOf(u,B).filter(x=>x.alive&&STATUS_KEYS.some(k=>x.st[k]>0)); if(!c.length) return; const a=pick(c);
     STATUS_KEYS.forEach(k=>{ const m=Math.min(2,a.st[k]||0); if(m>0){ loseStatus(a,k,m,B); applyStatus(u,t,k,m,B); } }); }}},
   Renew:{flag:'renew'}}, // Mend's bonus below half HP instead of a quarter
- Thief:{passive:{hooks:{onHit:(u,t,d,B)=>{ if((u.stole||0)>=3) return; t.stolenBy=t.stolenBy||{}; if(t.stolenBy[u.uid]) return; t.stolenBy[u.uid]=1; u.stole=(u.stole||0)+1; B.bounty+=1; B.fx(t,'+1 gold','buff'); }}},
+ Thief:{passive:{hooks:{onHit:(u,t,d,B)=>{ if((u.stole||0)>=(u.hero?CLASSES[u.hero.id].tier+1:2)) return; /* 2 a fight as a starter, 3 as a tier 3, 4 as a capstone */ t.stolenBy=t.stolenBy||{}; if(t.stolenBy[u.uid]) return; t.stolenBy[u.uid]=1; u.stole=(u.stole||0)+1; B.bounty+=1; B.fx(t,'+1 gold','buff'); }}},
   Finisher:{hooks:{onTarget:(u,t,ac,B)=>{ if(t.hp<t.maxHp/2) addApply(ac,'poison',2); }}},
   Backstab:{hooks:{onTarget:(u,t,ac,B)=>{ u.bs=u.bs||{}; u.lastBackstab=false; if(!u.bs[t.uid]||u.bsNext){ ac.mult*=1.5; u.lastBackstab=true; } u.bs[t.uid]=1; u.bsNext=false; },
     onHit:(u,t,d,B)=>{ if(u.lastBackstab&&u.lastCrit) u.bsNext=true; }}},
@@ -80,8 +80,8 @@ const HOOKS={
   Hemorrhage:{hooks:{onTarget:(u,t,ac,B)=>{ ac.critBonus=(ac.critBonus||0)+0.1*afflictions(t); }, onCrit:(u,t,B)=>{ const d=u.lastDealt||0; if(d>0) alliesOf(u,B).forEach(x=>abilityHeal(u,x,d,B)); }}},
   Stockpile:{hooks:{onStart:(u,B)=>{ u.reserve=Math.floor(bank(B)/2); }, onAttack:(u,a,B)=>{ if(u.reserve>=2){ u.reserve-=2; a.mult*=1.5; } }}},
   'Crimson Tide':{hooks:{onHeal:(u,t,r,over,B)=>{ if(over>0&&u.lastTarget&&u.lastTarget.alive) dealDamage(u,u.lastTarget,over,{type:'bleed'},B); }}}},
- 'Glacier Warden':{passive:{hooks:{onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack'&&src&&src.alive&&src.side!==u.side) applyStatus(u,src,'chill',2,B); },
-    onDefend:(u,src,ac,B)=>{ if(src.side!==u.side) src.keepChill={by:u,gain:(src.keepChill||{}).gain||0}; }}},
+ 'Glacier Warden':{passive:{hooks:{onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack'&&src&&src.alive&&src.side!==u.side) applyStatus(u,src,'chill',3,B); },
+    onChillLost:(u,att,n,B)=>{ if(att.side!==u.side&&att.lastTarget===u) addShield(u,n,B); }}}, // any Chill an attacker sheds by attacking him (halving or Frozen) becomes his Shield
   Avalanche:{hooks:{onAffliction:(u,t,kind,B)=>{ if(kind!=='frozen'||t.side===u.side) return; aliveEnemies(u,B).forEach(o=>{ if(o!==t) applyStatus(u,o,'chill',3,B); }); }}},
   'Branding Blow':{hooks:{onAttack:(u,a,B)=>{ if(nthAttack(u,4)){ addApply(a,'burn',4); a.brand=true; } }, onTarget:(u,t,ac,B)=>{ if(ac.brand){ B.brand={t,until:B.t+2}; B.fx(t,'BRANDED','burn'); } }}},
   Glacier:{hooks:{onDefend:(u,src,ac,B)=>{ ac.reduce=(ac.reduce||0)+Math.min(5,Math.floor((src.st.chill||0)/4)); }}},
