@@ -14,7 +14,7 @@ const RELICS={
  drums:{name:'Drums of War',tier:'common',cost:6,desc:'Every 3 seconds, all heroes gain +1 ATK',
   hooks:{onSecond:(u,B)=>{ if(u.secs%3===0){u.atk+=1;} }}},
  wildfire:{name:'Wildfire',tier:'rare',cost:7,desc:'Whenever Burn damages an enemy, 1 Burn spreads to another enemy'},
- glacialcore:{name:'Glacial Core',tier:'common',cost:5,desc:'Attacks on Chilled enemies deal +1 per Chill'},
+ glacialcore:{name:'Glacial Core',tier:'common',cost:5,desc:'Attacks on Chilled enemies deal +1 per Chill (up to 5)'},
  mirrorward:{name:'Mirror Ward',tier:'rare',cost:7,desc:"When a hero's Shield absorbs damage, the attacker takes that much"},
  luckycoin:{name:'Lucky Coin',tier:'common',cost:6,desc:'All heroes +10% crit. Crits heal the attacker 3'},
  resonance:{name:'Resonance',tier:'rare',cost:7,desc:'Enemies carrying 3 different statuses take +30% damage from everything'},

@@ -59,7 +59,9 @@ function renderUnits(){
     const p=clamp(u.hp/u.maxHp,0,1), sp=clamp(u.shield/u.maxHp,0,1);
     el.querySelector('.f').style.width=(p*100)+'%'; el.querySelector('.sh').style.width=(sp*100)+'%'; el.querySelector('.tx').textContent=`${Math.max(0,Math.ceil(u.hp))}${u.maxHp!==u.maxHp0?'/'+u.maxHp:''}${u.shield?' +'+u.shield:''}`;
     el.querySelector('.a').textContent='ATK '+u.atk; el.querySelector('.s').textContent='SPD '+(Math.round(effSpd(u)*100)/100);
-    const st=[]; if(u.st.poison>0) st.push(`<span class="stx p" title="Poison ${u.st.poison}">${u.st.poison}</span>`); if(u.st.burn>0) st.push(`<span class="stx b" title="Burn ${u.st.burn}">${u.st.burn}</span>`); if(u.st.chill>0) st.push(`<span class="stx c" title="Chill ${u.st.chill}">${u.st.chill}</span>`);
+    const st=[]; if(u.st.poison>0) st.push(`<span class="stx p" title="Poison ${u.st.poison}">${u.st.poison}</span>`); if(u.st.burn>0) st.push(`<span class="stx b" title="Burn ${u.st.burn}">${u.st.burn}</span>`); if(u.st.chill>0) st.push(`<span class="stx c${isFrozen(u)?' aff':''}" title="Chill ${u.st.chill}${isFrozen(u)?' (Frozen)':''}">${u.st.chill}</span>`);
+    if(u.ablaze) st[st.findIndex(x=>x.includes('stx b'))]=`<span class="stx b aff" title="Burn ${u.st.burn} (Ablaze)">${u.st.burn}</span>`; if(isFestering(u)) st[st.findIndex(x=>x.includes('stx p'))]=`<span class="stx p aff" title="Poison ${u.st.poison} (Festering)">${u.st.poison}</span>`;
+    for(const k in u.kw) st.push(`<span class="stx k" title="${k[0].toUpperCase()+k.slice(1)}">${k[0].toUpperCase()}</span>`);
     const sh=st.join(''); if(el.querySelector('.stt').innerHTML!==sh) el.querySelector('.stt').innerHTML=sh; });
 }
 function endBattle(){

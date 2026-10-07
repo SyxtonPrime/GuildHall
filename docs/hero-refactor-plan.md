@@ -247,7 +247,8 @@ Written against `game/guildhall.html` as of 6 October 2026 (engine in `<script i
 
 ### Phases
 
-1. **Status rework, current heroes.** In the engine only, so the existing bot tunes it:
+1. **Status rework, current heroes.** Done 6 October 2026 (see "Phase 1 results" below).
+   Original scope: In the engine only, so the existing bot tunes it:
    - `applyStatus`: Chill uncapped (today it caps at 5); `effSpd`: 2.5% per stack up to 20.
    - `attack`/`hit`: a unit with under 20 Chill halves it when it attacks; at 20 or more its attack deals half (a quarter at 40) and consumes 20; status lands after the hit resolves.
    - `tickStatus`: `BURN_DMG` 2 → 1; Burn halves each second but never below 10 once it has reached 10 (Ablaze); Poison unchanged; Festering at 15 zeroes Armor and blocks `heal` and `addShield`.
@@ -259,6 +260,14 @@ Written against `game/guildhall.html` as of 6 October 2026 (engine in `<script i
 4. **Hooks**, tier by tier: starters and roots first (the game is playable at that point), then tier 3, then capstones. Each hook is a few lines in `HOOKS`; the plan's rulings are the spec.
 5. **Bot.** `tools/tune.js` learns to socket toward an upgrade requirement and to promote at training, then reports gold held per floor (for the per-10-gold thresholds), reach rates per class, and the watch lists.
 6. **Content.** Enemies with Shield and small status application; relics; the gem pass (new rares for the six uncovered hybrids, forge rules for 5- and 6-gem recipes); art.
+
+### Phase 1 results
+
+The rework is in `game/src/engine` and the content files, with the old 5-stack Chill content (Frost mage, Glacier Warden, Deep Freeze, Shatter, Absolute Zero, Shatterpoint, the per-Chill crit and damage bonuses) rekeyed to Frozen or capped at 5 stacks through `chill5`. Enemy numbers: Pit Lord 2 Burn, Banshee 6 Chill, Basilisk 3 Chill with Petrify at 10; Imp and Fire Elemental unchanged. The help screen describes the new rules.
+
+Bot (300 runs, legacy heroes): win rate 16% → 5%, average floor 7.5 → 5.4. An engine-only check (`tools/floor-check.js`, random level-1 pairs on floor 2, 4000 fights) attributes it: attacking halving the attacker's Chill costs about 4 points on its own (Glacier Warden 48% → 7%, Frost mage 8% → 3%), because every legacy Chill effect assumed stacks that never decayed, including Frost armour gems. The Festering heal and Shield block, Burn at 1 a stack, and the crit/dodge streaks are each within noise overall (Pyromancer alone loses 8 points to the Burn change). This is the designed outcome: Chill's defensive value now lives in Frozen, which no legacy hero can reach, so the legacy heroes stay broken until phase 2 replaces them. Enemy tuning against them would be wasted.
+
+Bot knobs added for the next passes: `CHILLSLOW`, `CHILLSHED`, `FESTER`, `BURNDMG`, `STREAK`, `SPIDER`. Node is not installed on the design machine; `tools/gjs-run.js` runs the tools under gjs.
 
 ### Settled for phase 2
 

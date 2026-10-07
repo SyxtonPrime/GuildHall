@@ -1,6 +1,6 @@
 // ---------- Heroes ----------
 const REAPER_HP=46, REAPER_GAIN=3, REAPER_CAP=60;
-const BURN_DMG=2; // Burn deals this × its stacks per tick (it halves each tick, so stacks are hard to build) // Reaper grows permanently with kills
+const BURN_DMG=ENV('BURNDMG',1); // Burn deals this × its stacks per tick (it halves each tick until Ablaze holds it at 10) // Reaper grows permanently with kills
 const HEROES={
  knight:{tags:['shield', 'tank'],name:'Knight',row:'front',hp:58,atk:5,spd:0.8,armor:2,
   ab:L=>`Whenever another ally is hit, gain ${1+L} Shield.`,
@@ -34,9 +34,9 @@ const HEROES={
   ab:L=>`Whenever Burn damages an enemy, gain ${L} Shield.`,
   hooks:{onBurnDamage:(u,t,d,B)=>addShield(u,u.flags.ashenheart?d:u.L,B)}},
  glacier:{tags:['chill', 'shield', 'tank'],name:'Glacier Warden',row:'front',hp:54,atk:4,spd:0.8,
-  ab:L=>`Attackers that hit her gain 1 Chill. She takes −1 damage per Chill on her attacker (−2 at ★★★).`,
-  hooks:{onDefend:(u,src,a,B)=>{ a.bonus-=(u.L>=3?2:1)*(src.st.chill||0); }, onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack'&&src.alive) applyStatus(u,src,'chill',u.flags.permafrost?2:1,B); },
-         onTarget:(u,t,a,B)=>{ if(u.flags.shatter&&t.st.chill>=5) a.bonus+=12; }}},
+  ab:L=>`Attackers that hit her gain 1 Chill. She takes −1 damage per Chill on her attacker, up to 5 (−2 at ★★★).`,
+  hooks:{onDefend:(u,src,a,B)=>{ a.bonus-=(u.L>=3?2:1)*chill5(src); }, onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack'&&src.alive) applyStatus(u,src,'chill',u.flags.permafrost?2:1,B); },
+         onTarget:(u,t,a,B)=>{ if(u.flags.shatter&&isFrozen(t)) a.bonus+=12; }}},
  duelist:{tags:['crit'],name:'Duelist',row:'mid',hp:40,atk:6,spd:1.1,
   ab:L=>`Every 3rd attack is a guaranteed crit. Her crits reduce the target's ATK by ${L+1}.`,
   hooks:{onAttack:(u,a,B)=>{ const n=u.flags.form?2:3; if(u.attacks%n===n-1) a.forceCrit=true; }, onHit:(u,t,d,B)=>{ if(u.lastCrit){ t.atk=Math.max(1,t.atk-u.L-1-(u.flags.shred?3:0)); B.fx(t,`-${u.L} ATK`,'miss'); if(u.flags.flourish) u.spd*=1.05; } },
@@ -54,8 +54,8 @@ const HEROES={
   ab:L=>`Other allies attack ${12*L}% faster and have +${L} ATK.`,
   hooks:{onStart:(u,B)=>{ alliesOf(u,B).forEach(x=>{ if(x!==u){ x.spd*=1+0.12*u.L; x.atk+=u.L; } }); }}},
  frostmage:{tags:['chill'],name:'Frost Mage',row:'back',hp:34,atk:5,spd:0.9,apply:L=>({chill:1}),locked:'Win a run',
-  ab:L=>`Attacks apply Chill (−10% speed each, max 5) and deal +${L} damage per Chill on the target.`,
-  hooks:{onAttack:(u,a,B)=>{ if(u.flags.blizzard){ a.hitAll=true; a.mult*=0.5; } }, onTarget:(u,t,a,B)=>{ a.bonus+=u.L*(t.st.chill||0); if(u.flags.deepfreeze&&t.st.chill>=5) a.mult*=2; }}},
+  ab:L=>`Attacks apply Chill (−2.5% speed each; Frozen at 20) and deal +${L} damage per Chill on the target, up to 5.`,
+  hooks:{onAttack:(u,a,B)=>{ if(u.flags.blizzard){ a.hitAll=true; a.mult*=0.5; } }, onTarget:(u,t,a,B)=>{ a.bonus+=u.L*chill5(t); if(u.flags.deepfreeze&&isFrozen(t)) a.mult*=2; }}},
  reaper:{tags:['kill'],name:'Reaper',row:'front',hp:REAPER_HP,atk:8,spd:0.9,locked:'Slay 150 enemies in total',
   ab:L=>`Attacks execute enemies below ${15+5*L}% HP. Every kill permanently adds +${REAPER_GAIN} max HP (up to +${REAPER_CAP}) and heals ${5*L}.`,
   hooks:{onTarget:(u,t,a,B)=>{ if(t.hp<=t.maxHp*(0.15+0.05*u.L+(u.flags.dread?0.15:0)+(u.flags.grim?0.3:0))) a.execute=true; },

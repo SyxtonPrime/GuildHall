@@ -45,6 +45,6 @@ function computeStats(h,relics){
   if(relics.includes('huntinghorn')&&h.row==='back') spd*=1.25;
   if(relics.includes('cloak')) dodge+=0.1;
   if(relics.includes('boots')){ spd*=1.2; dodge+=0.1; }
-  return {maxHpRaw:Math.round(hpRaw),maxHp:Math.max(1,Math.round(hp)),atk:Math.round(atk),spd:Math.round(spd*100)/100,armor,crit,dodge:Math.min(DODGE_CAP,dodge),apply,statusMult,targetLowest,flags,startShield,regen,retaliate,spikes,lifesteal,shieldPerAttack,giltHand:gh.gilt||0,giltArmor:ga.gilt||0,skills,gold,gemHooks:gemDefs.map(g=>g.hooks||{})};
+  return {maxHpRaw:Math.round(hpRaw),maxHp:Math.max(1,Math.round(hp)),atk:Math.round(atk),spd:Math.round(spd*100)/100,armor,crit,dodge,apply,statusMult,targetLowest,flags,startShield,regen,retaliate,spikes,lifesteal,shieldPerAttack,giltHand:gh.gilt||0,giltArmor:ga.gilt||0,skills,gold,gemHooks:gemDefs.map(g=>g.hooks||{})};
 }
 

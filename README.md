@@ -28,6 +28,9 @@ tools/                        Node tools (no dependencies).
                               BOSS=<id> (force a boss), G1 G2 G3 GE ACT3 (difficulty curve), NAIVE, FORCE_RELIC, EVEN.
   slotab.js, arena.js         Weapon/armor essence A/B and head-to-head arena checks.
   chain.js                    Checks the dodge/speed caps and attack-chain rules.
+  floor-check.js              Engine-only check: random fixed parties against one floor's encounters (`[floor] [trials]`),
+                              for comparing rule changes without the bot's decisions in the way. Env: ENGINE, PARTY, GEMS.
+  gjs-run.js                  Runs any of the node tools under gjs when node isn't installed: `gjs tools/gjs-run.js tools/tune.js 300`.
 tests/                        Playwright screenshot/flow scripts (need `npm i playwright` + a Chromium).
                               Each loads ../game/guildhall.html; run them from tests/ (`mkdir -p out` first). Screenshots
                               are gitignored.

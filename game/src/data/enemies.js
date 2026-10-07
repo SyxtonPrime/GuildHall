@@ -5,7 +5,7 @@ const ENEMIES={
  goblin:{name:'Goblin',row:'front',hp:16,atk:3,spd:1.2,ab:'Cowardly: attacks 30% faster while another Goblin is alive.',
   hooks:{onAttack:(u,a,B)=>{ if(alliesOf(u,B).some(x=>x!==u&&x.alive&&x.eid==='goblin')) u.timer+=0.3; }}},
  archer:{name:'Goblin Archer',row:'back',hp:12,atk:4,spd:1.0,ab:'Aims at the back row when it can.',hooks:{onAttack:(u,a)=>{ a.preferBack=true; }}},
- spider:{name:'Cave Spider',row:'front',hp:20,atk:3,spd:1.1,apply:{poison:2},ab:'Attacks apply 2 Poison.'},
+ spider:{name:'Cave Spider',row:'front',hp:20,atk:3,spd:1.1,apply:{poison:ENV('SPIDER',2)},ab:'Attacks apply 2 Poison.'},
  wolf:{name:'Warg',row:'front',hp:18,atk:4,spd:1.4,ab:'On kill, +50% speed.',hooks:{onKill:(u)=>{u.spd*=1.5;}}},
  shaman:{name:'Shaman',row:'back',hp:22,atk:2,spd:0.8,ab:'Every 2s, heals its most injured ally 4.',
   hooks:{onSecond:(u,B)=>{ if(u.secs%2===0){const a=lowestAlly(u,B); if(a) heal(a,4,B);} }}},
@@ -42,7 +42,7 @@ const ENEMIES={
  fireelemental:{name:'Fire Elemental',row:'back',hp:24,atk:3,spd:0.9,apply:{burn:1},flags:{fireproof:1},ab:'Attacks apply 1 Burn, and a random other hero also catches 1 Burn. Immune to Burn.',
   hooks:{onAttackEnd:(u,t,B)=>{ const o=randomEnemy(u,B,t); if(o) applyStatus(u,o,'burn',1,B); }}},
  harpy:{name:'Harpy',row:'back',hp:22,atk:4,spd:1.1,dodge:0.25,targetLowest:true,ab:'25% dodge. Swoops on the lowest-HP hero, wherever they stand.'},
- basilisk:{name:'Basilisk',row:'front',hp:34,atk:5,spd:0.7,apply:{chill:1},ab:'Attacks apply 1 Chill. Petrify: deals ×2 to a target at 5 Chill.',hooks:{onTarget:(u,t,a)=>{ if(t.st.chill>=5) a.mult*=2; }}},
+ basilisk:{name:'Basilisk',row:'front',hp:34,atk:5,spd:0.7,apply:{chill:3},ab:'Attacks apply 3 Chill. Petrify: deals ×2 to a target with 10 or more Chill.',hooks:{onTarget:(u,t,a)=>{ if((t.st.chill||0)>=10) a.mult*=2; }}},
  fiend:{name:'Fiend',row:'front',hp:32,atk:4,spd:0.9,ab:'Trident: each attack hits 2 targets. +3 ATK when an ally dies.',
   hooks:{onAttack:(u,a)=>{ a.extraTargets=1; }, onAllyDeath:(u)=>{ u.atk+=3; }}},
  // --- elites ---
@@ -69,7 +69,7 @@ const ENEMIES={
   hooks:{onHit:(u,t,d,B)=>{ if(d>0) heal(u,Math.ceil(d/2),B); }, onDamaged:(u,src,d,info,B)=>{ if(!u.batted&&u.hp>0&&u.hp<u.maxHp/2){ u.batted=true; u.veilUntil=B.t+3; B.fx(u,'BAT SWARM','buff'); B.logf(`${u.name} dissolves into bats.`); for(let k=0;k<3;k++) spawnEnemy(B,'bat','back'); } }}},
  banshee:{name:'Banshee',row:'back',hp:110,atk:6,spd:0.9,dodge:0.3,boss:true,ab:'30% dodge. Every 4s she wails: every hero gains 2 Chill.',
   hooks:{onSecond:(u,B)=>{ if(u.secs%4===0){ B.fx(u,'WAIL','buff'); aliveEnemies(u,B).forEach(t=>applyStatus(u,t,'chill',BANSHEE_CHILL,B)); } }}},
- pitlord:{name:'Pit Lord',row:'front',hp:170,atk:9,spd:0.7,armor:1,boss:true,flags:{fireproof:1},ab:'1 Armor. Immune to Burn. Every 2s every hero gains 1 Burn. Deals ×1.25 to Shielded heroes.',
+ pitlord:{name:'Pit Lord',row:'front',hp:170,atk:9,spd:0.7,armor:1,boss:true,flags:{fireproof:1},ab:'1 Armor. Immune to Burn. Every 2s every hero gains 2 Burn. Deals ×1.25 to Shielded heroes.',
   hooks:{onSecond:(u,B)=>{ if(u.secs%2===0) aliveEnemies(u,B).forEach(t=>applyStatus(u,t,'burn',PIT_BURN,B)); }, onTarget:(u,t,a)=>{ if(t.shield>0) a.mult*=1.25; }}},
 };
 // Encounter templates: each act rolls one of several themed groups, so fights differ in shape, not just in art.
@@ -107,7 +107,7 @@ const kindOf=f=>f%4===0?'boss':'fight'; // elites are chosen, never fixed
 const curAct=f=>Math.ceil(f/4); // act (or 4-floor endless block) for once-per-act limits
 // Enemy strength compounds per floor: 10% in Act 1, 12% in Act 2, 13% in Act 3 (plus a one-off step entering Act 3),
 // and much faster in endless so a run there ends in a handful of floors rather than dragging on for dozens.
-const BANSHEE_CHILL=2, PIT_BURN=1, RK_EVERY=5, RK_N=2, BR_N=1; // v35 boss numbers (tuned so each act's bosses have similar bot loss rates)
+const BANSHEE_CHILL=6, PIT_BURN=2, RK_EVERY=5, RK_N=2, BR_N=1; // v35 boss numbers (tuned so each act's bosses have similar bot loss rates)
 const ACT_GROWTH=[ENV('G1',1.10),ENV('G2',1.12),ENV('G3',1.13)], ENDLESS_GROWTH=ENV('GE',1.20), ACT3_BOOST=ENV('ACT3',1.12);
 const floorGrowth=f=>f>FLOORS?ENDLESS_GROWTH:ACT_GROWTH[actOf(f-1)-1]; // an act's faster rate starts after its first floor, so entering the act is no cliff
 const enemyMult=(floor,depth)=>{ let m=0.7; for(let f=2;f<=floor;f++) m*=floorGrowth(f); return m*(1+0.10*depth)*(floor>=9?ACT3_BOOST:1); };

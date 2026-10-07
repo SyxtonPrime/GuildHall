@@ -7,9 +7,25 @@ const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=ri(i+1);[a[i
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const ENV=(k,d)=>+((typeof process!=='undefined'&&process.env&&process.env[k])||d); // tuning knobs the balance bot can override (browser: defaults)
 
+// ---------- Statuses ----------
+// Chill slows 2.5% a stack (up to 20 stacks). A unit at 20 or more is Frozen: its next attack deals half damage (a quarter at 40, and so on)
+// and consumes 20; under 20, attacking halves its Chill. Burn deals 1 a stack a second and halves each second; a unit that reaches 10 is Ablaze
+// and its Burn never decays below 10 unless something removes it. Poison deals 1 a stack a second (ignoring Armor and Shield) and loses 1; at 15
+// a unit is Festering: Armor counts as 0 and it cannot be healed or gain Shield. Frozen, Ablaze and Festering are the afflictions.
+// Two afflictions at once mark a unit for the rest of the fight: Brittle (Frozen + Ablaze: every Chill or Burn application is +1), Blighted
+// (Ablaze + Festering: +25% damage from statuses), Crippled (Frozen + Festering: attacks 25% slower). All three: Ruined (+50% damage from
+// everything, and all three marks). The rules are the same for heroes and enemies.
+const FROZEN_AT=20, ABLAZE_AT=10, FESTER_AT=ENV('FESTER',15), CHILL_SLOW=ENV('CHILLSLOW',0.025), CHILL_SLOW_MAX=20;
+const isFrozen=u=>(u.st.chill||0)>=FROZEN_AT, isAblaze=u=>!!u.ablaze, isFestering=u=>(u.st.poison||0)>=FESTER_AT;
+const chill5=u=>Math.min(5,u.st.chill||0); // content written against the old 5-stack Chill cap reads Chill through this
+// Crit and dodge chance halve after each success and reset on the first failure, so stacked chance never means a guaranteed streak.
+// Guaranteed crits and dodges (forceCrit / forceDodge) always succeed and leave the streak alone.
+const STREAKS=ENV('STREAK',1), CHILL_SHED=ENV('CHILLSHED',1); // bot knobs: STREAK=0 restores plain rolls, CHILLSHED=0 stops attacking from halving Chill
+const streakRoll=(chance,unit,key)=>{ if(Math.random()<chance/(STREAKS?Math.pow(2,unit[key]||0):1)){ unit[key]=(unit[key]||0)+1; return true; } unit[key]=0; return false; };
+
 // ---------- Heroes ----------
 const REAPER_HP=46, REAPER_GAIN=3, REAPER_CAP=60;
-const BURN_DMG=2; // Burn deals this × its stacks per tick (it halves each tick, so stacks are hard to build) // Reaper grows permanently with kills
+const BURN_DMG=ENV('BURNDMG',1); // Burn deals this × its stacks per tick (it halves each tick until Ablaze holds it at 10) // Reaper grows permanently with kills
 const HEROES={
  knight:{tags:['shield', 'tank'],name:'Knight',row:'front',hp:58,atk:5,spd:0.8,armor:2,
   ab:L=>`Whenever another ally is hit, gain ${1+L} Shield.`,
@@ -43,9 +59,9 @@ const HEROES={
   ab:L=>`Whenever Burn damages an enemy, gain ${L} Shield.`,
   hooks:{onBurnDamage:(u,t,d,B)=>addShield(u,u.flags.ashenheart?d:u.L,B)}},
  glacier:{tags:['chill', 'shield', 'tank'],name:'Glacier Warden',row:'front',hp:54,atk:4,spd:0.8,
-  ab:L=>`Attackers that hit her gain 1 Chill. She takes −1 damage per Chill on her attacker (−2 at ★★★).`,
-  hooks:{onDefend:(u,src,a,B)=>{ a.bonus-=(u.L>=3?2:1)*(src.st.chill||0); }, onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack'&&src.alive) applyStatus(u,src,'chill',u.flags.permafrost?2:1,B); },
-         onTarget:(u,t,a,B)=>{ if(u.flags.shatter&&t.st.chill>=5) a.bonus+=12; }}},
+  ab:L=>`Attackers that hit her gain 1 Chill. She takes −1 damage per Chill on her attacker, up to 5 (−2 at ★★★).`,
+  hooks:{onDefend:(u,src,a,B)=>{ a.bonus-=(u.L>=3?2:1)*chill5(src); }, onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack'&&src.alive) applyStatus(u,src,'chill',u.flags.permafrost?2:1,B); },
+         onTarget:(u,t,a,B)=>{ if(u.flags.shatter&&isFrozen(t)) a.bonus+=12; }}},
  duelist:{tags:['crit'],name:'Duelist',row:'mid',hp:40,atk:6,spd:1.1,
   ab:L=>`Every 3rd attack is a guaranteed crit. Her crits reduce the target's ATK by ${L+1}.`,
   hooks:{onAttack:(u,a,B)=>{ const n=u.flags.form?2:3; if(u.attacks%n===n-1) a.forceCrit=true; }, onHit:(u,t,d,B)=>{ if(u.lastCrit){ t.atk=Math.max(1,t.atk-u.L-1-(u.flags.shred?3:0)); B.fx(t,`-${u.L} ATK`,'miss'); if(u.flags.flourish) u.spd*=1.05; } },
@@ -63,8 +79,8 @@ const HEROES={
   ab:L=>`Other allies attack ${12*L}% faster and have +${L} ATK.`,
   hooks:{onStart:(u,B)=>{ alliesOf(u,B).forEach(x=>{ if(x!==u){ x.spd*=1+0.12*u.L; x.atk+=u.L; } }); }}},
  frostmage:{tags:['chill'],name:'Frost Mage',row:'back',hp:34,atk:5,spd:0.9,apply:L=>({chill:1}),locked:'Win a run',
-  ab:L=>`Attacks apply Chill (−10% speed each, max 5) and deal +${L} damage per Chill on the target.`,
-  hooks:{onAttack:(u,a,B)=>{ if(u.flags.blizzard){ a.hitAll=true; a.mult*=0.5; } }, onTarget:(u,t,a,B)=>{ a.bonus+=u.L*(t.st.chill||0); if(u.flags.deepfreeze&&t.st.chill>=5) a.mult*=2; }}},
+  ab:L=>`Attacks apply Chill (−2.5% speed each; Frozen at 20) and deal +${L} damage per Chill on the target, up to 5.`,
+  hooks:{onAttack:(u,a,B)=>{ if(u.flags.blizzard){ a.hitAll=true; a.mult*=0.5; } }, onTarget:(u,t,a,B)=>{ a.bonus+=u.L*chill5(t); if(u.flags.deepfreeze&&isFrozen(t)) a.mult*=2; }}},
  reaper:{tags:['kill'],name:'Reaper',row:'front',hp:REAPER_HP,atk:8,spd:0.9,locked:'Slay 150 enemies in total',
   ab:L=>`Attacks execute enemies below ${15+5*L}% HP. Every kill permanently adds +${REAPER_GAIN} max HP (up to +${REAPER_CAP}) and heals ${5*L}.`,
   hooks:{onTarget:(u,t,a,B)=>{ if(t.hp<=t.maxHp*(0.15+0.05*u.L+(u.flags.dread?0.15:0)+(u.flags.grim?0.3:0))) a.execute=true; },
@@ -97,7 +113,7 @@ const TRAITS={
  a_numb:{tags:['chill'],hero:'apothecary',name:'Numbing Toxin',desc:'Poison she applies also applies 1 Chill',flag:'numb'},
  p_inferno:{tags:['burn'],hero:'pyromancer',name:'Inferno',desc:'Her Burn decays by 1 instead of halving',flag:'slowBurn'},
  p_back:{tags:['burn'],hero:'pyromancer',name:'Backdraft',desc:'Hits everyone for 100% instead of 60%',flag:'aoeFull'},
- p_shock:{tags:['chill'],hero:'pyromancer',name:'Thermal Shock',desc:'Hitting a Chilled enemy deals +4 per Chill, then removes the Chill',hooks:{onTarget:(u,t,a,B)=>{ if(t.st.chill>0){ a.bonus+=4*t.st.chill; t.st.chill=0; } }}},
+ p_shock:{tags:['chill'],hero:'pyromancer',name:'Thermal Shock',desc:'Hitting a Chilled enemy deals +4 per Chill (up to 5), then removes the Chill',hooks:{onTarget:(u,t,a,B)=>{ if(t.st.chill>0){ a.bonus+=4*chill5(t); t.st.chill=0; } }}},
  c_bless:{tags:['shield'],hero:'cleric',name:'Blessing',desc:'Her heals also grant 4 Shield',flag:'blessing'},
  c_radiance:{tags:['heal'],hero:'cleric',name:'Radiance',desc:'Heals every ally instead, for half',flag:'radiance'},
  c_consec:{tags:['burn'],hero:'cleric',name:'Consecrate',desc:'Each heal also applies 2 Burn to a random enemy',flag:'consecrate'},
@@ -113,16 +129,16 @@ const TRAITS={
  bd_anthem:{tags:['speed'],hero:'bard',name:'Anthem',desc:'Other allies also +2 ATK',hooks:{onStart:(u,B)=>alliesOf(u,B).forEach(x=>{ if(x!==u) x.atk+=2; })}},
  bd_lull:{tags:['chill'],hero:'bard',name:'Lullaby',desc:'Enemies start with 3 Chill',hooks:{onStart:(u,B)=>aliveEnemies(u,B).forEach(t=>applyStatus(u,t,'chill',3,B))}},
  bd_war:{tags:['crit'],hero:'bard',name:'War Song',desc:'Other allies +15% crit chance',hooks:{onStart:(u,B)=>alliesOf(u,B).forEach(x=>{ if(x!==u) x.crit+=0.15; })}},
- f_deep:{tags:['chill'],hero:'frostmage',name:'Deep Freeze',desc:'Attacks on a 5-Chill target deal ×2',flag:'deepfreeze'},
+ f_deep:{tags:['chill'],hero:'frostmage',name:'Deep Freeze',desc:'Attacks on a Frozen target deal ×2',flag:'deepfreeze'},
  f_bliz:{tags:['chill'],hero:'frostmage',name:'Blizzard',desc:'Hits all enemies for 50%, chilling each',flag:'blizzard'},
- f_brittle:{tags:['crit'],hero:'frostmage',name:'Brittle',desc:'+10% crit chance per Chill on the target',hooks:{onTarget:(u,t,a,B)=>{ a.critBonus=(a.critBonus||0)+0.1*(t.st.chill||0); }}},
+ f_brittle:{tags:['crit'],hero:'frostmage',name:'Cold Read',desc:'+10% crit chance per Chill on the target, up to 5',hooks:{onTarget:(u,t,a,B)=>{ a.critBonus=(a.critBonus||0)+0.1*chill5(t); }}},
  re_harvest:{tags:['kill'],hero:'reaper',name:'Harvest',desc:'His kills grant all allies +2 ATK',hooks:{onKill:(u,t,B)=>alliesOf(u,B).forEach(x=>{ if(x.alive){x.atk+=2;} })}},
  re_dread:{tags:['kill'],hero:'reaper',name:'Dread',desc:'Execute threshold +15%',flag:'dread'},
  re_soul:{tags:['burn'],hero:'reaper',name:'Soul Fire',desc:'Executes set every enemy ablaze: 4 Burn',hooks:{onKill:(u,t,B)=>{ if(u.lastExec) aliveEnemies(u,B).forEach(x=>applyStatus(u,x,'burn',4,B)); }}},
  aw_cinder:{tags:['burn'],hero:'ashwalker',name:'Cinder Skin',desc:'Attackers that hit him gain 2 Burn',hooks:{onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack'&&src.alive) applyStatus(u,src,'burn',2,B); }}},
  aw_pyre:{tags:['burn'],hero:'ashwalker',name:'Pyre',desc:'When an ally dies, every enemy gains 4 Burn',hooks:{onAllyDeath:(u,d,B)=>aliveEnemies(u,B).forEach(t=>applyStatus(u,t,'burn',4,B))}},
  aw_brim:{tags:['poison'],hero:'ashwalker',name:'Brimstone',desc:'When Burn damages an enemy, it also gains 1 Poison',hooks:{onBurnDamage:(u,t,d,B)=>{ if(t.alive) applyStatus(u,t,'poison',1,B); }}},
- gw_shatter:{tags:['chill'],hero:'glacier',name:'Shatter',desc:'Her attacks on 5-Chill targets deal +12',flag:'shatter'},
+ gw_shatter:{tags:['chill'],hero:'glacier',name:'Shatter',desc:'Her attacks on Frozen targets deal +12',flag:'shatter'},
  gw_grip:{tags:['chill'],hero:'glacier',name:"Winter's Grip",desc:'All heroes deal +15% to Chilled enemies',flag:'wintersgrip'},
  gw_frozen:{tags:['shield'],hero:'glacier',name:'Frozen Armor',desc:'Whenever an enemy gains Chill, she gains 2 Shield',flag:'frozenarmor'},
  du_riposte:{tags:['dodge'],hero:'duelist',name:'Riposte',desc:'20% dodge; counterattacks after dodging',mod:{dodge:0.2},flag:'riposte'},
@@ -144,9 +160,9 @@ const FUSIONS={
  fu_b_shield:{tr:'burn',out:'shield',name:'Heat Shield',desc:'Whenever your Burn damages an enemy, gain 2 Shield',hooks:{onBurnDamage:(u,t,d,B)=>{ if(t.burnSrc===u) addShield(u,2,B); }}},
  fu_b_heal:{tr:'burn',out:'heal',name:'Warmth',desc:'Whenever your Burn damages an enemy, heal the most injured ally 2',hooks:{onBurnDamage:(u,t,d,B)=>{ if(t.burnSrc===u) heal(lowestAlly(u,B),2,B,u); }}},
  fu_b_crit:{tr:'burn',out:'crit',name:'Glowing Marks',desc:'+8% crit per Burn on the target (max +40%)',hooks:{onTarget:(u,t,a,B)=>{ a.critBonus=(a.critBonus||0)+Math.min(0.4,0.08*(t.st.burn||0)); }}},
- fu_c_crit:{tr:'chill',out:'crit',name:'Brittle Edge',desc:'+8% crit per Chill on the target',hooks:{onTarget:(u,t,a,B)=>{ a.critBonus=(a.critBonus||0)+0.08*(t.st.chill||0); }}},
+ fu_c_crit:{tr:'chill',out:'crit',name:'Brittle Edge',desc:'+8% crit per Chill on the target (up to 5)',hooks:{onTarget:(u,t,a,B)=>{ a.critBonus=(a.critBonus||0)+0.08*chill5(t); }}},
  fu_c_poison:{tr:'chill',out:'poison',name:'Frostbite',desc:'When you apply Chill, also apply 1 Poison',hooks:{onApply:(u,k,t,n,B)=>{ if(k==='chill') applyStatus(u,t,'poison',1,B); }}},
- fu_c_burn:{tr:'chill',out:'burn',name:'Thermal Clash',desc:'Hitting a Chilled enemy applies Burn equal to its Chill',hooks:{onTarget:(u,t,a,B)=>{ if(t.st.chill>0) a.extraApply=Object.assign({},a.extraApply,{burn:t.st.chill}); }}},
+ fu_c_burn:{tr:'chill',out:'burn',name:'Thermal Clash',desc:'Hitting a Chilled enemy applies Burn equal to its Chill (up to 10)',hooks:{onTarget:(u,t,a,B)=>{ if(t.st.chill>0) a.extraApply=Object.assign({},a.extraApply,{burn:Math.min(10,t.st.chill)}); }}},
  fu_c_shield:{tr:'chill',out:'shield',name:'Rime',desc:'When you apply Chill, gain 2 Shield',hooks:{onApply:(u,k,t,n,B)=>{ if(k==='chill') addShield(u,2,B); }}},
  fu_k_poison:{tr:'crit',out:'poison',name:'Envenomed Crits',desc:'Crits apply 2 Poison',hooks:{onCrit:(u,t,B)=>applyStatus(u,t,'poison',2,B)}},
  fu_k_burn:{tr:'crit',out:'burn',name:'Searing Crits',desc:'Crits apply 2 Burn',hooks:{onCrit:(u,t,B)=>applyStatus(u,t,'burn',2,B)}},
@@ -246,7 +262,7 @@ const SKILLS={
   {need:'G',name:'Pickpocket',desc:'+1 gold for each enemy he kills',gold:{kill:1}},
   {need:'KK',name:'Lethal',desc:'Crits deal ×3 instead of ×2',flag:'crit3'}, {need:'KV',ref:'r_assn'},
   {need:'KS',name:'Shadowstep',desc:'20% dodge. Slips back to the back row when he drops below 66% HP (once per fight)',mod:{dodge:0.2},flag:'retreat'},
-  {need:'KKF',name:'Frozen Precision',desc:'Crits apply 2 Chill; +8% crit per Chill on the target',flag:'critChill',hooks:{onTarget:(u,t,a,B)=>{ a.critBonus=(a.critBonus||0)+0.08*(t.st.chill||0); }}},
+  {need:'KKF',name:'Frozen Precision',desc:'Crits apply 2 Chill; +8% crit per Chill on the target (up to 5)',flag:'critChill',hooks:{onTarget:(u,t,a,B)=>{ a.critBonus=(a.critBonus||0)+0.08*chill5(t); }}},
   {need:'KKK',name:'Flurry',desc:'35% chance each attack also hits another enemy for 50%',hooks:{onAttackEnd:(u,t,B)=>{ if(Math.random()<0.35){ const o=randomEnemy(u,B,t); if(o) hit(u,o,{mult:0.5},B); } }}},
   {need:'KKKK',name:'Death Blossom',desc:'Each of his regular attacks that crits is followed by one extra attack (the extra attack cannot trigger this again)',hooks:{onAttack:(u,a,B)=>{ if(u.chain===0) u.blossomed=false; }, onCrit:(u,t,B)=>{ if(u.chain===0&&!u.blossomed){ u.blossomed=true; u.chain++; attack(u,B); u.chain--;} }}},
   {need:'KKVS',name:'Venom Dance',desc:'+20% dodge; dodging gives the attacker 3 Poison; crits apply 2 Poison',mod:{dodge:0.2},flags:['critPoison'],hooks:{onDodge:(u,src,B)=>applyStatus(u,src,'poison',3,B)}} ],
@@ -255,7 +271,7 @@ const SKILLS={
   {need:'WW',ref:'s_aegis'}, {need:'WK',ref:'s_bash'}, {need:'WF',ref:'s_frost'},
   {need:'WWW',ref:'k_bastion'}, {need:'WWK',ref:'fu_s_crit'},
   {need:'WWWW',name:'Aegis Eternal',desc:'Regains 6 Shield every second and starts with 20 extra Shield',hooks:{onStart:(u,B)=>addShield(u,20,B), onSecond:(u,B)=>addShield(u,6,B)}},
-  {need:'WWKF',name:'Glacial Bash',desc:'Attacks deal +2 per Chill on the target; her crits apply 2 Chill',flag:'critChill',hooks:{onTarget:(u,t,a,B)=>{ a.bonus+=2*(t.st.chill||0); }}} ],
+  {need:'WWKF',name:'Glacial Bash',desc:'Attacks deal +2 per Chill on the target (up to 5); her crits apply 2 Chill',flag:'critChill',hooks:{onTarget:(u,t,a,B)=>{ a.bonus+=2*chill5(t); }}} ],
  ranger:[ st('S','Fleet','+15% attack speed',{spdMult:1.15}), st('K','Keen Eye','+15% crit chance',{crit:0.15}),
   st('V','Barbed Tips','Attacks apply +1 Poison',null,{poison:1}),
   {need:'SS',ref:'ra_volley'}, {need:'SK',ref:'ra_pierce'}, {need:'SE',ref:'ra_fire'},
@@ -275,8 +291,8 @@ const SKILLS={
   {need:'EE',ref:'p_inferno'}, {need:'ES',ref:'p_back'}, {need:'EF',ref:'p_shock'},
   {need:'EEE',name:'Firestorm',desc:'Burn she applies is doubled',statusMult:2},
   {need:'EEW',ref:'fu_b_shield'},
-  {need:'EEEE',name:'Conflagration',desc:'Whenever her Burn damages an enemy, every other enemy gains 1 Burn',hooks:{onBurnDamage:(u,t,d,B)=>{ if(t.burnSrc!==u) return; aliveEnemies(u,B).forEach(x=>{ if(x!==t){ x.st.burn=(x.st.burn||0)+1; x.burnSrc=u; } }); }}},
-  {need:'EESK',name:'Blue Flame',desc:'Crits apply 3 Burn; attacks deal +1 per Burn on the target',flag:'critBurn',hooks:{onTarget:(u,t,a,B)=>{ a.bonus+=(t.st.burn||0); }}} ],
+  {need:'EEEE',name:'Conflagration',desc:'Whenever her Burn damages an enemy, every other enemy gains 1 Burn',hooks:{onBurnDamage:(u,t,d,B)=>{ if(t.burnSrc!==u) return; aliveEnemies(u,B).forEach(x=>{ if(x!==t){ gainStatus(x,'burn',1,B); x.burnSrc=u; } }); }}},
+  {need:'EESK',name:'Blue Flame',desc:'Crits apply 3 Burn; attacks deal +1 per Burn on the target (up to 10)',flag:'critBurn',hooks:{onTarget:(u,t,a,B)=>{ a.bonus+=Math.min(10,t.st.burn||0); }}} ],
  cleric:[ st('H','Devout','+10 HP',{hp:10}), st('S','Hymn','+15% attack speed',{spdMult:1.15}),
   {need:'GH',name:'Tithe',desc:'Interest cap raised by 1 (3 → 4)',gold:{interest:1}},
   {need:'HH',ref:'c_radiance'}, {need:'HW',ref:'c_bless'}, {need:'HE',ref:'c_consec'},
@@ -308,8 +324,8 @@ const SKILLS={
   {need:'FF',ref:'gw_grip'}, {need:'FK',ref:'gw_shatter'}, {need:'FW',ref:'gw_frozen'},
   {need:'FFF',name:'Permafrost',desc:'Attackers that hit her gain 2 Chill instead of 1',flag:'permafrost'},
   {need:'FFW',ref:'fu_c_shield'},
-  {need:'FFFF',name:'Absolute Zero',desc:'Enemies at 5 Chill take +50% damage from every hero',flag:'abszero'},
-  {need:'FFWK',name:"Glacier's Edge",desc:'+8% crit and +2 damage per Chill on her target',hooks:{onTarget:(u,t,a,B)=>{ const c=t.st.chill||0; a.critBonus=(a.critBonus||0)+0.08*c; a.bonus+=2*c; }}} ],
+  {need:'FFFF',name:'Absolute Zero',desc:'Frozen enemies take +50% damage from every hero',flag:'abszero'},
+  {need:'FFWK',name:"Glacier's Edge",desc:'+8% crit and +2 damage per Chill on her target (up to 5)',hooks:{onTarget:(u,t,a,B)=>{ const c=chill5(t); a.critBonus=(a.critBonus||0)+0.08*c; a.bonus+=2*c; }}} ],
  duelist:[ st('K','En Garde','+15% crit chance',{crit:0.15}), st('S','Footwork','+15% attack speed',{spdMult:1.15}),
   st('E','Hot Temper','+2 ATK',{atk:2}),
   {need:'KK',ref:'du_flourish'},
@@ -344,8 +360,8 @@ const SKILLS={
   st('W','Ice Armor','+1 Armor, +5 HP',{armor:1,hp:5}),
   {need:'FF',ref:'f_bliz'}, {need:'FK',ref:'f_brittle'}, {need:'FE',ref:'fu_c_burn'},
   {need:'FFF',ref:'f_deep'}, {need:'FFW',ref:'fu_c_shield'},
-  {need:'FFFF',name:'Shatterpoint',desc:'Hitting a 5-Chill enemy deals +15 and shatters the Chill',hooks:{onTarget:(u,t,a,B)=>{ if(t.st.chill>=5){ a.bonus+=15; t.st.chill=0; } }}},
-  {need:'FFKE',name:'Frostfire',desc:'Crits apply 3 Burn; attacks deal +1 per Burn on the target',flag:'critBurn',hooks:{onTarget:(u,t,a,B)=>{ a.bonus+=(t.st.burn||0); }}} ],
+  {need:'FFFF',name:'Shatterpoint',desc:'Hitting a Frozen enemy deals +15 and shatters the Chill',hooks:{onTarget:(u,t,a,B)=>{ if(isFrozen(t)){ a.bonus+=15; t.st.chill=0; } }}},
+  {need:'FFKE',name:'Frostfire',desc:'Crits apply 3 Burn; attacks deal +1 per Burn on the target (up to 10)',flag:'critBurn',hooks:{onTarget:(u,t,a,B)=>{ a.bonus+=Math.min(10,t.st.burn||0); }}} ],
  reaper:[ st('K','Whetted Scythe','+2 ATK',{atk:2}), st('H','Grave Vigor','+10 HP',{hp:10}),
   {need:'GK',name:'Death Tax',desc:'+1 gold for each enemy he kills',gold:{kill:1}},
   {need:'KK',ref:'re_dread'}, {need:'KE',ref:'re_soul'}, {need:'KS',ref:'re_harvest'},
@@ -385,7 +401,7 @@ const RELICS={
  drums:{name:'Drums of War',tier:'common',cost:6,desc:'Every 3 seconds, all heroes gain +1 ATK',
   hooks:{onSecond:(u,B)=>{ if(u.secs%3===0){u.atk+=1;} }}},
  wildfire:{name:'Wildfire',tier:'rare',cost:7,desc:'Whenever Burn damages an enemy, 1 Burn spreads to another enemy'},
- glacialcore:{name:'Glacial Core',tier:'common',cost:5,desc:'Attacks on Chilled enemies deal +1 per Chill'},
+ glacialcore:{name:'Glacial Core',tier:'common',cost:5,desc:'Attacks on Chilled enemies deal +1 per Chill (up to 5)'},
  mirrorward:{name:'Mirror Ward',tier:'rare',cost:7,desc:"When a hero's Shield absorbs damage, the attacker takes that much"},
  luckycoin:{name:'Lucky Coin',tier:'common',cost:6,desc:'All heroes +10% crit. Crits heal the attacker 3'},
  resonance:{name:'Resonance',tier:'rare',cost:7,desc:'Enemies carrying 3 different statuses take +30% damage from everything'},
@@ -420,7 +436,7 @@ const ENEMIES={
  goblin:{name:'Goblin',row:'front',hp:16,atk:3,spd:1.2,ab:'Cowardly: attacks 30% faster while another Goblin is alive.',
   hooks:{onAttack:(u,a,B)=>{ if(alliesOf(u,B).some(x=>x!==u&&x.alive&&x.eid==='goblin')) u.timer+=0.3; }}},
  archer:{name:'Goblin Archer',row:'back',hp:12,atk:4,spd:1.0,ab:'Aims at the back row when it can.',hooks:{onAttack:(u,a)=>{ a.preferBack=true; }}},
- spider:{name:'Cave Spider',row:'front',hp:20,atk:3,spd:1.1,apply:{poison:2},ab:'Attacks apply 2 Poison.'},
+ spider:{name:'Cave Spider',row:'front',hp:20,atk:3,spd:1.1,apply:{poison:ENV('SPIDER',2)},ab:'Attacks apply 2 Poison.'},
  wolf:{name:'Warg',row:'front',hp:18,atk:4,spd:1.4,ab:'On kill, +50% speed.',hooks:{onKill:(u)=>{u.spd*=1.5;}}},
  shaman:{name:'Shaman',row:'back',hp:22,atk:2,spd:0.8,ab:'Every 2s, heals its most injured ally 4.',
   hooks:{onSecond:(u,B)=>{ if(u.secs%2===0){const a=lowestAlly(u,B); if(a) heal(a,4,B);} }}},
@@ -457,7 +473,7 @@ const ENEMIES={
  fireelemental:{name:'Fire Elemental',row:'back',hp:24,atk:3,spd:0.9,apply:{burn:1},flags:{fireproof:1},ab:'Attacks apply 1 Burn, and a random other hero also catches 1 Burn. Immune to Burn.',
   hooks:{onAttackEnd:(u,t,B)=>{ const o=randomEnemy(u,B,t); if(o) applyStatus(u,o,'burn',1,B); }}},
  harpy:{name:'Harpy',row:'back',hp:22,atk:4,spd:1.1,dodge:0.25,targetLowest:true,ab:'25% dodge. Swoops on the lowest-HP hero, wherever they stand.'},
- basilisk:{name:'Basilisk',row:'front',hp:34,atk:5,spd:0.7,apply:{chill:1},ab:'Attacks apply 1 Chill. Petrify: deals ×2 to a target at 5 Chill.',hooks:{onTarget:(u,t,a)=>{ if(t.st.chill>=5) a.mult*=2; }}},
+ basilisk:{name:'Basilisk',row:'front',hp:34,atk:5,spd:0.7,apply:{chill:3},ab:'Attacks apply 3 Chill. Petrify: deals ×2 to a target with 10 or more Chill.',hooks:{onTarget:(u,t,a)=>{ if((t.st.chill||0)>=10) a.mult*=2; }}},
  fiend:{name:'Fiend',row:'front',hp:32,atk:4,spd:0.9,ab:'Trident: each attack hits 2 targets. +3 ATK when an ally dies.',
   hooks:{onAttack:(u,a)=>{ a.extraTargets=1; }, onAllyDeath:(u)=>{ u.atk+=3; }}},
  // --- elites ---
@@ -484,7 +500,7 @@ const ENEMIES={
   hooks:{onHit:(u,t,d,B)=>{ if(d>0) heal(u,Math.ceil(d/2),B); }, onDamaged:(u,src,d,info,B)=>{ if(!u.batted&&u.hp>0&&u.hp<u.maxHp/2){ u.batted=true; u.veilUntil=B.t+3; B.fx(u,'BAT SWARM','buff'); B.logf(`${u.name} dissolves into bats.`); for(let k=0;k<3;k++) spawnEnemy(B,'bat','back'); } }}},
  banshee:{name:'Banshee',row:'back',hp:110,atk:6,spd:0.9,dodge:0.3,boss:true,ab:'30% dodge. Every 4s she wails: every hero gains 2 Chill.',
   hooks:{onSecond:(u,B)=>{ if(u.secs%4===0){ B.fx(u,'WAIL','buff'); aliveEnemies(u,B).forEach(t=>applyStatus(u,t,'chill',BANSHEE_CHILL,B)); } }}},
- pitlord:{name:'Pit Lord',row:'front',hp:170,atk:9,spd:0.7,armor:1,boss:true,flags:{fireproof:1},ab:'1 Armor. Immune to Burn. Every 2s every hero gains 1 Burn. Deals ×1.25 to Shielded heroes.',
+ pitlord:{name:'Pit Lord',row:'front',hp:170,atk:9,spd:0.7,armor:1,boss:true,flags:{fireproof:1},ab:'1 Armor. Immune to Burn. Every 2s every hero gains 2 Burn. Deals ×1.25 to Shielded heroes.',
   hooks:{onSecond:(u,B)=>{ if(u.secs%2===0) aliveEnemies(u,B).forEach(t=>applyStatus(u,t,'burn',PIT_BURN,B)); }, onTarget:(u,t,a)=>{ if(t.shield>0) a.mult*=1.25; }}},
 };
 // Encounter templates: each act rolls one of several themed groups, so fights differ in shape, not just in art.
@@ -522,7 +538,7 @@ const kindOf=f=>f%4===0?'boss':'fight'; // elites are chosen, never fixed
 const curAct=f=>Math.ceil(f/4); // act (or 4-floor endless block) for once-per-act limits
 // Enemy strength compounds per floor: 10% in Act 1, 12% in Act 2, 13% in Act 3 (plus a one-off step entering Act 3),
 // and much faster in endless so a run there ends in a handful of floors rather than dragging on for dozens.
-const BANSHEE_CHILL=2, PIT_BURN=1, RK_EVERY=5, RK_N=2, BR_N=1; // v35 boss numbers (tuned so each act's bosses have similar bot loss rates)
+const BANSHEE_CHILL=6, PIT_BURN=2, RK_EVERY=5, RK_N=2, BR_N=1; // v35 boss numbers (tuned so each act's bosses have similar bot loss rates)
 const ACT_GROWTH=[ENV('G1',1.10),ENV('G2',1.12),ENV('G3',1.13)], ENDLESS_GROWTH=ENV('GE',1.20), ACT3_BOOST=ENV('ACT3',1.12);
 const floorGrowth=f=>f>FLOORS?ENDLESS_GROWTH:ACT_GROWTH[actOf(f-1)-1]; // an act's faster rate starts after its first floor, so entering the act is no cliff
 const enemyMult=(floor,depth)=>{ let m=0.7; for(let f=2;f<=floor;f++) m*=floorGrowth(f); return m*(1+0.10*depth)*(floor>=9?ACT3_BOOST:1); };
@@ -603,13 +619,13 @@ function computeStats(h,relics){
   if(relics.includes('huntinghorn')&&h.row==='back') spd*=1.25;
   if(relics.includes('cloak')) dodge+=0.1;
   if(relics.includes('boots')){ spd*=1.2; dodge+=0.1; }
-  return {maxHpRaw:Math.round(hpRaw),maxHp:Math.max(1,Math.round(hp)),atk:Math.round(atk),spd:Math.round(spd*100)/100,armor,crit,dodge:Math.min(DODGE_CAP,dodge),apply,statusMult,targetLowest,flags,startShield,regen,retaliate,spikes,lifesteal,shieldPerAttack,giltHand:gh.gilt||0,giltArmor:ga.gilt||0,skills,gold,gemHooks:gemDefs.map(g=>g.hooks||{})};
+  return {maxHpRaw:Math.round(hpRaw),maxHp:Math.max(1,Math.round(hp)),atk:Math.round(atk),spd:Math.round(spd*100)/100,armor,crit,dodge,apply,statusMult,targetLowest,flags,startShield,regen,retaliate,spikes,lifesteal,shieldPerAttack,giltHand:gh.gilt||0,giltArmor:ga.gilt||0,skills,gold,gemHooks:gemDefs.map(g=>g.hooks||{})};
 }
 
 // ---------- Battle ----------
 function baseUnit(def,side,row,s,B){
   return {uid:B.uid++,def,name:def.name,side,row,alive:true,hp:s.maxHp,maxHp:s.maxHp,maxHp0:s.maxHp,atk:s.atk,spd:s.spd,armor:s.armor,crit:s.crit||0,dodge:s.dodge||0,
-    shield:0,st:{},flags:{},tmpMult:1,timer:0.35+Math.random()*0.3,stTimer:Math.random()*0.2,secs:0,attacks:0,chain:0,L:1,apply:{},hooks:[],statusMult:1,targetLowest:false,hitAll:false,hitAllMult:1,
+    shield:0,st:{},kw:{},ablaze:false,critStreak:0,dodgeStreak:0,flags:{},tmpMult:1,timer:0.35+Math.random()*0.3,stTimer:Math.random()*0.2,secs:0,attacks:0,chain:0,L:1,apply:{},hooks:[],statusMult:1,targetLowest:false,hitAll:false,hitAllMult:1,
     stats:{dealt:0,taken:0,healed:0,kills:0}};
 }
 function createBattle(heroes,enc,relics){
@@ -681,13 +697,13 @@ const alliesOf=(u,B)=>B.units.filter(x=>x.side===u.side);
 const aliveEnemies=(u,B)=>B.units.filter(x=>x.side!==u.side&&x.alive);
 function lowestAlly(u,B){ const a=alliesOf(u,B).filter(x=>x.alive); if(!a.length) return null; return a.reduce((m,x)=>(x.hp/x.maxHp)<(m.hp/m.maxHp)?x:m); }
 function randomEnemy(u,B,not){ const f=aliveEnemies(u,B).filter(x=>x!==not); return f.length?pick(f):null; }
-// hard caps so stacking buffs can never run away: dodge tops out at 75%, attack speed at 3 attacks/s, kill-chains at one per possible kill
-const DODGE_CAP=0.75, SPD_CAP=3, KILL_CHAIN_MAX=ROW_MAX*2;
-const effSpd=u=>Math.min(SPD_CAP,u.spd*(1-0.1*(u.st.chill||0)));
-function addShield(u,n,B,echo){ if(!u||!u.alive||n<=0) return; if(u.flags.shieldMult2) n*=2; u.shield+=n; B.fx(u,`+${n}`,'shield'); fireOnce(u,'onShieldGain',B,n);
+// hard caps so stacking buffs can never run away: attack speed at 3 attacks/s, kill-chains at one per possible kill (crit and dodge use streaks instead, see core)
+const SPD_CAP=3, KILL_CHAIN_MAX=ROW_MAX*2;
+const effSpd=u=>Math.min(SPD_CAP,u.spd*(1-CHILL_SLOW*Math.min(CHILL_SLOW_MAX,u.st.chill||0))*(u.kw.crippled?0.75:1));
+function addShield(u,n,B,echo){ if(!u||!u.alive||n<=0) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.flags.shieldMult2) n*=2; u.shield+=n; B.fx(u,`+${n}`,'shield'); fireOnce(u,'onShieldGain',B,n);
   // Twin Aegis: copy to another random hero (the copy never copies itself)
   if(!echo&&u.hero&&B.relics.includes('twinaegis')){ const o=B.units.filter(x=>x!==u&&x.hero&&x.alive); if(o.length) addShield(pick(o),n,B,true); } }
-function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; B.fx(u,`+${r}`,'heal'); } if(n-r>0&&u.hero&&B.relics.includes('chalice')) addShield(u,Math.round(n-r),B); if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
+function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; B.fx(u,`+${r}`,'heal'); } if(n-r>0&&u.hero&&B.relics.includes('chalice')) addShield(u,Math.round(n-r),B); if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
 function pickTarget(u,foes,a,B){
   if(u.side==='e'&&B&&B.relics.includes('boots')&&!u.targetLowest&&!a.targetLowest&&!a.preferBack) return pick(foes); // Skirmisher's Boots: the back row is exposed
   if(a.preferBack){ const b=foes.filter(f=>f.row==='back'); if(b.length) return pick(b); }
@@ -698,6 +714,7 @@ function attack(u,B,forced){
   if(!u.alive||B.over) return;
   const a={mult:u.tmpMult||1,bonus:0,extraTargets:0,forceCrit:!!u.tmpCrit};
   fire(u,'onAttack',a,B);
+  const fz=Math.floor((u.st.chill||0)/FROZEN_AT); if(fz) a.mult/=Math.pow(2,fz); // Frozen: half damage per 20 Chill, consumed after the attack
   let foes=aliveEnemies(u,B).filter(f=>!(f.veilUntil>B.t)); if(!foes.length) return;
   let targets;
   if(forced&&forced.alive) targets=[forced];
@@ -706,17 +723,18 @@ function attack(u,B,forced){
   else { targets=[pickTarget(u,foes,a,B)]; for(let i=0;i<a.extraTargets;i++){ const o=foes.filter(f=>!targets.includes(f)); if(o.length) targets.push(pick(o)); } }
   u.attacks++;
   targets.forEach(t=>hit(u,t,a,B));
+  if(fz) u.st.chill-=fz*FROZEN_AT; else if(u.st.chill>0&&CHILL_SHED) u.st.chill=Math.floor(u.st.chill/2); // attacking sheds Chill: the Frozen amount, or half
   fire(u,'onAttackEnd',targets[0],B);
 }
 function hit(u,t,a,B){
   if(!t.alive||!u.alive) return;
-  if(Math.random()<Math.min(DODGE_CAP,t.dodge)){ B.anim(u,t,{type:'miss'}); B.fx(t,'miss','miss'); B.logf(`${t.name} dodges ${u.name}.`); fire(t,'onDodge',u,B); return; }
+  if(a.forceDodge||streakRoll(t.dodge,t,'dodgeStreak')){ B.anim(u,t,{type:'miss'}); B.fx(t,'miss','miss'); B.logf(`${t.name} dodges ${u.name}.`); fire(t,'onDodge',u,B); return; }
   const ac=Object.assign({mult:1,bonus:0},a);
   fire(u,'onTarget',t,ac,B);
   fire(t,'onDefend',u,ac,B);
-  if(t.st.chill>0&&u.side==='p'){ if(B.relics.includes('glacialcore')) ac.bonus+=t.st.chill; if(B.flags.wintersgrip) ac.mult*=1.15; if(t.st.chill>=5&&B.flags.abszero) ac.mult*=1.5; }
+  if(t.st.chill>0&&u.side==='p'){ if(B.relics.includes('glacialcore')) ac.bonus+=chill5(t); if(B.flags.wintersgrip) ac.mult*=1.15; if(isFrozen(t)&&B.flags.abszero) ac.mult*=1.5; }
   let dmg=Math.max(1,u.atk+ac.bonus)*ac.mult, crit=false;
-  if(ac.forceCrit||Math.random()<u.crit+(ac.critBonus||0)){ dmg*=u.flags.crit3?3:2; crit=true; }
+  if(ac.forceCrit||streakRoll(u.crit+(ac.critBonus||0),u,'critStreak')){ dmg*=u.flags.crit3?3:2; crit=true; }
   u.lastCrit=crit;
   let dealt;
   u.lastExec=!!ac.execute;
@@ -735,19 +753,36 @@ function applyStatus(src,t,k,n,B){
   if((t.flags.stone&&(k==='poison'||k==='burn'))||(t.flags.fireproof&&k==='burn')||(t.flags.boneproof&&k==='poison')){ B.fx(t,'immune','miss'); return; }
   n=n*(src.statusMult||1);
   if(k==='poison'&&src.side==='p'&&B.relics.includes('plaguebanner')) n+=1;
-  if(k==='chill') t.st.chill=Math.min(5,(t.st.chill||0)+n); else t.st[k]=(t.st[k]||0)+n;
+  if(t.kw.brittle&&(k==='chill'||k==='burn')) n+=1;
+  gainStatus(t,k,n,B);
   fireOnce(src,'onApply',B,k,t,n);
   if(k==='poison') t.poisonSrc=src; if(k==='burn') t.burnSrc=src;
   if(k==='poison'&&src.flags.numb&&!B._numb){ B._numb=1; applyStatus(src,t,'chill',1,B); B._numb=0; }
   if(k==='chill'&&src.side==='p'&&B.flags.frozenarmor) B.units.forEach(x=>{ if(x.alive&&x.flags.frozenarmor) addShield(x,2,B); });
   if(k==='poison'&&src.flags.virulent&&!B._vir){ B._vir=1; const o=randomEnemy(src,B,t); if(o) applyStatus(src,o,'poison',n/(src.statusMult||1),B); B._vir=0; }
 }
+// raw stack gain plus the threshold bookkeeping; applyStatus wraps this with sources, multipliers and hooks
+function gainStatus(t,k,n,B){
+  const was=t.st[k]||0; t.st[k]=was+n;
+  if(k==='burn'&&!t.ablaze&&t.st.burn>=ABLAZE_AT){ t.ablaze=true; B.fx(t,'ABLAZE','burn'); B.logf(`${t.name} is ablaze.`); }
+  if(k==='chill'&&was<FROZEN_AT&&t.st.chill>=FROZEN_AT){ B.fx(t,'FROZEN','buff'); B.logf(`${t.name} is frozen.`); }
+  if(k==='poison'&&was<FESTER_AT&&t.st.poison>=FESTER_AT){ B.fx(t,'FESTERING','poison'); B.logf(`${t.name} is festering.`); }
+  checkMarks(t,B);
+}
+// two afflictions at once mark the unit for the rest of the fight (see core); Ruined carries all three marks
+function checkMarks(t,B){
+  const f=isFrozen(t), a=isAblaze(t), p=isFestering(t);
+  const mark=(k,label)=>{ if(!t.kw[k]){ t.kw[k]=1; B.fx(t,label,'buff'); B.logf(`${t.name} is ${label.toLowerCase()}.`); } };
+  if(f&&a) mark('brittle','BRITTLE'); if(a&&p) mark('blighted','BLIGHTED'); if(f&&p) mark('crippled','CRIPPLED'); if(f&&a&&p) mark('ruined','RUINED');
+}
 function dealDamage(src,t,amount,info,B){
   if(!t.alive) return 0;
+  if(t.kw.ruined) amount*=1.5;
+  if(t.kw.blighted&&(info.type==='poison'||info.type==='burn')) amount*=1.25;
   if(info.type==='attack'&&src) B.anim(src,t,info);
   if(t.side==='e'&&B.relics.includes('resonance')&&['poison','burn','chill'].filter(k=>t.st[k]>0).length>=3) amount*=1.3;
   let dmg=Math.max(0,Math.round(amount));
-  if(!info.ignoreArmor&&dmg>0) dmg=Math.max(1,dmg-t.armor);
+  if(!info.ignoreArmor&&dmg>0&&!isFestering(t)) dmg=Math.max(1,dmg-t.armor); // Festering: Armor counts as 0
   if((!info.ignoreShield||t.flags.shieldAll)&&t.shield>0&&dmg>0){ const ab=Math.min(t.shield,dmg); t.shield-=ab; dmg-=ab; if(ab){ B.fx(t,`-${ab}`,'shield'); if(info.type==='attack'&&src&&src.alive){ fire(t,'onShieldAbsorb',src,ab,B); if(t.side==='p'&&B.relics.includes('mirrorward')) dealDamage(t,src,ab,{type:'thorns',ignoreArmor:true},B); } } }
   t.hp-=dmg; t.stats.taken+=dmg; if(src) src.stats.dealt+=dmg;
   if((dmg>0||!info.ignoreShield)&&!info.silent) B.fx(t,info.exec?'EXECUTE':String(dmg),info.crit?'crit':info.type);
@@ -765,7 +800,7 @@ function checkSmoke(u,B){
   if(u.row==='front'&&moveUnit(u,'back',B)) checkVanguard(B);
 }
 function die(t,killer,B){
-  t.alive=false; t.hp=0; t.shield=0; t.st_poisonAtDeath=t.st.poison||0; t.st={};
+  t.alive=false; t.hp=0; t.shield=0; t.st_poisonAtDeath=t.st.poison||0; t.st={}; t.ablaze=false;
   fire(t,'onDeath',B);
   if(t.alive) return;
   B.logf(`${t.name} falls.`);
@@ -782,8 +817,8 @@ function tickStatus(u,B){
     if(d>0&&src){ B.units.forEach(x=>{ if(x.side===src.side&&x.alive) fire(x,'onPoisonDamage',u,d,B); }); } }
   if(!u.alive) return;
   if(st.burn>0){ const src=u.burnSrc; let m=(src&&src.side==='p'&&B.relics.includes('kindling'))?2:1; if(src&&src.flags.flask&&st.poison>0) m*=1.5; if(src&&src.side==='p'&&st.chill>0&&B.relics.includes('steam')) m*=2;
-    const d=dealDamage(src,u,st.burn*BURN_DMG*m,{type:'burn',ignoreArmor:true},B); st.burn=(src&&src.flags.slowBurn)?st.burn-1:Math.floor(st.burn/2);
-    if(d>0&&src){ B.units.forEach(x=>{ if(x.side===src.side&&x.alive) fire(x,'onBurnDamage',u,d,B); }); if(src.side==='p'&&B.relics.includes('wildfire')){ const o=randomEnemy(src,B,u); if(o){ o.st.burn=(o.st.burn||0)+1; o.burnSrc=src; } } } }
+    const d=dealDamage(src,u,st.burn*BURN_DMG*m,{type:'burn',ignoreArmor:true},B); st.burn=(src&&src.flags.slowBurn)?st.burn-1:Math.floor(st.burn/2); if(u.ablaze) st.burn=Math.max(ABLAZE_AT,st.burn); // Ablaze holds the floor
+    if(d>0&&src){ B.units.forEach(x=>{ if(x.side===src.side&&x.alive) fire(x,'onBurnDamage',u,d,B); }); if(src.side==='p'&&B.relics.includes('wildfire')){ const o=randomEnemy(src,B,u); if(o){ gainStatus(o,'burn',1,B); o.burnSrc=src; } } } }
 }
 function checkEnd(B){
   if(B.over) return true;

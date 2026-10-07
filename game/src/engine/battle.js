@@ -1,7 +1,7 @@
 // ---------- Battle ----------
 function baseUnit(def,side,row,s,B){
   return {uid:B.uid++,def,name:def.name,side,row,alive:true,hp:s.maxHp,maxHp:s.maxHp,maxHp0:s.maxHp,atk:s.atk,spd:s.spd,armor:s.armor,crit:s.crit||0,dodge:s.dodge||0,
-    shield:0,st:{},flags:{},tmpMult:1,timer:0.35+Math.random()*0.3,stTimer:Math.random()*0.2,secs:0,attacks:0,chain:0,L:1,apply:{},hooks:[],statusMult:1,targetLowest:false,hitAll:false,hitAllMult:1,
+    shield:0,st:{},kw:{},ablaze:false,critStreak:0,dodgeStreak:0,flags:{},tmpMult:1,timer:0.35+Math.random()*0.3,stTimer:Math.random()*0.2,secs:0,attacks:0,chain:0,L:1,apply:{},hooks:[],statusMult:1,targetLowest:false,hitAll:false,hitAllMult:1,
     stats:{dealt:0,taken:0,healed:0,kills:0}};
 }
 function createBattle(heroes,enc,relics){
@@ -73,13 +73,13 @@ const alliesOf=(u,B)=>B.units.filter(x=>x.side===u.side);
 const aliveEnemies=(u,B)=>B.units.filter(x=>x.side!==u.side&&x.alive);
 function lowestAlly(u,B){ const a=alliesOf(u,B).filter(x=>x.alive); if(!a.length) return null; return a.reduce((m,x)=>(x.hp/x.maxHp)<(m.hp/m.maxHp)?x:m); }
 function randomEnemy(u,B,not){ const f=aliveEnemies(u,B).filter(x=>x!==not); return f.length?pick(f):null; }
-// hard caps so stacking buffs can never run away: dodge tops out at 75%, attack speed at 3 attacks/s, kill-chains at one per possible kill
-const DODGE_CAP=0.75, SPD_CAP=3, KILL_CHAIN_MAX=ROW_MAX*2;
-const effSpd=u=>Math.min(SPD_CAP,u.spd*(1-0.1*(u.st.chill||0)));
-function addShield(u,n,B,echo){ if(!u||!u.alive||n<=0) return; if(u.flags.shieldMult2) n*=2; u.shield+=n; B.fx(u,`+${n}`,'shield'); fireOnce(u,'onShieldGain',B,n);
+// hard caps so stacking buffs can never run away: attack speed at 3 attacks/s, kill-chains at one per possible kill (crit and dodge use streaks instead, see core)
+const SPD_CAP=3, KILL_CHAIN_MAX=ROW_MAX*2;
+const effSpd=u=>Math.min(SPD_CAP,u.spd*(1-CHILL_SLOW*Math.min(CHILL_SLOW_MAX,u.st.chill||0))*(u.kw.crippled?0.75:1));
+function addShield(u,n,B,echo){ if(!u||!u.alive||n<=0) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.flags.shieldMult2) n*=2; u.shield+=n; B.fx(u,`+${n}`,'shield'); fireOnce(u,'onShieldGain',B,n);
   // Twin Aegis: copy to another random hero (the copy never copies itself)
   if(!echo&&u.hero&&B.relics.includes('twinaegis')){ const o=B.units.filter(x=>x!==u&&x.hero&&x.alive); if(o.length) addShield(pick(o),n,B,true); } }
-function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; B.fx(u,`+${r}`,'heal'); } if(n-r>0&&u.hero&&B.relics.includes('chalice')) addShield(u,Math.round(n-r),B); if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
+function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; B.fx(u,`+${r}`,'heal'); } if(n-r>0&&u.hero&&B.relics.includes('chalice')) addShield(u,Math.round(n-r),B); if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
 function pickTarget(u,foes,a,B){
   if(u.side==='e'&&B&&B.relics.includes('boots')&&!u.targetLowest&&!a.targetLowest&&!a.preferBack) return pick(foes); // Skirmisher's Boots: the back row is exposed
   if(a.preferBack){ const b=foes.filter(f=>f.row==='back'); if(b.length) return pick(b); }
@@ -90,6 +90,7 @@ function attack(u,B,forced){
   if(!u.alive||B.over) return;
   const a={mult:u.tmpMult||1,bonus:0,extraTargets:0,forceCrit:!!u.tmpCrit};
   fire(u,'onAttack',a,B);
+  const fz=Math.floor((u.st.chill||0)/FROZEN_AT); if(fz) a.mult/=Math.pow(2,fz); // Frozen: half damage per 20 Chill, consumed after the attack
   let foes=aliveEnemies(u,B).filter(f=>!(f.veilUntil>B.t)); if(!foes.length) return;
   let targets;
   if(forced&&forced.alive) targets=[forced];
@@ -98,17 +99,18 @@ function attack(u,B,forced){
   else { targets=[pickTarget(u,foes,a,B)]; for(let i=0;i<a.extraTargets;i++){ const o=foes.filter(f=>!targets.includes(f)); if(o.length) targets.push(pick(o)); } }
   u.attacks++;
   targets.forEach(t=>hit(u,t,a,B));
+  if(fz) u.st.chill-=fz*FROZEN_AT; else if(u.st.chill>0&&CHILL_SHED) u.st.chill=Math.floor(u.st.chill/2); // attacking sheds Chill: the Frozen amount, or half
   fire(u,'onAttackEnd',targets[0],B);
 }
 function hit(u,t,a,B){
   if(!t.alive||!u.alive) return;
-  if(Math.random()<Math.min(DODGE_CAP,t.dodge)){ B.anim(u,t,{type:'miss'}); B.fx(t,'miss','miss'); B.logf(`${t.name} dodges ${u.name}.`); fire(t,'onDodge',u,B); return; }
+  if(a.forceDodge||streakRoll(t.dodge,t,'dodgeStreak')){ B.anim(u,t,{type:'miss'}); B.fx(t,'miss','miss'); B.logf(`${t.name} dodges ${u.name}.`); fire(t,'onDodge',u,B); return; }
   const ac=Object.assign({mult:1,bonus:0},a);
   fire(u,'onTarget',t,ac,B);
   fire(t,'onDefend',u,ac,B);
-  if(t.st.chill>0&&u.side==='p'){ if(B.relics.includes('glacialcore')) ac.bonus+=t.st.chill; if(B.flags.wintersgrip) ac.mult*=1.15; if(t.st.chill>=5&&B.flags.abszero) ac.mult*=1.5; }
+  if(t.st.chill>0&&u.side==='p'){ if(B.relics.includes('glacialcore')) ac.bonus+=chill5(t); if(B.flags.wintersgrip) ac.mult*=1.15; if(isFrozen(t)&&B.flags.abszero) ac.mult*=1.5; }
   let dmg=Math.max(1,u.atk+ac.bonus)*ac.mult, crit=false;
-  if(ac.forceCrit||Math.random()<u.crit+(ac.critBonus||0)){ dmg*=u.flags.crit3?3:2; crit=true; }
+  if(ac.forceCrit||streakRoll(u.crit+(ac.critBonus||0),u,'critStreak')){ dmg*=u.flags.crit3?3:2; crit=true; }
   u.lastCrit=crit;
   let dealt;
   u.lastExec=!!ac.execute;
@@ -127,19 +129,36 @@ function applyStatus(src,t,k,n,B){
   if((t.flags.stone&&(k==='poison'||k==='burn'))||(t.flags.fireproof&&k==='burn')||(t.flags.boneproof&&k==='poison')){ B.fx(t,'immune','miss'); return; }
   n=n*(src.statusMult||1);
   if(k==='poison'&&src.side==='p'&&B.relics.includes('plaguebanner')) n+=1;
-  if(k==='chill') t.st.chill=Math.min(5,(t.st.chill||0)+n); else t.st[k]=(t.st[k]||0)+n;
+  if(t.kw.brittle&&(k==='chill'||k==='burn')) n+=1;
+  gainStatus(t,k,n,B);
   fireOnce(src,'onApply',B,k,t,n);
   if(k==='poison') t.poisonSrc=src; if(k==='burn') t.burnSrc=src;
   if(k==='poison'&&src.flags.numb&&!B._numb){ B._numb=1; applyStatus(src,t,'chill',1,B); B._numb=0; }
   if(k==='chill'&&src.side==='p'&&B.flags.frozenarmor) B.units.forEach(x=>{ if(x.alive&&x.flags.frozenarmor) addShield(x,2,B); });
   if(k==='poison'&&src.flags.virulent&&!B._vir){ B._vir=1; const o=randomEnemy(src,B,t); if(o) applyStatus(src,o,'poison',n/(src.statusMult||1),B); B._vir=0; }
 }
+// raw stack gain plus the threshold bookkeeping; applyStatus wraps this with sources, multipliers and hooks
+function gainStatus(t,k,n,B){
+  const was=t.st[k]||0; t.st[k]=was+n;
+  if(k==='burn'&&!t.ablaze&&t.st.burn>=ABLAZE_AT){ t.ablaze=true; B.fx(t,'ABLAZE','burn'); B.logf(`${t.name} is ablaze.`); }
+  if(k==='chill'&&was<FROZEN_AT&&t.st.chill>=FROZEN_AT){ B.fx(t,'FROZEN','buff'); B.logf(`${t.name} is frozen.`); }
+  if(k==='poison'&&was<FESTER_AT&&t.st.poison>=FESTER_AT){ B.fx(t,'FESTERING','poison'); B.logf(`${t.name} is festering.`); }
+  checkMarks(t,B);
+}
+// two afflictions at once mark the unit for the rest of the fight (see core); Ruined carries all three marks
+function checkMarks(t,B){
+  const f=isFrozen(t), a=isAblaze(t), p=isFestering(t);
+  const mark=(k,label)=>{ if(!t.kw[k]){ t.kw[k]=1; B.fx(t,label,'buff'); B.logf(`${t.name} is ${label.toLowerCase()}.`); } };
+  if(f&&a) mark('brittle','BRITTLE'); if(a&&p) mark('blighted','BLIGHTED'); if(f&&p) mark('crippled','CRIPPLED'); if(f&&a&&p) mark('ruined','RUINED');
+}
 function dealDamage(src,t,amount,info,B){
   if(!t.alive) return 0;
+  if(t.kw.ruined) amount*=1.5;
+  if(t.kw.blighted&&(info.type==='poison'||info.type==='burn')) amount*=1.25;
   if(info.type==='attack'&&src) B.anim(src,t,info);
   if(t.side==='e'&&B.relics.includes('resonance')&&['poison','burn','chill'].filter(k=>t.st[k]>0).length>=3) amount*=1.3;
   let dmg=Math.max(0,Math.round(amount));
-  if(!info.ignoreArmor&&dmg>0) dmg=Math.max(1,dmg-t.armor);
+  if(!info.ignoreArmor&&dmg>0&&!isFestering(t)) dmg=Math.max(1,dmg-t.armor); // Festering: Armor counts as 0
   if((!info.ignoreShield||t.flags.shieldAll)&&t.shield>0&&dmg>0){ const ab=Math.min(t.shield,dmg); t.shield-=ab; dmg-=ab; if(ab){ B.fx(t,`-${ab}`,'shield'); if(info.type==='attack'&&src&&src.alive){ fire(t,'onShieldAbsorb',src,ab,B); if(t.side==='p'&&B.relics.includes('mirrorward')) dealDamage(t,src,ab,{type:'thorns',ignoreArmor:true},B); } } }
   t.hp-=dmg; t.stats.taken+=dmg; if(src) src.stats.dealt+=dmg;
   if((dmg>0||!info.ignoreShield)&&!info.silent) B.fx(t,info.exec?'EXECUTE':String(dmg),info.crit?'crit':info.type);
@@ -157,7 +176,7 @@ function checkSmoke(u,B){
   if(u.row==='front'&&moveUnit(u,'back',B)) checkVanguard(B);
 }
 function die(t,killer,B){
-  t.alive=false; t.hp=0; t.shield=0; t.st_poisonAtDeath=t.st.poison||0; t.st={};
+  t.alive=false; t.hp=0; t.shield=0; t.st_poisonAtDeath=t.st.poison||0; t.st={}; t.ablaze=false;
   fire(t,'onDeath',B);
   if(t.alive) return;
   B.logf(`${t.name} falls.`);
@@ -174,8 +193,8 @@ function tickStatus(u,B){
     if(d>0&&src){ B.units.forEach(x=>{ if(x.side===src.side&&x.alive) fire(x,'onPoisonDamage',u,d,B); }); } }
   if(!u.alive) return;
   if(st.burn>0){ const src=u.burnSrc; let m=(src&&src.side==='p'&&B.relics.includes('kindling'))?2:1; if(src&&src.flags.flask&&st.poison>0) m*=1.5; if(src&&src.side==='p'&&st.chill>0&&B.relics.includes('steam')) m*=2;
-    const d=dealDamage(src,u,st.burn*BURN_DMG*m,{type:'burn',ignoreArmor:true},B); st.burn=(src&&src.flags.slowBurn)?st.burn-1:Math.floor(st.burn/2);
-    if(d>0&&src){ B.units.forEach(x=>{ if(x.side===src.side&&x.alive) fire(x,'onBurnDamage',u,d,B); }); if(src.side==='p'&&B.relics.includes('wildfire')){ const o=randomEnemy(src,B,u); if(o){ o.st.burn=(o.st.burn||0)+1; o.burnSrc=src; } } } }
+    const d=dealDamage(src,u,st.burn*BURN_DMG*m,{type:'burn',ignoreArmor:true},B); st.burn=(src&&src.flags.slowBurn)?st.burn-1:Math.floor(st.burn/2); if(u.ablaze) st.burn=Math.max(ABLAZE_AT,st.burn); // Ablaze holds the floor
+    if(d>0&&src){ B.units.forEach(x=>{ if(x.side===src.side&&x.alive) fire(x,'onBurnDamage',u,d,B); }); if(src.side==='p'&&B.relics.includes('wildfire')){ const o=randomEnemy(src,B,u); if(o){ gainStatus(o,'burn',1,B); o.burnSrc=src; } } } }
 }
 function checkEnd(B){
   if(B.over) return true;
