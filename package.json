@@ -1,7 +1,7 @@
 {
   "name": "guildhall",
   "private": true,
-  "description": "A phone-portrait autobattler roguelike in a single HTML file.",
+  "description": "A phone-portrait autobattler roguelike. Source in game/src, built into a single HTML file.",
   "scripts": {
     "build": "node tools/build.js",
     "check": "node tools/build.js && git diff --exit-code -- game/",
