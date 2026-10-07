@@ -29,7 +29,14 @@ function createBattle(heroes,enc,relics,gold,ctx){
 const rowRoom=(B,side,row)=>B.units.filter(x=>x.side===side&&x.alive&&x.row===row).length<ROW_MAX;
 function moveUnit(u,row,B){ if(u.row===row||!rowRoom(B,u.side,row)) return false; u.row=row; B.move(u); fire(u,'onMove',B); return true; }
 // neighbours in the same row (card order), for "adjacent" effects
-function adjacentOf(t,B){ const row=B.units.filter(x=>x.side===t.side&&x.row===t.row&&(x.alive||x===t)); const i=row.indexOf(t); return [row[i-1],row[i+1]].filter(Boolean); } // works for a unit that just died
+// The board as the player sees it: a row's cards in order (living units, and the fallen regulars that keep a card; summons vanish).
+const rowCards=(B,side,row,keep)=>B.units.filter(x=>x.side===side&&x.row===row&&(x.alive||!x.summon||x===keep));
+const colOf=(u,B)=>Math.max(0,rowCards(B,u.side,u.row,u).indexOf(u));
+function adjacentOf(t,B){ const row=rowCards(B,t.side,t.row,t); const i=row.indexOf(t); return [row[i-1],row[i+1]].filter(x=>x&&x.alive); } // works for a unit that just died
+// Closest enemy by the board: columns apart squared, plus 1 for the enemy front row or 4 for its back row; the unit's own row doesn't count.
+// Ties go to the front row, then at random. The Duelist's "opposite" and the Champion's "closest" are both this.
+function closest(u,B){ const es=aliveEnemies(u,B); if(!es.length) return null; const c=colOf(u,B); let best=null, bd=Infinity;
+  shuffle(es).forEach(e=>{ const d=Math.pow(colOf(e,B)-c,2)+(e.row==='front'?1:4); if(d<bd||(d===bd&&e.row==='front'&&best.row!=='front')){ best=e; bd=d; } }); return best; }
 const wasFrozen=t=>t.alive?isFrozen(t):(t.stAtDeath&&t.stAtDeath.chill||0)>=FROZEN_AT, wasChilled=t=>(t.alive?t.st.chill:t.stAtDeath&&t.stAtDeath.chill)>0;
 const bank=B=>(B.gold+B.bounty)*(B.flags.goldenage?2:1); // Golden Age: gold counts double for everything that reads it
 // Timed buffs: {tag,key,n,until}. key is 'spd' (attack speed, +n as a fraction), 'dodge' or 'crit' (+n chance). A tag given again refreshes
@@ -39,9 +46,6 @@ function buffSum(u,key){ if(!u.buffs) return 0; const t=u.B.t; let s=0; for(let 
 function dropBuff(u,tag){ if(u.buffs) u.buffs=u.buffs.filter(b=>b.tag!==tag); }
 // a plain hit from a skill (Shatter, Shield Slam, Deflect): no crit, no on-hit status, no attack counters
 const splash=(u,t,n,B)=>dealDamage(u,t,n,{type:'attack',splash:true},B);
-// the Duelist's opposite number: the enemy in his row at his position, else one from that row, else anyone
-function opposite(u,B){ const mine=B.units.filter(x=>x.side===u.side&&x.alive&&x.row===u.row), theirs=B.units.filter(x=>x.side!==u.side&&x.alive&&x.row===u.row); const i=mine.indexOf(u);
-  return theirs[i]||(theirs.length?pick(theirs):null)||randomEnemy(u,B); }
 function startDuel(u,t,B){ if(!t||!t.alive) return false; u.duel=t; t.duel=u; B.fx(u,'DUEL','buff'); B.fx(t,'DUEL','buff'); B.logf(`${u.name} challenges ${t.name} to a duel.`); fire(u,'onDuelStart',t,B); return true; }
 // An ally raised mid-fight (Wilfred, Skeletons, Legion): a unit on the hero side with no hero record, so it counts as an ally, not a hero.
 // stats: {maxHp,atk,spd,armor,crit,dodge}; opts: {hooks, apply, flags, eid (sprite), fx}. Goes in the row asked for, else the other, else nowhere.
@@ -305,4 +309,4 @@ function stepBattle(B,dt){
   if(B.t>=60){ B.over=true; B.winner='e'; B.logf('Time runs out. Your guild retreats.'); }
 }
 function runToEnd(B){ let n=0; while(!B.over&&n<4000){ stepBattle(B,0.05); n++; } return B; }
-if(typeof module!=='undefined') module.exports={CLASSES,STARTERS,ROOTS,newHero,trainHero,upgradeOptions,upgradesOf,promote,heroSkills,heroPath,HOOKS,rollActBoss,bossPool,bossNorm,BOSSES,enemyMult,gemLeaves,defineMergedGem,restoreMergedGems,genChoices,curAct,slotKind,HAND_SLOTS,HEROES,defaultRow,ROW_MAX,ENCOUNTERS,GEMS,BASIC_GEMS,RARE_GEMS,SLOTS,RELICS,ENEMIES,ARCH_LABEL,heroSkills,activeSkills,skillActive,needCounts,gemCounts,genEncounter,computeStats,createBattle,stepBattle,runToEnd,actOf,kindOf,FLOORS};
+if(typeof module!=='undefined') module.exports={closest,colOf,adjacentOf,CLASSES,STARTERS,ROOTS,newHero,trainHero,upgradeOptions,upgradesOf,promote,heroSkills,heroPath,HOOKS,rollActBoss,bossPool,bossNorm,BOSSES,enemyMult,gemLeaves,defineMergedGem,restoreMergedGems,genChoices,curAct,slotKind,HAND_SLOTS,HEROES,defaultRow,ROW_MAX,ENCOUNTERS,GEMS,BASIC_GEMS,RARE_GEMS,SLOTS,RELICS,ENEMIES,ARCH_LABEL,heroSkills,activeSkills,skillActive,needCounts,gemCounts,genEncounter,computeStats,createBattle,stepBattle,runToEnd,actOf,kindOf,FLOORS};

@@ -144,7 +144,7 @@ const HOOKS={
     const a=al.reduce((m,x)=>tot(x)>tot(m)?x:m); STATUS_KEYS.forEach(k=>{ const m=a.st[k]||0; if(m>0){ loseStatus(a,k,m,B); applyStatus(u,t,k,m,B); } }); }}},
   Miasma:{hooks:{onSecond:(u,B)=>{ if(u.secs%4===0) aliveEnemies(u,B).forEach(e=>applyStatus(u,e,'poison',1,B)); }}},
   Sickbed:{hooks:{onAllyDefend:(u,t,src,ac,B)=>{ if(isFestering(src)) ac.mult*=0.8; }}}},
- Duelist:{passive:{hooks:{onStart:(u,B)=>startDuel(u,opposite(u,B),B)}}, // die() fires onDuelWon when the opponent falls
+ Duelist:{passive:{hooks:{onStart:(u,B)=>startDuel(u,closest(u,B),B)}}, // opposite him, else the closest; die() fires onDuelWon when the opponent falls
   Footwork:{hooks:{onIncoming:(u,src,ac,B)=>{ if(src===u.duel) ac.dodgeBonus=(ac.dodgeBonus||0)+0.25; }, onDodge:(u,src,B)=>{ if(src===u.duel) u.footwork=Math.min(0.3,(u.footwork||0)+0.05); }, onTarget:(u,t,ac,B)=>{ ac.critBonus=(ac.critBonus||0)+(u.footwork||0); }}},
   Parry:{hooks:{onHit:(u,t,d,B)=>addShield(u,2,B), onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack'&&(u.parry||0)<10){ u.parry=(u.parry||0)+2; u.atk+=2; } }}},
   Wager:{hooks:{onStart:(u,B)=>{ const s=Math.min(5,bank(B)); if(s>0){ u.stake=s; B.bounty-=s; B.logf(`${u.name} stakes ${s} gold.`); } }, onDuelWon:(u,t,B)=>{ if(u.stake&&!u.paid){ u.paid=1; B.bounty+=u.stake*2; B.fx(u,`+${u.stake*2} gold`,'buff'); } }}},
@@ -351,7 +351,6 @@ function manyHands(u,B){ const n=Math.max(0,B.units.filter(x=>x.hero&&x.alive).l
 const bat=(u,B)=>addBuff(u,'bat','spd',u.hp/200,Infinity,B); // +X%, X = half her current HP
 const flash=(u,B)=>addBuff(u,'flash','spd',0.05*aliveEnemies(u,B).filter(isAblaze).length+(u.flashPerm||0),Infinity,B);
 function challenge(u,B,choose){ if(u.duel&&u.duel.alive) return; const t=choose(u,B); if(t) startDuel(u,t,B); }
-const closest=(u,B)=>{ const es=aliveEnemies(u,B), fr=es.filter(e=>e.row==='front'); return (fr.length?pick(fr):es.length?pick(es):null); };
 const highestHp=(u,B)=>{ const es=aliveEnemies(u,B); return es.length?es.reduce((m,x)=>x.hp>m.hp?x:m):null; };
 function shell(u,B){ if(u.shellSec!==u.secs){ u.shellSec=u.secs; u.shellN=0; } if(u.shellN<5){ u.shellN++; addShield(u,1,B); } }
 // Necromancer: a Skeleton copy of the fallen at half its max HP, no abilities
