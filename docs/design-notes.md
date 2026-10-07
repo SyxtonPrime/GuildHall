@@ -40,7 +40,7 @@ Artifact: https://claude.ai/artifact/Q94BUTLmfaqPHnYZGTGXKD (single HTML file; e
 - Battle speed buttons 0.5× / 1× / 2× / 3× / Skip; `speed` is the real-time multiplier (one 50 ms step per 50 ms tick at 1×), saved in `meta.speed` so it persists across runs; Skip (99) is momentary — the next fight restores `meta.speed`.
 
 ## Art (pixel sprites)
-- Sprite gallery: https://claude.ai/artifact/AJCyHxvrRcsr9rz7nzBKcE. All 17 new enemies wired in (v23). Every hero (18) and enemy (34 + Slimelet) has a sprite: 16×16 regular, 24×24 elites/bosses. Text grids `SPR`/`SPR_PAL`, `buildPixelSprites()` → `SPR_URI`, `spr(id,size,title)`, `spr:'slime'` aliasing, `ic()` fallback.
+- Sprite gallery: https://claude.ai/artifact/AJCyHxvrRcsr9rz7nzBKcE. All 17 new enemies wired in (v23). Every class (61, one sprite each, id = class name in lowercase letters, see `art/sprites/README.md`) and enemy (34 + Slimelet) has a sprite: 16×16 regular, 24×24 elites/bosses. Text grids `SPR`/`SPR_PAL`, `buildPixelSprites()` → `SPR_URI`, `spr(id,size,title)`, `spr:'slime'` aliasing, `ic()` fallback.
 - **Gear sockets (art chat):** `EQUIP[heroId]={s,r,l}`; `h.gems[k]` per gear slot (nullable); `hspr(h,size)` draws gems into sockets and tints gear. Helpers `gemsOf`, `putGem`, `takeGem`, `firstFree`, `openSlots`.
 - Relic icons: SVG glyphs (`RELIC_C`, `RELIC_G`). Battle animation: `B.anim`, `rerender(side,mover)` FLIP for `B.move`/`B.spawn`/`B.vanish`.
 - Pixel-art conventions: no solid-black hat brims; props without outline boxes; bows are 1-px arcs; one clear "tell" per unit. Source: `sprites.py` + `fixes/<id>.txt` + `preview.py` in the art working folder.

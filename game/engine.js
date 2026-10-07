@@ -661,12 +661,8 @@ const ROLE_GAIN={ // [starter, tier 3, capstone]
  mid:[{hp:8,atk:2,spd:0.05,armor:0},{hp:14,atk:3,spd:0.1,armor:0},{hp:20,atk:4,spd:0.1,armor:0}],
  back:[{hp:4,atk:3,spd:0,armor:0},{hp:8,atk:4,spd:0.05,armor:0},{hp:12,atk:5,spd:0.05,armor:0}]};
 const BASE_CRIT=0.1; // every hero crits 10% of the time before gems
-// Sprites: classes that match an existing sprite by name use it; the rest borrow their root's.
-const SPR_FOR={Sentinel:'knight',Berserker:'berserker',Swordsman:'duelist',Duelist:'duelist',Thief:'rogue',Cutthroat:'rogue',Windrunner:'ranger','Shadow Archer':'ranger',
- Apothecary:'apothecary',Alchemist:'apothecary','Fire mage':'pyromancer',Flamecaller:'pyromancer',Pyromancer:'pyromancer',Healer:'cleric',Cleric:'cleric',Monk:'monk',
- Hearthguard:'ashwalker','Lava strider':'ashwalker','Glacier Warden':'glacier','Blood mage':'bloodmage',Vampire:'bloodmage','Plague doctor':'plaguedoctor',Plaguecaller:'plaguedoctor',
- Bard:'bard','Frost mage':'frostmage',Rimecaller:'frostmage',Cryomancer:'frostmage',Shieldmaiden:'shieldmaiden',Bulwark:'shieldmaiden',Reaper:'reaper',Assassin:'sniper'};
-const ROOT_SPR={Mage:'frostmage',Warrior:'knight',Rogue:'rogue'};
+// Sprites: every class has its own sprite, keyed by its name in lowercase letters (art/sprites/fixes/<id>.txt); roots show their first starter's look.
+const ROOT_SPR={Mage:'frostmage',Warrior:'sentinel',Rogue:'thief'};
 // Effects live in HOOKS (engine/hooks.js, loaded before this file).
 const CLASSES={};
 for(const id in CLASS_DATA.classes){ const c=CLASS_DATA.classes[id]; const tier=c.ess.length>=3?3:c.ess.length; const H=HOOKS[c.name]||{};
@@ -686,7 +682,7 @@ for(const id in CLASSES){ const c=CLASSES[id]; if(c.tier===0) continue; const s=
   HEROES[id]={name:c.name,row:c.role,tier:c.tier,tags:[GEMS[c.ess[0]].arch],hp:s.hp,atk:s.atk,spd:s.spd,armor:s.armor,crit:s.crit,ab:L=>c.passive,skills:c.skills}; }
 const BASE_HEROES=STARTERS;
 const defaultRow=id=>HEROES[id].row==='mid'?'back':HEROES[id].row; // 'mid' heroes start in the back and may move
-const sprId=x=>{ const id=x&&x.id||x; const c=CLASSES[id]; if(!c) return id; return SPR_FOR[c.name]||ROOT_SPR[CLASSES[(x&&x.root)||rootOf(id)].name]; };
+const sprId=x=>{ const id=x&&x.id||x; const c=CLASSES[id]; if(!c) return id; if(c.tier===0) return ROOT_SPR[c.name]; return c.name==='Necromancer'?'necromancerhero':c.name.toLowerCase().replace(/[^a-z]/g,''); }; // 'necromancer' is an enemy sprite
 function newHero(id,row){ const c=CLASSES[id]; const root=pick(c.from.filter(f=>CLASSES[f].tier===0)); return {id,root,path:[root,id],lv:1,gems:[],open:[0,1],row:row||defaultRow(id),kills:0}; }
 const heroPath=h=>h.path||routeTo(h.id);
 // a hero's skills: its current class's, plus every earlier class's (inherited)

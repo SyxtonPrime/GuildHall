@@ -39,3 +39,10 @@ Their current grids are in placeholders/<id>.txt (sprites.py loads them); your f
   Render them with preview.py next to yours to compare. Bosses fill most of the 24x24 box (feet on the bottom 1–2 rows, ~20–23 px tall).
 - Each boss must read at 2x (≈ 48 px in game, often 32 px). One big clear tell, a strong silhouette, 2-tone shading plus a highlight.
 - Must be distinct from existing sprites — especially from its own minions (rat, spider, bat) and from goblinking (who already has a gold crown + staff).
+
+## Class sprites (pass 6)
+Every class in the promotion tree has its own 16x16 hero sprite, id = class name in lowercase letters (see README). When drawing or revising one:
+- Keep a visible link to each class that promotes into it (same body, prop, hat or essence colours), so a promotion reads as the same hero dressed up.
+- Essence colours: frost C/c/U, ember R/O/Y, venom N/n/L, vital M/m/R, ward B/b, edge W/G steel, swift P/p, gilt Y/y.
+- Ornament grows with tier: starters plain with one prop; tier 3 a bigger prop, trim or cape; capstones a crown, halo, aura or twin props. Still 16x16, still one clear tell.
+- Each sprite needs an `equipspec/<id>.json` (stone + tint region per gear slot); check it with `equip.py preview`.
