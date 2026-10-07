@@ -10,7 +10,7 @@
 //   take the hit · onPoisonDamage/onBurnDamage(x,t,d,B) · onAttackEnd(u,t,B).
 // Status an attack applies on hit goes through hitApply (Mage +1, Scald); heals from abilities go through abilityHeal (Mage +1, Healer bonuses);
 // area effects and moved stacks use applyStatus. "Every Nth attack" is nthAttack(u,N). Rulings: docs/hero-refactor-plan.md.
-const CLERIC_BREAK=ENV('CLERICBREAK',5), CLERIC_OVER=ENV('CLERICOVER',1), FLOW=ENV('FLOW',0.10), BALLAD=ENV('BALLAD',2), BARD_AURA=ENV('BARDAURA',0.10), ELIXIR=ENV('ELIXIR',2), MEND=ENV('MEND',4), BLOOD_COST=ENV('BLOOD',2), BLOOD_CAP=ENV('BLOODCAP',0), BLOOD_HEAL=ENV('BLOODHEAL',0.5), MONK_DODGE=ENV('MONKDODGE',0.10), COUNTER_MULT=ENV('COUNTER',1); // balance knobs under test
+const CLERIC_BREAK=ENV('CLERICBREAK',5), CLERIC_OVER=ENV('CLERICOVER',1), FLOW=ENV('FLOW',0.05), BALLAD=ENV('BALLAD',2), BARD_AURA=ENV('BARDAURA',0.10), ELIXIR=ENV('ELIXIR',2), MEND=ENV('MEND',4), BLOOD_COST=ENV('BLOOD',2), BLOOD_CAP=ENV('BLOODCAP',0), BLOOD_HEAL=ENV('BLOODHEAL',0.2), MONK_DODGE=ENV('MONKDODGE',0.05), COUNTER_MULT=ENV('COUNTER',1); // balance knobs under test
 function acroRow(u,B){ // Acrobat: the bonus follows the row
   if(u.acro==='front') u.dodge-=0.2; else if(u.acro==='back') u.spd/=1.15;
   u.acro=u.row; if(u.row==='front') u.dodge+=0.2; else u.spd*=1.15; }
@@ -46,12 +46,12 @@ const HOOKS={
   'Cold Read':{hooks:{onTarget:(u,t,ac,B)=>{ ac.critBonus=(ac.critBonus||0)+0.025*(t.st.chill||0); }}},
   'Pristine Gear':{hooks:{onAttack:(u,a,B)=>{ if(u.attacks===1) a.forceCrit=true; }}},
   Momentum:{hooks:{onTarget:(u,t,ac,B)=>{ ac.critBonus=(ac.critBonus||0)+(u.momentum||0); }, onHit:(u,t,d,B)=>{ u.momentum=u.lastCrit?0:(u.momentum||0)+0.1; }}}},
- Healer:{passive:{hooks:{onSecond:(u,B)=>{ if(u.secs%3===0) abilityHeal(u,lowestAlly(u,B),MEND,B); }, onHealing:(u,t,h,B)=>{ if(t.hero&&t.hp<t.maxHp/4) h.n*=1.5; }}}, // Mend
+ Healer:{passive:{hooks:{onSecond:(u,B)=>{ if(u.secs%3===0&&!u.flags.noMend) abilityHeal(u,lowestAlly(u,B),MEND,B); }, onHealing:(u,t,h,B)=>{ if(t.hero&&t.hp<t.maxHp*(u.flags.renew?0.5:0.25)) h.n*=1.5; }}}, // Mend; Renew lifts the threshold to half
   Bandage:{hooks:{onHeal:(u,t,r,over,B)=>addShield(t,2,B)}},
   'Quick Hands':{hooks:{onHeal:(u,t,r,over,B)=>{ if(t!==u&&t.hero) u.sureDodge=1; }}},
   'Side Effects':{hooks:{onTarget:(u,t,ac,B)=>{ if(u.sideFxAt===u.attacks) return; u.sideFxAt=u.attacks; const c=alliesOf(u,B).filter(x=>x.alive&&STATUS_KEYS.some(k=>x.st[k]>0)); if(!c.length) return; const a=pick(c);
     STATUS_KEYS.forEach(k=>{ const m=Math.min(2,a.st[k]||0); if(m>0){ loseStatus(a,k,m,B); applyStatus(u,t,k,m,B); } }); }}},
-  Renew:{hooks:{onHealing:(u,t,h,B)=>{ if(t.hero&&t.hp<t.maxHp/2) h.n*=1.5; }}}},
+  Renew:{flag:'renew'}}, // Mend's bonus below half HP instead of a quarter
  Thief:{passive:{hooks:{onHit:(u,t,d,B)=>{ if((u.stole||0)>=3) return; t.stolenBy=t.stolenBy||{}; if(t.stolenBy[u.uid]) return; t.stolenBy[u.uid]=1; u.stole=(u.stole||0)+1; B.bounty+=1; B.fx(t,'+1 gold','buff'); }}},
   Finisher:{hooks:{onTarget:(u,t,ac,B)=>{ if(t.hp<t.maxHp/2) addApply(ac,'poison',2); }}},
   Backstab:{hooks:{onTarget:(u,t,ac,B)=>{ u.bs=u.bs||{}; u.lastBackstab=false; if(!u.bs[t.uid]||u.bsNext){ ac.mult*=1.5; u.lastBackstab=true; } u.bs[t.uid]=1; u.bsNext=false; },
@@ -74,7 +74,7 @@ const HOOKS={
   Eager:{hooks:{onStart:(u,B)=>addBuff(u,'eager','spd',0.2,Infinity,B), onKill:(u,t,B)=>dropBuff(u,'eager')}},
   'Second Wind':{hooks:{onKill:(u,t,B)=>abilityHeal(u,u,Math.round((u.maxHp-u.hp)/4),B)}},
   'Mark for Death':{hooks:{onTarget:(u,t,ac,B)=>{ if(t.hp<t.maxHp/4) ac.mult*=1.5; }}}},
- 'Blood mage':{passive:{hooks:{onHit:(u,t,d,B)=>{ if(d<=0) return; let n=Math.round(d*BLOOD_HEAL*(u.flags.sanguine&&isFestering(t)?2:1)); if(BLOOD_CAP){ if(u.bmSec!==u.secs){ u.bmSec=u.secs; u.bmN=0; } n=Math.min(n,BLOOD_CAP-u.bmN); u.bmN+=Math.max(0,n); } if(n>0) abilityHeal(u,lowestAlly(u,B),n,B); },
+ 'Blood mage':{passive:{flag:'noMend',hooks:{onHit:(u,t,d,B)=>{ if(d<=0) return; let n=Math.round(d*BLOOD_HEAL*(u.flags.sanguine&&isFestering(t)?2:1)); if(BLOOD_CAP){ if(u.bmSec!==u.secs){ u.bmSec=u.secs; u.bmN=0; } n=Math.min(n,BLOOD_CAP-u.bmN); u.bmN+=Math.max(0,n); } if(n>0) abilityHeal(u,lowestAlly(u,B),n,B); },
     onAttackEnd:(u,t,B)=>{ if(!(t&&u.flags.sanguine&&isFestering(t))) dealDamage(null,u,BLOOD_COST,{type:'cost',ignoreArmor:true,ignoreShield:true},B); }}},
   Sanguine:{flag:'sanguine'},
   Hemorrhage:{hooks:{onTarget:(u,t,ac,B)=>{ ac.critBonus=(ac.critBonus||0)+0.1*afflictions(t); }, onCrit:(u,t,B)=>{ const d=u.lastDealt||0; if(d>0) alliesOf(u,B).forEach(x=>abilityHeal(u,x,d,B)); }}},

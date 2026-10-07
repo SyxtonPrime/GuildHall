@@ -90,7 +90,7 @@
    "name": "Blood mage",
    "notes": "",
    "order": 1791144773672,
-   "passive": "Her attacks heal the most injured ally for half the damage dealt. Each attack costs her 2 HP.",
+   "passive": "Her attacks heal the most injured ally for a fifth of the damage dealt, in place of Mend. Each attack costs her 2 HP.",
    "rename": false,
    "updated": 1791256390260
   },
@@ -366,7 +366,7 @@
    "name": "Monk",
    "notes": "",
    "order": 1791148252294,
-   "passive": "+10% dodge. Counterattacks after dodging.",
+   "passive": "+5% dodge. Counterattacks after dodging.",
    "updated": 1791253549203
   },
   "c_muu8t3slx20j": {
@@ -1098,7 +1098,7 @@
     "vital"
    ],
    "name": "Renew",
-   "effect": "Healing you apply to heroes below 50% hp is increased by 50%.",
+   "effect": "Mend's bonus applies to heroes below half HP instead of a quarter.",
    "notes": "",
    "status": "idea",
    "updated": 1791223983061,
@@ -2016,7 +2016,7 @@
   "r_2x1c0r4vwou8": {
    "classId": "c_muubf8nae0xm",
    "created": 1791253549203,
-   "effect": "Each dodge heals him a tenth of his max HP. Each hit he takes gives +10% dodge until his next dodge.",
+   "effect": "Each dodge heals him 5% of his max HP. Each hit he takes gives +10% dodge until his next dodge.",
    "name": "Flow",
    "need": [
     "vital",
