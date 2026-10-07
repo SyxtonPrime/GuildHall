@@ -233,9 +233,36 @@ Watch list, in the order I'd bot them:
 - Stats and rows for every root and class. The bench has none.
 - Art: about 13 of the 61 playable classes match an existing sprite by name. Each new class also needs a gear-socket spec.
 
-## Suggested order
+## Implementation plan
 
-1. Status rework on the current heroes, so it can be tuned with the existing bot.
-2. Starters with roots and promotion to tier 3.
-3. The 8 mono capstones.
-4. Hybrid capstones, once the slot-timing question is settled.
+Written against `game/guildhall.html` as of 6 October 2026 (engine in `<script id="engine">`, lines 293 to 1099; UI after it; `tools/build.js` derives `engine.js` and the standalone file).
+
+### Shape
+
+- **Classes and skills are data; effects are code.** `tools/build.js` inlines `design/gem-recipe-bench/recipes.json` into the game as `CLASSES` (names, essences, routes, passive text, skill names, recipes and effect text), the way the bench inlines `EMBEDDED`. A hand-written `HOOKS` table in the engine maps each skill and passive id to its hooks, like today's `SKILLS`. A skill with no entry in `HOOKS` is shown with its text and does nothing. That keeps one source of truth for text and lets the game run with every class visible while effects are filled in.
+- **No effect DSL.** The effects are too varied (duels, charm, summons, targeting rules) for a small interpreter to pay for itself. 244 skills and 61 passives at a few lines each is the existing pattern.
+- **Hero record** becomes `{cls, root, lv, gems, open, row, learned}`: `cls` is the current class id, `root` is Mage, Warrior or Rogue, `learned` is the list of skill ids inherited along the route. Promotion rewrites `cls` and appends the old class's skills to `learned`.
+- **Stats** come from a small table by root and tier until the bench has per-class numbers: root base stats (Mage, Warrior, Rogue) times a tier multiplier, with per-class overrides where a class obviously differs (walls, back-liners). Rows by role.
+- **Sprites** by class name where one exists, otherwise the root's sprite. Gear-socket specs later.
+
+### Phases
+
+1. **Status rework, current heroes.** In the engine only, so the existing bot tunes it:
+   - `applyStatus`: Chill uncapped (today it caps at 5); `effSpd`: 2.5% per stack up to 20.
+   - `attack`/`hit`: a unit with under 20 Chill halves it when it attacks; at 20 or more its attack deals half (a quarter at 40) and consumes 20; status lands after the hit resolves.
+   - `tickStatus`: `BURN_DMG` 2 → 1; Burn halves each second but never below 10 once it has reached 10 (Ablaze); Poison unchanged; Festering at 15 zeroes Armor and blocks `heal` and `addShield`.
+   - Keywords as flags set on transition: Brittle, Crippled, Blighted, Ruined, with their effects in `applyStatus`, `effSpd` and `dealDamage`.
+   - Crit and dodge streaks: a counter per unit for each, halving after a success, reset on a failure; `forceCrit` and guaranteed dodges bypass it. `DODGE_CAP` goes.
+   - Retune Imp, Fire Elemental, Pit Lord, Basilisk's Petrify; recheck relics that read Chill stacks or multiply Burn.
+2. **Hero model and promotion.** Replace `HEROES`/`SKILLS` lookups with `CLASSES`/`HOOKS`; `addHero` creates a starter with a random root; `unlockSlot` (training) checks the four upgrades' requirements against socketed essences, offers a choice if several fit, and promotes; `computeStats` reads root, tier, class, `learned` and gems; the market sells starters, later with gems socketed. Camp and hero sheet UI show class, root, route and inherited skills.
+3. **Engine primitives the hooks need**, in the order the tiers need them: targeting priority (duel, forced target, class rule, random) with `pickTarget` reading a per-unit rule; "every Nth attack" counters that extra attacks advance; splash hits that are not crits and apply nothing; untargetable with a timer (today's `veilUntil`); the duel; row leaps (`moveUnit` exists); blind; Charm and Turncoat (side switch); summons with the ally/hero distinction (`raiseSkeleton` is a start); revive; lock-on; run-permanent stat gains stored on the hero record; gold-reading effects with Golden Age's doubling; enemy Shield and Stalwart on elites and bosses.
+4. **Hooks**, tier by tier: starters and roots first (the game is playable at that point), then tier 3, then capstones. Each hook is a few lines in `HOOKS`; the plan's rulings are the spec.
+5. **Bot.** `tools/tune.js` learns to socket toward an upgrade requirement and to promote at training, then reports gold held per floor (for the per-10-gold thresholds), reach rates per class, and the watch lists.
+6. **Content.** Enemies with Shield and small status application; relics; the gem pass (new rares for the six uncovered hybrids, forge rules for 5- and 6-gem recipes); art.
+
+### Settled for phase 2
+
+- **Decided.** Stats are a sum along the route. Each class carries a small stat contribution keyed by a classification (Front line, Mid, Back line to begin with; finer later), and a hero's stats are the sum of its starter's, tier 3's and capstone's contributions, so the same capstone reached by two routes has different stats. The table lives with the classes (in the bench) once the classifications are set.
+- **Decided.** Each training opens one slot and promotes if the gems allow; costs stay 5 then 9 gold for now. Starters have two slots, so the third opens at the first training and the fourth at the second.
+- **Decided.** `recipes.json` stays the source of truth; the bench is the editor.
+- The game's source now lives in `game/src/` (split 6 October 2026); the generated files are built by `tools/build.js`.
