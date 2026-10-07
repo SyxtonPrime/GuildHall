@@ -86,7 +86,7 @@ function checkWeave(u,B,dt){
 }
 const ELITE_BOOST=1.15; // elites are optional (and pay a free gem), so the elite itself hits a little harder
 function makeEnemy(B,id,row){
-  const d=ENEMIES[id], m=B.enc.mult*(d.elite?ELITE_BOOST:1), nz=(d.boss&&B.enc.norm)||{hp:1,atk:1}; const s={maxHp:Math.round(d.hp*m*ENEMY_HP*nz.hp),atk:Math.round(d.atk*m*ENEMY_ATK*nz.atk),spd:d.spd,armor:d.armor||0,crit:d.crit||0,dodge:d.dodge||0};
+  const d=ENEMIES[id], m=B.enc.mult*(d.elite?ELITE_BOOST:1), nz=(d.boss&&B.enc.norm)||{hp:1,atk:1}, bz=d.boss?{hp:BOSS_HP,atk:BOSS_ATK}:{hp:1,atk:1}; const s={maxHp:Math.round(d.hp*m*ENEMY_HP*nz.hp*bz.hp),atk:Math.round(d.atk*m*ENEMY_ATK*nz.atk*bz.atk),spd:d.spd,armor:d.armor||0,crit:d.crit||0,dodge:d.dodge||0};
   const u=baseUnit(d,'e',row,s,B); u.eid=id; u.apply=Object.assign({},d.apply||{}); u.flags=Object.assign({},d.flags||{}); u.targetLowest=!!d.targetLowest; u.hooks=[d.hooks||{}]; B.units.push(u); return u;
 }
 // mid-battle reinforcements (Slime splits, Necromancer raises). Capped at 6 living enemies.
