@@ -1,6 +1,7 @@
 // Boss benchmark: can a party of a given shape beat an act's bosses? node/gjs tools/boss-check.js [scenario|all] [comps]
 //   final-caps  floor 12 boss vs 4 capstones (2 front, 2 back), each with its requirement and one capstone skill   — should ~always win
 //   final-t3    floor 12 boss vs 4 tier 3 heroes (2 front, 2 back) with every tier 3 skill active                  — should ~never win
+//   Env: DEPTH (ascension), PAIRS=1 (pair table), SYN=venom|ember|frost, B1/B1IDS (boost act 1 bosses in the tool), BOSSHP/BOSSATK/EHP/EATK (engine).
 //   first-mixed floor 4 boss vs 1 tier 3 (lv 2, requirement only) + 3 starters (1 gem each): 5 gems between them    — a decent chance
 // Each comp is random (classes, routes, boss) and fights once; the per-hero table is the win rate of comps containing that class.
 // Gems are given as a list and may exceed the hero's slots (the engine counts recipes over the whole list; only the first four get
@@ -25,19 +26,43 @@ const SCEN={
   'first-3':{floor:4,gold:10,spent:15,party:()=>mixed(2)}, // the guild holds 3 until a slot is bought: 1 tier 3 + 2 starters, 4 gems
   'first-syn':{floor:4,gold:10,spent:15,party:()=>mixed(2,true)}, // as first-3, but one starter shares an essence with the tier 3 (a parent class)
   'first-syn4':{floor:4,gold:10,spent:15,party:()=>mixed(3,true)},
+  // mid boss (floor 8, ~87 gold earned by then): two tier 3s + two starters with two gems (~60), or a capstone + a tier 3 + two starters (~74)
+  'mid-t3':{floor:8,gold:17,spent:70,party:()=>front1(split(byTier(2),1,1).map(t3).concat(sample(byTier(1),2).map(starter2)))},
+  'mid-cap':{floor:8,gold:17,spent:70,party:()=>front1([cap(pick(byTier(3))),t3(pick(byTier(2)))].concat(sample(byTier(1),2).map(starter2)))},
+  // same shape as mid-t3 (a front tier 3, a back one, two starters) but the damage dealers share one status essence; a support starter holds the party up
+  'mid-syn':{floor:8,gold:17,spent:70,party:()=>{ const s=pick(STATUS); const w=withEss(byTier(2),s); return front1([pick(w.filter(id=>E.CLASSES[id].role==='front').concat(w.filter(id=>E.CLASSES[id].role==='front').length?[]:byTier(2).filter(id=>E.CLASSES[id].role==='front'))),pick(w.filter(id=>E.CLASSES[id].role!=='front'))].map(t3).concat([byTier(1).find(id=>E.CLASSES[id].ess[0]===s),pick(SUPPORT)].map(starter2))); }},
+  // final boss, mixed guilds (~170 earned): two capstones + two tier 3s, random or sharing one status essence
+  'final-mix':{floor:12,gold:50,spent:120,party:()=>front1(sample(byTier(3),2).map(cap).concat(sample(byTier(2),2).map(t3)))},
+  'final-syn':{floor:12,gold:50,spent:120,party:()=>{ const s=pick(STATUS); const c=withEss(byTier(3),s), t=withEss(byTier(2),s); const fr=c.filter(id=>E.CLASSES[id].role==='front'); return front1([fr.length?pick(fr):pick(c),pick(c.filter(id=>E.CLASSES[id].role!=='front'))].map(cap).concat(sample(t,2).map(t3))); }},
+  // curated synergy: two of a status trio of capstones + two random tier 3s; or one of them + a same-status tier 3 + two random tier 3s (baseline final-1cap)
+  'final-cur-frost':{floor:12,gold:50,spent:120,party:()=>front1(sample(byNames(['Cryomancer','Icemaiden','Bladestorm']),2).map(cap).concat(sample(byTier(2),2).map(t3)))},
+  'final-cur-fire':{floor:12,gold:50,spent:120,party:()=>front1(sample(byNames(['Pyromancer','Flame dancer','Lava strider']),2).map(cap).concat(sample(byTier(2),2).map(t3)))},
+  'final-cur-venom':{floor:12,gold:50,spent:120,party:()=>front1(sample(byNames(['Venomancer','Alchemist','Witch Doctor']),2).map(cap).concat(sample(byTier(2),2).map(t3)))},
+  'final-1cap':{floor:12,gold:50,spent:120,party:()=>front1([cap(pick(byTier(3)))].concat(sample(byTier(2),3).map(t3)))},
+  'final-cur1-frost':{floor:12,gold:50,spent:120,party:()=>front1([cap(pick(byNames(['Cryomancer','Icemaiden','Bladestorm']))),t3(pick(byNames(['Rimecaller','Frostblade','Glacier Warden'])))].concat(sample(byTier(2),2).map(t3)))},
+  'final-cur1-fire':{floor:12,gold:50,spent:120,party:()=>front1([cap(pick(byNames(['Pyromancer','Flame dancer','Lava strider']))),t3(pick(byNames(['Flamecaller','Berserker','Hearthguard'])))].concat(sample(byTier(2),2).map(t3)))},
 };
+const byNames=ns=>ns.map(n=>Object.keys(E.CLASSES).find(id=>E.CLASSES[id].name===n));
+const STATUS=process.env.SYN?[process.env.SYN]:['venom','ember','frost'], // SYN=venom|ember|frost pins the shared status
+  withEss=(pool,s)=>pool.filter(id=>E.CLASSES[id].ess.includes(s)), SUPPORT=byTier(1).filter(id=>['ward','vital'].includes(E.CLASSES[id].ess[0])); // the engine's real synergy: several heroes stacking the same status
+const sample=(pool,n)=>{ const p=pool.slice(), out=[]; while(out.length<n&&p.length) out.push(p.splice(ri(p.length),1)[0]); return out; };
+const starter2=id=>hero(id,1,[LET[need(id)],LET[need(id)]],rowOf(id)); // a starter with two of its own essence: its 2-gem skill is on
+const t3=id=>hero(id,2,bestThird(id),rowOf(id));
+const cap=id=>{ const c=E.CLASSES[id], sk=c.skills.slice().sort((a,b)=>a.need.length-b.need.length)[0]; return hero(id,3,union([need(id),sk.need]),rowOf(id)); };
+const front1=party=>{ if(!party.some(h=>h.row==='front')) party[0].row='front'; return party; }; // someone has to hold the line
 function mixed(nStarters,syn){ const t3=pick(byTier(2)); const ss=[]; const pool=byTier(1); if(syn) ss.push(pick(pool.filter(s=>E.CLASSES[t3].ess.includes(E.CLASSES[s].ess[0])))); while(ss.length<nStarters){ const s=pick(pool); if(!ss.includes(s)) ss.push(s); }
   return [hero(t3,2,union([need(t3)]),rowOf(t3))].concat(ss.map(s=>hero(s,1,union([need(s)]),rowOf(s)))); }
-const B1=+process.env.B1||1, DEPTH=+process.env.DEPTH||0, B1IDS=(process.env.B1IDS||'broodmother,goblinking,ratking').split(','); // sweep: act 1 bosses' HP and ATK multiplied in the fight (bake the answer into data/enemies.js)
+const DEPTH=+process.env.DEPTH||0, PAIRS=!!process.env.PAIRS, B1=+process.env.B1||1, B1IDS=(process.env.B1IDS||'broodmother,goblinking,ratking').split(','); // sweep: act 1 bosses' HP and ATK multiplied in the fight (bake the answer into data/enemies.js)
 const which=process.argv[2]||'all', N=+process.argv[3]||400;
 for(const name of (which==='all'?Object.keys(SCEN):[which])){
-  const S=SCEN[name]; let wins=0; const byHero={}, byBoss={};
+  const S=SCEN[name]; let wins=0; const byHero={}, byBoss={}, byPair={};
   for(let i=0;i<N;i++){ const party=S.party(); const enc=E.genEncounter(S.floor,DEPTH,'boss'); const B=E.createBattle(party,enc,[],S.gold,{spent:S.spent}); if(S.floor<=4&&B1!==1) B.units.filter(x=>x.side==='e'&&x.def.boss&&B1IDS.includes(x.eid)).forEach(x=>{ x.maxHp=x.hp=Math.round(x.hp*B1); x.atk=Math.round(x.atk*B1); }); E.runToEnd(B); const w=B.winner==='p'; if(w) wins++;
-    party.forEach(h=>{ const k=E.CLASSES[h.id].name; const o=byHero[k]=byHero[k]||{n:0,w:0}; o.n++; if(w) o.w++; }); const b=enc.list[0].id; const o=byBoss[b]=byBoss[b]||{n:0,w:0}; o.n++; if(w) o.w++; }
+    party.forEach(h=>{ const k=E.CLASSES[h.id].name; const o=byHero[k]=byHero[k]||{n:0,w:0}; o.n++; if(w) o.w++; }); if(PAIRS){ const ns=party.map(h=>E.CLASSES[h.id].name).sort(); for(let a=0;a<ns.length;a++) for(let b=a+1;b<ns.length;b++){ const k=ns[a]+' + '+ns[b]; const o=byPair[k]=byPair[k]||{n:0,w:0}; o.n++; if(w) o.w++; } } const b=enc.list[0].id; const o=byBoss[b]=byBoss[b]||{n:0,w:0}; o.n++; if(w) o.w++; }
   const pct=o=>(100*o.w/o.n).toFixed(0).padStart(3)+'%';
   console.log(`\n== ${name}: floor ${S.floor} boss, ${N} comps, won ${(100*wins/N).toFixed(1)}%`);
   console.log('bosses: '+Object.keys(byBoss).sort().map(k=>`${k} ${pct(byBoss[k])} (n=${byBoss[k].n})`).join(' · '));
   const rows=Object.keys(byHero).sort((a,b)=>byHero[b].w/byHero[b].n-byHero[a].w/byHero[a].n);
   console.log('heroes (win rate of comps containing them, best first):');
+  if(PAIRS){ const pr=Object.keys(byPair).filter(k=>byPair[k].n>=12).sort((a,b)=>byPair[b].w/byPair[b].n-byPair[a].w/byPair[a].n); console.log('pairs (n>=12), best five and worst five:'); pr.slice(0,5).concat(['…'],pr.slice(-5)).forEach(k=>console.log(k==='…'?'  …':`  ${k.padEnd(34)} ${pct(byPair[k])}  n=${byPair[k].n}`)); }
   rows.forEach(k=>console.log(`  ${k.padEnd(16)} ${pct(byHero[k])}  n=${String(byHero[k].n).padStart(3)}  ${E.CLASSES[Object.keys(E.CLASSES).find(id=>E.CLASSES[id].name===k)].role}`));
 }
