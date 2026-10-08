@@ -5,8 +5,15 @@ const EVENTS={
  cutter:{name:'Gem Cutter',sub:'reshape two gems',ok:()=>ownedGems().some(it=>!GEMS[it.g].merged),open:()=>openCutter()},
  retire:{name:'Retirement',sub:'pass on a hero\'s strength',ok:()=>run.heroes.length>=2,open:()=>openRetire()},
  scout:{name:"Scout's Camp",sub:'choose the act boss',ok:()=>true,open:()=>openScout()},
+ shrine:{name:'Cursed Shrine',sub:'power at a price',ok:()=>relicsOfTier('cursed',run.relics).length>0,open:()=>openShrine()},
+ trial:{name:'Proving Grounds',sub:'fight handicapped for a prize',ok:()=>!run.trial,open:()=>openTrial()},
+ mentor:{name:'Mentor',sub:"retrain a hero's last promotion",ok:()=>run.heroes.some(h=>siblingsOf(h).length),open:()=>openMentor()},
+ pawn:{name:'Pawnbroker',sub:'sell or trade up a relic',ok:()=>pawnable().length>0,open:()=>openPawn()},
+ den:{name:"Gambler's Den",sub:'bet on the next fight',ok:()=>run.gold>=5&&!run.wager,open:()=>openDen()},
 };
 const rollEvents=()=>shuffle(Object.keys(EVENTS).filter(k=>EVENTS[k].ok())).slice(0,2);
+// what an event rolled stays put until the bonus is done, so closing and reopening it can't reroll the offer
+const memo=(k,f)=>{ run.bonus=run.bonus||{opts:[]}; if(run.bonus[k]===undefined){ run.bonus[k]=f(); saveRun(); } return run.bonus[k]; };
 function finishBonus(){ run.bonus=null; sel.gem=null; saveRun(); renderCamp(); }
 const lockModal=()=>{ $('#modal').dataset.lock='1'; }, unlockModal=()=>{ $('#sheet').onclick=null; delete $('#modal').dataset.lock; closeModal(); };
 const slotName=(h,k)=>(((EQUIP[sprId(h)]||{}).l||[])[k])||['Weapon','Body','Head','Off-hand'][k];
@@ -81,14 +88,103 @@ function bossLine(id,floor){ const d=ENEMIES[id], m=enemyMult(floor,run.depth), 
 function openScout(){
   const k=actKey(run.floor), floor=k*4, cur=actBoss();
   const opts=[cur].concat(shuffle(bossPool(floor).filter(x=>x!==cur)).slice(0,2)); let ch=cur;
+  const nf=floor+1, nextEl=[...new Set(ELITES[nf>FLOORS?((Math.ceil(nf/4)-1)%3)+1:actOf(nf)])]; nextEl.forEach(id=>seen('e',id)); // the elites waiting in the next act (or endless block)
   const draw=()=>{ modal(`<h2>Scout's Camp</h2><div class="muted small">Your scouts found the lairs ahead. Choose which boss you face on floor ${floor}.</div>
      <div class="stack">${opts.map(id=>{ const d=ENEMIES[id]; return `<div class="ench ${ch===id?'sel':''}" data-sb="${id}"><div class="row" style="gap:8px">${spr(id,36,d.name)}<div class="grow"><b>${esc(d.name)}</b>${id===cur?' <span class="pill">current</span>':''}<div class="tiny muted num">${bossLine(id,floor)}</div></div></div><div class="tiny" style="margin-top:3px">${esc(d.ab||'')}</div></div>`; }).join('')}</div>
+     ${nextEl.length?`<div class="eyebrow" style="margin-top:6px">Next act's elites</div><div class="stack">${nextEl.map(id=>{ const d=ENEMIES[id]; return `<div class="ench"><div class="row" style="gap:8px">${spr(id,30,d.name)}<div class="grow"><b>${esc(d.name)}</b><div class="tiny">${esc(d.ab||'')}</div></div></div></div>`; }).join('')}</div>`:''}
      <div class="row"><button class="grow ghost" data-sx="cancel">Not now</button><button class="grow gold" data-sx="go">Choose</button></div>`); lockModal(); };
   draw();
   $('#sheet').onclick=e=>{ const c=e.target.closest('[data-sb]'); if(c){ ch=c.dataset.sb; return draw(); }
     const x=e.target.closest('[data-sx]'); if(!x) return; unlockModal();
     if(x.dataset.sx==='cancel') return renderCamp();
     run.bosses[k]=ch; seen('e',ch); toast(`${ENEMIES[ch].name} awaits on floor ${floor}`); finishBonus(); };
+}
+
+// Cursed Shrine: take one of two cursed relics, a real upside with a cost that lasts the run
+function openShrine(){
+  const opts=memo('shrine',()=>shuffle(relicsOfTier('cursed',run.relics)).slice(0,2)); let ch=null;
+  const draw=()=>{ modal(`<h2>Cursed Shrine</h2><div class="muted small">An altar hums with something old. Take one relic: its power is real, and so is its price. Cursed relics last the run and can't be sold.</div>
+     <div class="stack">${opts.map(id=>`<div class="ench ${ch===id?'sel':''}" data-cs="${id}"><div class="row" style="gap:8px">${ic(id,'r',30,RELICS[id].name)}<div class="grow"><b>${esc(RELICS[id].name)}</b> ${tierPill(id)}<div class="tiny">${esc(RELICS[id].desc)}</div></div></div></div>`).join('')}</div>
+     <div class="row"><button class="grow ghost" data-csx="cancel">Not now</button><button class="grow gold" data-csx="go" ${ch?'':'disabled'}>Take it</button></div>`); lockModal(); };
+  opts.forEach(id=>seen('r',id)); draw();
+  $('#sheet').onclick=e=>{ const c=e.target.closest('[data-cs]'); if(c){ ch=c.dataset.cs; return draw(); }
+    const x=e.target.closest('[data-csx]'); if(!x||(x.dataset.csx==='go'&&!ch)) return; unlockModal();
+    if(x.dataset.csx==='cancel') return renderCamp();
+    run.relics.push(ch); if(ch==='cursedhoard') run.gold+=15; toast(`${RELICS[ch].name} is yours`); finishBonus(); };
+}
+
+// Proving Grounds: accept a handicap for your next fight; win it and claim the prize. Losing still ends the run.
+const TRIAL_DEBUFFS={ehp:'enemies have +30% HP',eatk:'enemies have +25% ATK',hhp:'your heroes have −25% max HP',norelic:'your relics do nothing'};
+const TRIAL_PRIZES={relic:'a relic (pick 1 of 3)',gem:'a rare gem (pick 1 of 3)',gold:'15 gold'}, TRIAL_GOLD=15;
+function openTrial(){
+  const opts=memo('trial',()=>{ const ds=shuffle(Object.keys(TRIAL_DEBUFFS).filter(k=>k!=='norelic'||run.relics.length)), ps=shuffle(Object.keys(TRIAL_PRIZES)); return [0,1].map(i=>({debuff:ds[i],prize:ps[i]})); }); let ch=null;
+  const draw=()=>{ modal(`<h2>Proving Grounds</h2><div class="muted small">The arena master offers a wager of a different kind. Take a handicap into your next fight; win it and the prize is yours. Lose, and the run ends as usual.</div>
+     <div class="stack">${opts.map((o,i)=>`<div class="ench ${ch===i?'sel':''}" data-tr="${i}"><div class="small"><span class="acc">Handicap:</span> ${esc(TRIAL_DEBUFFS[o.debuff])}</div><div class="small"><span class="good">Prize:</span> ${esc(TRIAL_PRIZES[o.prize])}</div></div>`).join('')}</div>
+     <div class="row"><button class="grow ghost" data-trx="cancel">Not now</button><button class="grow gold" data-trx="go" ${ch!==null?'':'disabled'}>Accept</button></div>`); lockModal(); };
+  draw();
+  $('#sheet').onclick=e=>{ const c=e.target.closest('[data-tr]'); if(c){ ch=+c.dataset.tr; return draw(); }
+    const x=e.target.closest('[data-trx]'); if(!x||(x.dataset.trx==='go'&&ch===null)) return; unlockModal();
+    if(x.dataset.trx==='cancel') return renderCamp();
+    run.trial=Object.assign({},opts[ch]); toast('Trial accepted: your next fight is handicapped'); finishBonus(); };
+}
+function trialPrize(prize,next){
+  if(prize!=='gold') return freePick(prize,next,'trial');
+  run.gold+=TRIAL_GOLD;
+  modal(`<h2>Trial won</h2><div class="gold" style="font-size:18px;font-weight:700;margin:8px 0">+${TRIAL_GOLD} gold</div><button class="primary" data-tp="1">Continue</button>`); lockModal();
+  $('#sheet').onclick=e=>{ if(!e.target.closest('button[data-tp]')) return; unlockModal(); next(); };
+}
+
+// Mentor: re-route a hero's last promotion to any sibling class (another upgrade of the class before), whatever its gems
+const siblingsOf=h=>{ const p=heroPath(h); return p.length<3?[]:upgradesOf(p[p.length-2]).filter(id=>id!==h.id); };
+function openMentor(){
+  const elig=run.heroes.map((h,i)=>i).filter(i=>siblingsOf(run.heroes[i]).length); let hi=elig[0], ch=null;
+  const draw=()=>{ const h=run.heroes[hi], prev=heroPath(h)[heroPath(h).length-2];
+    modal(`<h2>Mentor</h2><div class="muted small">An old guildmaster can undo a hero's last promotion and train them down another path from ${esc(CLASSES[prev].name)}. Their gems don't need to match; skills still need their recipes.</div>
+     <div class="heronav">${elig.map(i=>`<button class="hn ${i===hi?'on':''}" data-mh="${i}">${hspr(run.heroes[i],32)}</button>`).join('')}</div>
+     <div class="tiny muted">${esc(HEROES[h.id].name)} now · ${routeLine(h)}</div>
+     <div class="stack">${siblingsOf(h).map(id=>{ const c=CLASSES[id]; return `<div class="ench ${ch===id?'sel':''}" data-mc="${id}"><div class="row" style="gap:8px">${ic(id,'h',30,c.name)}<div class="grow"><b>${esc(c.name)}</b> <span class="tiny muted">${c.role}</span> ${recipeHtml({need:c.need},h,14)}<div class="tiny">${esc(c.passive)}</div></div></div></div>`; }).join('')}</div>
+     <div class="row"><button class="grow ghost" data-mx="cancel">Not now</button><button class="grow gold" data-mx="go" ${ch?'':'disabled'}>Retrain</button></div>`); lockModal(); };
+  draw();
+  $('#sheet').onclick=e=>{ const n=e.target.closest('[data-mh]'); if(n){ hi=+n.dataset.mh; ch=null; return draw(); }
+    const c=e.target.closest('[data-mc]'); if(c){ ch=c.dataset.mc; return draw(); }
+    const x=e.target.closest('[data-mx]'); if(!x||(x.dataset.mx==='go'&&!ch)) return; unlockModal();
+    if(x.dataset.mx==='cancel') return renderCamp();
+    const h=run.heroes[hi], old=h.id; h.path=heroPath(h).slice(0,-1).concat(ch); h.id=ch; seen('h',ch);
+    toast(`${CLASSES[old].name} retrains as ${CLASSES[ch].name}`); finishBonus(); };
+}
+
+// Pawnbroker: sell a relic for what it cost, or trade it for one of three from the tier above (Legendary trades for Legendary).
+// Cursed relics are refused, and so is the Contract of Blood while its extra slot is filled.
+const TIER_UP={common:'rare',rare:'legendary',legendary:'legendary'};
+const pawnable=()=>run.relics.filter(r=>RELICS[r].tier!=='cursed'&&!(r==='contract'&&run.heroes.length>=partyMax()));
+function openPawn(){
+  let sel=null, pk=null;
+  const offers=r=>memo('pawn_'+r,()=>shuffle(relicsOfTier(TIER_UP[RELICS[r].tier],run.relics)).slice(0,3));
+  const draw=()=>{ const of=sel?offers(sel):[];
+    modal(`<h2>Pawnbroker</h2><div class="muted small">"I'll give you what you paid, or something better if you've the nerve to trade." Pick a relic to part with.</div>
+     <div class="stack">${pawnable().map(r=>`<div class="ench ${sel===r?'sel':''}" data-pr="${r}"><div class="row" style="gap:8px">${ic(r,'r',26,RELICS[r].name)}<div class="grow"><b>${esc(RELICS[r].name)}</b> ${tierPill(r)} <span class="tiny gold">sells for ${RELICS[r].cost}g</span></div></div></div>`).join('')}</div>
+     ${sel?`<div class="eyebrow" style="margin-top:6px">…or trade it for</div>${of.length?`<div class="stack">${of.map(r=>`<div class="ench ${pk===r?'sel':''}" data-po="${r}"><div class="row" style="gap:8px">${ic(r,'r',26,RELICS[r].name)}<div class="grow"><b>${esc(RELICS[r].name)}</b> ${tierPill(r)}<div class="tiny">${esc(RELICS[r].desc)}</div></div></div></div>`).join('')}</div>`:'<div class="tiny muted">Nothing better left to trade for.</div>'}`:''}
+     <div class="row"><button class="grow ghost" data-px="cancel">Not now</button><button class="grow" data-px="sell" ${sel?'':'disabled'}>Sell${sel?' · '+RELICS[sel].cost+'g':''}</button><button class="grow gold" data-px="trade" ${pk?'':'disabled'}>Trade</button></div>`); lockModal(); };
+  draw();
+  $('#sheet').onclick=e=>{ const r=e.target.closest('[data-pr]'); if(r){ sel=r.dataset.pr; pk=null; offers(sel).forEach(x=>seen('r',x)); return draw(); }
+    const o=e.target.closest('[data-po]'); if(o){ pk=o.dataset.po; return draw(); }
+    const x=e.target.closest('[data-px]'); if(!x) return; const a=x.dataset.px; if((a==='sell'&&!sel)||(a==='trade'&&!pk)) return; unlockModal();
+    if(a==='cancel') return renderCamp();
+    run.relics.splice(run.relics.indexOf(sel),1);
+    if(a==='sell'){ run.gold+=RELICS[sel].cost; toast(`Sold ${RELICS[sel].name} for ${RELICS[sel].cost}g`); }
+    else { run.relics.push(pk); toast(`${RELICS[sel].name} → ${RELICS[pk].name}`); }
+    finishBonus(); };
+}
+
+// Gambler's Den: stake gold on the next fight; if no hero falls, double it back
+const DEN_STAKES=[5,10];
+function openDen(){
+  modal(`<h2>Gambler's Den</h2><div class="muted small">A table in the back, dice already rolling. Stake gold on your next fight: if every hero is standing at the end, you get double back. If anyone falls, it's gone.</div>
+   <div class="row">${DEN_STAKES.map(n=>`<button class="grow gold" data-dn="${n}" ${run.gold>=n?'':'disabled'}>Stake ${n}g</button>`).join('')}</div>
+   <div class="row"><button class="grow ghost" data-dn="cancel">Not now</button></div>`); lockModal();
+  $('#sheet').onclick=e=>{ const b=e.target.closest('button[data-dn]'); if(!b) return; unlockModal();
+    if(b.dataset.dn==='cancel') return renderCamp();
+    const n=+b.dataset.dn; if(run.gold<n) return renderCamp(); run.gold-=n; run.wager=n; toast(`${n}g on the table`); finishBonus(); };
 }
 function recipeHtml(sk,h,size){
   const have=h?gemCounts(h):{}; const used={};
@@ -101,7 +197,7 @@ function skillRow(sk,h){
 }
 function offerSheet(kind,i){
   const o=kind==='h'?run.shop.heroes[i]:kind==='g'?run.shop.gems[i]:run.shop.relic; if(!o) return;
-  const d=kind==='h'?HEROES[o.id]:kind==='g'?GEMS[o.id]:RELICS[o.id]; const cost=kind==='h'?heroCost():d.cost;
+  const d=kind==='h'?HEROES[o.id]:kind==='g'?GEMS[o.id]:RELICS[o.id]; const cost=kind==='h'?heroCost():kind==='g'?gemPrice(o.id):d.cost;
   const full=kind==='h'&&run.heroes.length>=partyMax(); const can=!o.sold&&run.gold>=cost&&!full;
   let body='';
   if(kind==='h'){

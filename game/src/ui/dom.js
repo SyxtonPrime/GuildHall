@@ -18,6 +18,17 @@ titanseye:'M2 12c3-5 7-7 10-7s7 2 10 7c-3 5-7 7-10 7s-7-2-10-7z M12 9a3 3 0 1 0 
 stormheart:'M7 16a4 4 0 0 1 0-8 5 5 0 0 1 10 0 4 4 0 0 1 0 8 M13 12l-3 5h4l-2 4',
 hollowpearl:'M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16z M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6z',
 midasheart:'M12 20c-5-4-8-7-8-11a4 4 0 0 1 8-2 4 4 0 0 1 8 2c0 4-3 7-8 11z M12 7v8 M14 9h-3a1.5 1.5 0 0 0 0 3h2a1.5 1.5 0 0 1 0 3h-3',
+frostfang:'M5 20l7-7 M12 4l8 8-4 4-8-8z M18 3v6 M15 6h6',
+oathstone:'M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z M9 15l6-6 M10 9h5v5',
+cinderwing:'M3 12c4-6 9-7 13-5-3 0-5 2-6 4 3-2 7-2 11 1-4 0-7 2-9 5-3-3-6-5-9-5z',
+luckstone:'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M8 15c2-2 2-6 4-6s2 4 4 6 M9 12h6',
+hallowstone:'M12 3l8 5v8l-8 5-8-5V8z M12 8v8 M8 12h8',
+beaconstone:'M12 2v4 M12 18v4 M2 12h4 M18 12h4 M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8z',
+martyrscoal:'M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 M12 11v6 M9 14h6',
+glasscomet:'M4 20l9-9 M13 5l6 6-4 4-6-6z M3 13l3 1 M10 3l1 3',
+hourglassheart:'M6 3h12 M6 21h12 M7 3c0 5 5 6 5 9s-5 4-5 9 M17 3c0 5-5 6-5 9s5 4 5 9 M10 18h4',
+stillwater:'M3 9c3-2 6 2 9 0s6-2 9 0 M3 15c3-2 6 2 9 0s6-2 9 0 M12 3v3',
+gamblersknot:'M8 4h8v8H8z M10 6h.5 M13.5 9.5h.5 M12 12v4 M8 16c0 3 8 3 8 0',
 knight:'M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z M12 8v6 M9 11h6',
 berserker:'M4 20l9-9 M12 4l8 8c-2 1-4 3-5 5L12 4z',
 rogue:'M12 3v12 M8 15h8 M12 15v6 M9 8c2-1 4-1 6 0',
@@ -78,5 +89,5 @@ steam:'M6 21c0-3 2-4 2-7s-2-4-2-7 M12 21c0-3 2-4 2-7s-2-4-2-7 M18 21c0-3 2-4 2-7
 };
 const ARCH_G={poison:'venomvial',burn:'pyromancer',chill:'frostmage',shield:'knight',crit:'sparkgem',heal:'cleric',speed:'quickboots',dodge:'monk',kill:'reaper',tank:'ironskin',rage:'berserker'};
 const GEM_G={venom:'venomvial',ember:'emberring',frost:'frostmage',ward:'towershield',edge:'execedge',vital:'lifeleaf',swift:'quickboots',gilt:'coinpurse'};
-const RELIC_G={scales:'coinpurse',cloak:'guardiancharm',boots:'quickboots',tithe:'coinpurse',iron:'ironskin',smoke:'catalyst',marching:'towershield',grimoire:'execedge',contract:'bloodgem',prism:'sparkgem',chalice:'lifeleaf',twinaegis:'aegischarm'};
-const RELIC_C={scales:'crit',cloak:'dodge',boots:'speed',tithe:'poison',iron:'tank',smoke:'dodge',marching:'tank',grimoire:'kill',contract:'rage',prism:'crit',chalice:'heal',twinaegis:'shield',warhorn:'rage',bloodpact:'rage',bulwark:'tank',huntinghorn:'speed',hourglass:'speed',plaguebanner:'poison',kindling:'burn',coinpurse:'crit',phoenix:'heal',drums:'rage',rally:'rage',wildfire:'burn',glacialcore:'chill',mirrorward:'shield',luckycoin:'crit',resonance:'kill',steam:'burn'};
+const RELIC_G={timewatch:'hourglass',secondwind:'lifeleaf',ledger:'coinpurse',gamblersdie:'luckycoin',cruelty:'huntersmark',censer:'catalyst',trophy:'warhorn',valor:'aegischarm',hydra:'chainlightning',reddawn:'bloodgem',gildedchains:'ambergold',pactofhaste:'hourglass',crownofthorns:'thornmail',foolsbargain:'luckycoin',bloodidol:'bloodpact',cursedhoard:'coinpurse',scales:'coinpurse',cloak:'guardiancharm',boots:'quickboots',tithe:'coinpurse',iron:'ironskin',smoke:'catalyst',marching:'towershield',grimoire:'execedge',contract:'bloodgem',prism:'sparkgem',chalice:'lifeleaf',twinaegis:'aegischarm'};
+const RELIC_C={whetstone:'crit',timewatch:'speed',secondwind:'heal',ledger:'crit',gamblersdie:'rage',cruelty:'kill',censer:'heal',trophy:'rage',catalyst:'kill',valor:'shield',hydra:'kill',reddawn:'rage',gildedchains:'rage',pactofhaste:'rage',crownofthorns:'rage',foolsbargain:'rage',bloodidol:'rage',cursedhoard:'rage',scales:'crit',cloak:'dodge',boots:'speed',tithe:'poison',iron:'tank',smoke:'dodge',marching:'tank',grimoire:'kill',contract:'rage',prism:'crit',chalice:'heal',twinaegis:'shield',warhorn:'rage',bloodpact:'rage',bulwark:'tank',huntinghorn:'speed',hourglass:'speed',plaguebanner:'poison',kindling:'burn',coinpurse:'crit',phoenix:'heal',drums:'rage',rally:'rage',wildfire:'burn',glacialcore:'chill',mirrorward:'shield',luckycoin:'crit',resonance:'kill',steam:'burn'};

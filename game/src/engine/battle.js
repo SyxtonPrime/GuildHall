@@ -7,7 +7,11 @@ function baseUnit(def,side,row,s,B){
 // gold: the run's bank when the fight starts; skills that read "gold in the bank" see it plus whatever the fight has paid so far (B.bounty)
 // ctx: {spent} — gold spent this run (War Bonds). Master Jeweller (flag jeweller on any hero) doubles everyone's basic gem effects.
 function createBattle(heroes,enc,relics,gold,ctx){
-  const B={units:[],t:0,over:false,winner:null,log:[],relics,fx:()=>{},anim:()=>{},spawn:()=>{},move:()=>{},vanish:()=>{},phoenixUsed:false,uid:0,enc,flags:{},busy:{},bounty:0,gold:gold||0,spent:(ctx&&ctx.spent)||0};
+  const B={units:[],t:0,over:false,winner:null,log:[],relics,fx:()=>{},anim:()=>{},spawn:()=>{},move:()=>{},vanish:()=>{},uid:0,enc,flags:{},busy:{},bounty:0,gold:gold||0,spent:(ctx&&ctx.spent)||0};
+  // ctx.trial (Proving Grounds): this fight's handicap. Pact of Haste shortens the clock; Fool's Bargain and some trials toughen every enemy.
+  const tr=ctx&&ctx.trial; B.tLimit=relics.includes('pactofhaste')?40:60;
+  B.trophies=(ctx&&ctx.trophies)||0; // Trophy Rack: elite fights won this run
+  B.eHp=(relics.includes('foolsbargain')?1.15:1)*(tr==='ehp'?1.3:1); B.eAtk=tr==='eatk'?1.25:1;
   B.logf=s=>{B.log.push(`${B.t.toFixed(1)}s ${s}`); if(B.log.length>400) B.log.shift();};
   const sctx=heroes.some(h=>computeStats(h,relics).flags.jeweller)?{gemMult:2}:null;
   heroes.forEach(h=>{ const d=HEROES[h.id], s=computeStats(h,relics,sctx);
@@ -18,7 +22,9 @@ function createBattle(heroes,enc,relics,gold,ctx){
       onDamaged:(u,src,d,info,B)=>{ if(info.type!=='attack'||!src||!src.alive) return; for(const k in s.retaliate) applyStatus(u,src,k,s.retaliate[k],B); if(s.spikes) dealDamage(u,src,s.spikes,{type:'thorns',ignoreArmor:true},B); }};
     u.gemHooks=gemHooks; // Perfect Partners gives Wilfred the same socket passives
     u.hooks=[...s.passives.map(x=>x.hooks||{}), gemHooks, ...s.gemHooks, ...s.skills.map(x=>x.hooks||{}), ...relics.map(r=>RELICS[r].hooks||{})];
+    if(tr==='hhp'){ u.maxHp=u.maxHp0=Math.max(1,Math.round(u.maxHp*0.75)); u.hp=u.maxHp; }
     B.units.push(u); });
+  if(relics.includes('gamblersdie')){ const hs=B.units.filter(u=>u.hero); if(hs.length){ const u=pick(hs); u.atk=Math.round(u.atk*1.5); B.logf(`The die favours ${u.name}.`); } } // Gambler's Die
   enc.list.forEach(e=>makeEnemy(B,e.id,e.row));
   B.flags={}; B.units.forEach(u=>{ for(const f in u.flags) B.flags[f]=1; });
   B.units.forEach(u=>fire(u,'onStart',B));
@@ -51,18 +57,9 @@ const splash=(u,t,n,B)=>dealDamage(u,t,n,{type:'attack',splash:true},B);
 function startDuel(u,t,B){ if(!t||!t.alive) return false; u.duel=t; t.duel=u; B.fx(u,'DUEL','buff'); B.fx(t,'DUEL','buff'); B.logf(`${u.name} challenges ${t.name} to a duel.`); fire(u,'onDuelStart',t,B); return true; }
 // An ally raised mid-fight (Wilfred, Skeletons, Legion): a unit on the hero side with no hero record, so it counts as an ally, not a hero.
 // stats: {maxHp,atk,spd,armor,crit,dodge}; opts: {hooks, apply, flags, eid (sprite), fx}. Goes in the row asked for, else the other, else nowhere.
-function summonAlly(B,name,stats,row,opts){ opts=opts||{}; if(B.over) return null; const other=row==='front'?'back':'front'; row=rowRoom(B,'p',row)?row:rowRoom(B,'p',other)?other:null; if(!row) return null;
+function summonAlly(B,name,stats,row,opts){ opts=opts||{}; if(B.over) return null; if(B.relics.includes('grimoire')) stats=Object.assign({},stats,{maxHp:Math.round(stats.maxHp*1.5),atk:Math.round(stats.atk*1.5)}); // Necromancer's Grimoire const other=row==='front'?'back':'front'; row=rowRoom(B,'p',row)?row:rowRoom(B,'p',other)?other:null; if(!row) return null;
   const u=baseUnit({name},'p',row,stats,B); u.summon=true; u.timer=0; u.eid=opts.eid||'skeleton'; u.hooks=opts.hooks||[]; u.apply=Object.assign({},opts.apply||{}); if(opts.flags) u.flags=opts.flags;
   B.units.push(u); B.fx(u,opts.fx||'RISE','buff'); B.logf(`${name} joins your guild.`); B.move(u); fire(u,'onStart',B); return u; }
-// Necromancer's Grimoire: slain enemies rise on the hero side (half an enemy Skeleton of this floor, no relic hooks)
-function raiseSkeleton(B){
-  if(B.over) return;
-  const row=rowRoom(B,'p','front')?'front':rowRoom(B,'p','back')?'back':null; if(!row) return;
-  const d=ENEMIES.skeleton, m=B.enc.mult;
-  const s={maxHp:Math.round(d.hp*m*ENEMY_HP*0.5),atk:Math.round(d.atk*m*ENEMY_ATK*0.6),spd:d.spd,armor:d.armor||0,crit:0,dodge:0};
-  const u=baseUnit({name:'Risen Skeleton'},'p',row,s,B); u.name='Risen Skeleton'; u.eid='skeleton'; u.summon=true; u.timer=0; u.hooks=[];
-  B.units.push(u); B.fx(u,'RISE','buff'); B.logf('A Risen Skeleton joins your guild.'); B.move(u);
-}
 // row movement: 'vanguard' heroes step forward when no ally holds the front; 'retreat' heroes fall back when hurt
 function checkVanguard(B){
   const frontHeld=B.units.some(x=>x.side==='p'&&x.alive&&x.row==='front');
@@ -86,7 +83,7 @@ function checkWeave(u,B,dt){
 }
 const ELITE_BOOST=1.15; // elites are optional (and pay a free gem), so the elite itself hits a little harder
 function makeEnemy(B,id,row){
-  const d=ENEMIES[id], m=B.enc.mult*(d.elite?ELITE_BOOST:1), nz=(d.boss&&B.enc.norm)||{hp:1,atk:1}, bz=d.boss?{hp:BOSS_HP,atk:BOSS_ATK}:{hp:1,atk:1}; const s={maxHp:Math.round(d.hp*m*ENEMY_HP*nz.hp*bz.hp),atk:Math.round(d.atk*m*ENEMY_ATK*nz.atk*bz.atk),spd:d.spd,armor:d.armor||0,crit:d.crit||0,dodge:d.dodge||0};
+  const d=ENEMIES[id], m=B.enc.mult*(d.elite?ELITE_BOOST:1), nz=(d.boss&&B.enc.norm)||{hp:1,atk:1}, bz=d.boss?{hp:BOSS_HP,atk:BOSS_ATK}:{hp:1,atk:1}; const s={maxHp:Math.round(d.hp*m*ENEMY_HP*nz.hp*bz.hp*(B.eHp||1)),atk:Math.round(d.atk*m*ENEMY_ATK*nz.atk*bz.atk*(B.eAtk||1)),spd:d.spd,armor:d.armor||0,crit:d.crit||0,dodge:d.dodge||0};
   const u=baseUnit(d,'e',row,s,B); u.eid=id; u.apply=Object.assign({},d.apply||{}); u.flags=Object.assign({},d.flags||{}); u.targetLowest=!!d.targetLowest; u.hooks=[d.hooks||{}]; B.units.push(u); return u;
 }
 // mid-battle reinforcements (Slime splits, Necromancer raises). Capped at 6 living enemies.
@@ -110,7 +107,7 @@ const effSpd=u=>Math.min(SPD_CAP,u.spd*(1+buffSum(u,'spd'))*(1-CHILL_SLOW*Math.m
 function addShield(u,n,B,echo){ if(!u||!u.alive||n<=0) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.flags.shieldMult2) n*=2; u.shield+=n; B.fx(u,`+${n}`,'shield'); fireOnce(u,'onShieldGain',B,n);
   // Twin Aegis: copy to another random hero (the copy never copies itself)
   if(!echo&&u.hero&&B.relics.includes('twinaegis')){ const o=B.units.filter(x=>x!==u&&x.hero&&x.alive); if(o.length) addShield(pick(o),n,B,true); } }
-function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.side==='e'&&u.st.poison>0&&B.flags.quarantine) n=Math.floor(n/2); const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; B.fx(u,`+${r}`,'heal'); } if(n-r>0&&u.hero&&B.relics.includes('chalice')) addShield(u,Math.round(n-r),B); if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
+function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.side==='e'&&u.st.poison>0&&B.flags.quarantine) n=Math.floor(n/2); if(u.hero){ if(B.relics.includes('chalice')) n=Math.round(n*1.25); if(B.relics.includes('bloodidol')) n=Math.ceil(n/2); } const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; B.fx(u,`+${r}`,'heal'); } if(r>0&&u.flags.martyr) gainStatus(u,'burn',1,B); /* Martyr's Coal */ if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
 // a heal performed by a class ability: onHealing hooks scale it (Healer's bonuses), then the Mage root's +1; gem regeneration and lifesteal skip this
 function abilityHeal(src,t,n,B){ if(!t||!t.alive||n<=0) return; const h={n}; fire(src,'onHealing',t,h,B); heal(t,Math.round(h.n)+(src.healBonus||0),B,src); }
 // on-hit status: the attack's own applications, which get the Mage root's +1 and per-hit bonuses (u.hitBonus is set while a hit resolves)
@@ -129,6 +126,7 @@ function pickTarget(u,foes,a,B){
   if(u.side==='p'&&B.brand&&B.brand.t.alive&&B.brand.until>B.t&&foes.includes(B.brand.t)) return B.brand.t;
   if(u.lock&&u.lock.alive&&foes.includes(u.lock)) return u.lock; // Stalk: beats class rules
   if(u.nextTarget){ const t=u.nextTarget; u.nextTarget=null; if(t.alive&&foes.includes(t)) return t; }
+  if(u.side==='e'){ const bc=foes.filter(f=>f.flags.beacon); if(bc.length) return pick(bc); } // Beacon Stone draws every enemy's attacks
   if(u.targetRule){ const t=u.targetRule(u,foes,B); if(t&&t.alive&&foes.includes(t)) return t; }
   if(u.side==='e'&&B&&B.relics.includes('boots')&&!u.targetLowest&&!a.targetLowest&&!a.preferBack) return pick(foes); // Skirmisher's Boots: the back row is exposed
   if(a.preferBack){ const b=foes.filter(f=>f.row==='back'); if(b.length) return pick(b); }
@@ -178,7 +176,7 @@ function hit(u,t,a,B){
   fire(u,'onTarget',t,ac,B);
   fire(t,'onDefend',u,ac,B);
   for(const x of B.units){ if(!x.alive) continue; if(x.side===u.side) fire(x,'onAllyTarget',u,t,ac,B); else fire(x,'onAllyDefend',t,u,ac,B); } // side-wide auras, the attacker and defender included
-  if(t.st.chill>0&&u.side==='p'){ if(B.relics.includes('glacialcore')) ac.bonus+=chill5(t); if(B.flags.wintersgrip) ac.mult*=1.15; if(isFrozen(t)&&B.flags.abszero) ac.mult*=1.5; }
+  if(t.st.chill>0&&u.side==='p'){ if(B.relics.includes('glacialcore')) ac.bonus+=Math.min(5,Math.floor(t.st.chill/4)); if(B.flags.wintersgrip) ac.mult*=1.15; if(isFrozen(t)&&B.flags.abszero) ac.mult*=1.5; }
   let dmg=Math.max(1,Math.max(1,u.atk+ac.bonus)*ac.mult-(ac.reduce||0)), crit=false;
   // crit: forced unless ac.noForce turns the guarantee into a 100% roll (Elemental Rush), scaled by ac.critScale; ac.noCrit (Immovable, Spirit Ward) stops it
   const forcedCrit=ac.forceCrit&&!ac.noForce, chance=(ac.forceCrit?1:u.crit+(ac.critBonus||0)+buffSum(u,'crit'))*(ac.critScale||1);
@@ -222,6 +220,7 @@ function gainStatus(t,k,n,B){
   if(k==='chill'&&was<FROZEN_AT&&t.st.chill>=FROZEN_AT){ kind='frozen'; B.fx(t,'FROZEN','buff'); B.logf(`${t.name} is frozen.`); }
   if(k==='poison'&&was<FESTER_AT&&t.st.poison>=FESTER_AT){ kind='festering'; B.fx(t,'FESTERING','poison'); B.logf(`${t.name} is festering.`); }
   checkMarks(t,B);
+  if(kind&&t.side==='e'&&B.relics.includes('catalyst')&&!B.catalysing){ B.catalysing=true; const k2={frozen:'chill',ablaze:'burn',festering:'poison'}[kind]; B.units.forEach(x=>{ if(x.alive&&x.side==='e'&&x!==t) gainStatus(x,k2,3,B); }); B.catalysing=false; } // Catalyst: no chain reactions
   if(kind) B.units.forEach(x=>{ if(x.alive) fire(x,'onAffliction',t,kind,B); }); // everyone hears it; hooks check the side
 }
 // two afflictions at once mark the unit for the rest of the fight (see core); Ruined carries all three marks
@@ -233,15 +232,17 @@ function checkMarks(t,B){
 function dealDamage(src,t,amount,info,B){
   if(!t.alive) return 0;
   if(t.kw.ruined) amount*=1.5;
+  if(B.t<3&&B.relics.includes('reddawn')) amount*=2; // Red Dawn: both sides
   if(t.kw.blighted&&(info.type==='poison'||info.type==='burn')) amount*=1.25;
   if(info.type==='poison'&&t.flags.poisonResist) amount*=0.5; // Bone Dragon: resistant, not immune
   if(info.type==='attack'&&src) B.anim(src,t,info);
-  if(t.side==='e'&&B.relics.includes('resonance')&&['poison','burn','chill'].filter(k=>t.st[k]>0).length>=3) amount*=1.3;
+  if(t.side==='e'&&B.relics.includes('resonance')&&(t.kw.brittle||t.kw.blighted||t.kw.crippled)) amount*=1.2;
+  if(t.hero&&info.type==='attack'&&B.relics.includes('crownofthorns')) amount*=1.2;
   if(info.type==='attack'&&src&&t.duel&&t.duel.alive&&src!==t.duel) amount*=0.5; // a duellist takes half from anyone but the opponent
   if(info.type==='burn'&&src&&src.flags.ashen&&t.shield>0) amount*=2; // Ashen Guard: Burn doubles against Shield
   let dmg=Math.max(0,Math.round(amount));
   if(!info.ignoreArmor&&dmg>0&&!isFestering(t)) dmg=Math.max(1,dmg-t.armor); // Festering: Armor counts as 0
-  if((!info.ignoreShield||t.flags.shieldAll)&&t.shield>0&&dmg>0){ const ab=Math.min(t.shield,dmg); t.shield-=ab; dmg-=ab; if(ab){ B.fx(t,`-${ab}`,'shield'); if(info.type==='attack'&&src&&src.alive){ fire(t,'onShieldAbsorb',src,ab,B); if(t.side==='p'&&B.relics.includes('mirrorward')) dealDamage(t,src,ab,{type:'thorns',ignoreArmor:true},B); }
+  if((!info.ignoreShield||t.flags.shieldAll)&&t.shield>0&&dmg>0){ const ab=Math.min(t.shield,dmg); t.shield-=ab; dmg-=ab; if(ab){ B.fx(t,`-${ab}`,'shield'); if(info.type==='attack'&&src&&src.alive){ fire(t,'onShieldAbsorb',src,ab,B); }
     if(info.type==='burn'&&src&&src.alive&&src.flags.ashen) addShield(src,ab,B);
     if(t.shield<=0) alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyShieldBreak',t,src,B); }); } }
   t.hp-=dmg; t.stats.taken+=dmg; if(src) src.stats.dealt+=dmg;
@@ -250,7 +251,7 @@ function dealDamage(src,t,amount,info,B){
   if(dmg>0&&src) fire(t,'onDamaged',src,dmg,info,B);
   if(dmg>0){ alliesOf(t,B).forEach(x=>{ if(x!==t&&x.alive) fire(x,'onAllyDamaged',t,src,dmg,info,B); }); aliveEnemies(t,B).forEach(x=>fire(x,'onFoeDamaged',t,src,dmg,info,B)); }
   if(t.hp<=0&&t.hero&&!t.ironUsed&&B.relics.includes('iron')){ t.ironUsed=true; t.hp=1; B.fx(t,'ENDURE','buff'); B.logf(`${t.name} refuses to fall.`); }
-  if(t.hp<=0){ if(t.side==='e'&&(info.type==='poison'||info.type==='burn')&&src&&src.side==='p'&&B.relics.includes('tithe')){ B.bounty++; B.fx(t,'+1 gold','buff'); } die(t,src,B); }
+  if(t.hp<=0) die(t,src,B);
   else { checkSmoke(t,B); checkRetreat(t,B); }
   return dmg;
 }
@@ -270,7 +271,6 @@ function die(t,killer,B){
   if(killer&&killer.alive){ killer.stats.kills++; fire(killer,'onKill',t,B); alliesOf(killer,B).forEach(x=>{ if(x!==killer&&x.alive) fire(x,'onAllyKill',killer,t,B); }); }
   alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyDeath',t,B); });
   aliveEnemies(t,B).forEach(x=>fire(x,'onFoeDeath',t,B));
-  if(t.side==='e'&&killer&&killer.side==='p'&&B.relics.includes('grimoire')) raiseSkeleton(B);
   if(t.side==='p'&&t.row==='front'&&B.relics.includes('marching')){ const c=B.units.filter(x=>x.side==='p'&&x.alive&&x.row==='back'&&!x.summon); if(c.length){ const n=c.reduce((m,x)=>x.hp>m.hp?x:m); if(moveUnit(n,'front',B)){ n.retreated=false; n.resting=false; addShield(n,n.maxHp,B); B.fx(n,'STEP UP','buff'); B.logf(`${n.name} steps up to hold the line.`); } } }
   if(t.side==='p') checkVanguard(B);
 }
@@ -297,7 +297,7 @@ function tickStatus(u,B){
 function checkEnd(B){
   if(B.over) return true;
   const p=B.units.some(x=>x.side==='p'&&x.alive), e=B.units.some(x=>x.side==='e'&&x.alive);
-  if(!e){B.over=true;B.winner='p';} else if(!p){B.over=true;B.winner='e';}
+  if(!e){B.over=true;B.winner='p'; B.units.forEach(x=>{ if(x.alive) fire(x,'onWin',B); });} else if(!p){B.over=true;B.winner='e';}
   return B.over;
 }
 function stepBattle(B,dt){
@@ -309,7 +309,7 @@ function stepBattle(B,dt){
     u.timer+=dt*effSpd(u); if(u.timer>=1){ u.timer-=1; attack(u,B); }
     if(checkEnd(B)) return;
   }
-  if(B.t>=60){ B.over=true; B.winner='e'; B.logf('Time runs out. Your guild retreats.'); }
+  if(B.t>=(B.tLimit||60)){ B.over=true; B.winner='e'; B.logf('Time runs out. Your guild retreats.'); }
 }
 function runToEnd(B){ let n=0; while(!B.over&&n<4000){ stepBattle(B,0.05); n++; } return B; }
-if(typeof module!=='undefined') module.exports={GILT_PER_KILLS,closest,opposite,colOf,adjacentOf,CLASSES,STARTERS,ROOTS,newHero,trainHero,upgradeOptions,upgradesOf,promote,heroSkills,heroPath,HOOKS,rollActBoss,bossPool,bossNorm,BOSSES,enemyMult,gemLeaves,defineMergedGem,restoreMergedGems,genChoices,curAct,slotKind,HAND_SLOTS,HEROES,defaultRow,ROW_MAX,ENCOUNTERS,GEMS,BASIC_GEMS,RARE_GEMS,SLOTS,RELICS,ENEMIES,ARCH_LABEL,heroSkills,activeSkills,skillActive,needCounts,gemCounts,genEncounter,computeStats,createBattle,stepBattle,runToEnd,actOf,kindOf,FLOORS};
+if(typeof module!=='undefined') module.exports={GILT_PER_KILLS,closest,opposite,colOf,adjacentOf,CLASSES,STARTERS,ROOTS,newHero,trainHero,upgradeOptions,upgradesOf,promote,heroSkills,heroPath,HOOKS,rollActBoss,bossPool,bossNorm,BOSSES,enemyMult,gemLeaves,defineMergedGem,restoreMergedGems,genChoices,genPrologue,RARE_ODDS,actOf,curAct,slotKind,HAND_SLOTS,HEROES,defaultRow,ROW_MAX,ENCOUNTERS,GEMS,BASIC_GEMS,RARE_GEMS,SLOTS,RELICS,ENEMIES,ARCH_LABEL,heroSkills,activeSkills,skillActive,needCounts,gemCounts,genEncounter,computeStats,createBattle,stepBattle,runToEnd,actOf,kindOf,FLOORS};

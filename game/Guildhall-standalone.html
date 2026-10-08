@@ -163,8 +163,9 @@ html,body,body *{-webkit-touch-callout:none!important;user-select:none!important
 .pill.tier-common{color:var(--muted);border-color:var(--line)}
 .pill.tier-rare{color:#7fc8ff;border-color:#3d86c9}
 .pill.tier-legendary{color:#f2c14e;border-color:#f2c14e;background:#f2c14e18}
+.pill.tier-cursed{color:#d46bff;border-color:#9b3fd0;background:#9b3fd018}
 .offer.relic.tier-common{border-color:var(--line)}.offer.relic.tier-rare{border-color:#3d86c9}.offer.relic.tier-legendary{border-color:#f2c14e;box-shadow:0 0 0 1px #f2c14e55 inset}
-.relicchip.tier-rare{border-color:#3d86c9}.relicchip.tier-legendary{border-color:#f2c14e}
+.relicchip.tier-cursed{border-color:#9b3fd0}.relicchip.tier-rare{border-color:#3d86c9}.relicchip.tier-legendary{border-color:#f2c14e}
 .unit.veiled{opacity:.35;filter:grayscale(.6)}
 .unit.vanishing{transition:opacity .4s,transform .4s!important;opacity:0!important;transform:scale(.85)!important}
 .unit.summon{border-style:dashed;border-color:#8a6fc0}
@@ -340,21 +341,32 @@ const GEMS={
  vital:{name:'Vital',arch:'heal',letter:'H',cost:3,hand:'Each hit heals this hero 2',armor:'+12 HP · heal 1 every 2 seconds'},
  swift:{name:'Swift',arch:'speed',letter:'S',cost:3,hand:'+15% attack speed',armor:'+8% dodge'},
  gilt:{name:'Gilt',arch:'gold',letter:'G',cost:3,hand:'+1 gold for every 2 enemies this hero kills in a fight',armor:'+1 gold after every won fight'},
- // rare: two essences + a bonus effect
- bloodstone:{name:'Bloodstone',rare:1,ess:['venom','vital'],cost:5,desc:'Venom + Vital. Whenever this hero\'s Poison damages an enemy, heal 1',hooks:{onPoisonDamage:(u,t,d,B)=>{ if(t.poisonSrc===u) heal(u,1,B,u); }}},
- hearthstone:{name:'Hearthstone',rare:1,ess:['ember','ward'],cost:5,desc:'Ember + Ward. When this hero\'s Shield absorbs a hit, the attacker gains 1 Burn',hooks:{onShieldAbsorb:(u,src,ab,B)=>applyStatus(u,src,'burn',1,B)}},
- rimeheart:{name:'Rimeheart',rare:1,ess:['frost','ward'],cost:5,desc:'Frost + Ward. Whenever this hero applies Chill, gain 1 Shield',hooks:{onApply:(u,k,t,n,B)=>{ if(k==='chill') addShield(u,1,B); }}},
- sunstone:{name:'Sunstone',rare:1,ess:['ember','edge'],cost:5,desc:'Ember + Edge. Crits apply +2 Burn',hooks:{onCrit:(u,t,B)=>applyStatus(u,t,'burn',2,B)}},
- quicksilver:{name:'Quicksilver',rare:1,ess:['swift','edge'],cost:5,desc:'Swift + Edge. Every 4th attack is a guaranteed crit',hooks:{onAttack:(u,a,B)=>{ if(nthAttack(u,4)) a.forceCrit=true; }}},
- moonstone:{name:'Moonstone',rare:1,ess:['frost','vital'],cost:5,desc:'Frost + Vital. Whenever this hero applies Chill, heal the most injured ally 1',hooks:{onApply:(u,k,t,n,B)=>{ if(k==='chill') heal(lowestAlly(u,B),1,B,u); }}},
- ambergold:{name:'Ambergold',rare:1,ess:['gilt','edge'],cost:5,desc:'Gilt + Edge. +1 gold for each enemy this hero kills',gold:{kill:1}},
- verdigris:{name:'Verdigris',rare:1,ess:['venom','gilt'],cost:5,desc:'Venom + Gilt. Attacks apply +1 extra Poison',apply:{poison:1}},
- // rare: three essences with a drawback
- chaosshard:{name:'Chaos Shard',rare:2,ess:['venom','ember','frost'],cost:6,desc:'Venom + Ember + Frost. Drawback: −25% max HP',mod:{hpMult:0.75}},
- titanseye:{name:"Titan's Eye",rare:2,ess:['ward','vital','edge'],cost:6,desc:'Ward + Vital + Edge. Drawback: −25% attack speed',mod:{spdMult:0.75}},
- stormheart:{name:'Stormheart',rare:2,ess:['swift','edge','ember'],cost:6,desc:'Swift + Edge + Ember. Drawback: −2 Armor and −15 HP',mod:{armor:-2,hp:-15}},
- hollowpearl:{name:'Hollow Pearl',rare:2,ess:['venom','ward','swift'],cost:6,desc:'Venom + Ward + Swift. Drawback: this hero cannot be healed',flag:'noHeal'},
- midasheart:{name:'Midas Heart',rare:2,ess:['gilt','gilt','vital'],cost:6,desc:'Gilt ×2 + Vital. +2 gold after every won fight. Drawback: −4 ATK',mod:{atk:-4},gold:{win:2}},
+ // rare: two essences (each grants its socket passive, like a basic gem) + a bonus effect
+ bloodstone:{name:'Bloodstone',rare:1,ess:['venom','vital'],cost:7,desc:'Venom + Vital. Whenever this hero\'s Poison damages an enemy, heal 1',hooks:{onPoisonDamage:(u,t,d,B)=>{ if(t.poisonSrc===u) heal(u,1,B,u); }}},
+ hearthstone:{name:'Hearthstone',rare:1,ess:['ember','ward'],cost:7,desc:'Ember + Ward. When this hero\'s Shield absorbs a hit, the attacker gains 1 Burn',hooks:{onShieldAbsorb:(u,src,ab,B)=>applyStatus(u,src,'burn',1,B)}},
+ rimeheart:{name:'Rimeheart',rare:1,ess:['frost','ward'],cost:7,desc:'Frost + Ward. Whenever this hero applies Chill, gain 1 Shield',hooks:{onApply:(u,k,t,n,B)=>{ if(k==='chill') addShield(u,1,B); }}},
+ sunstone:{name:'Sunstone',rare:1,ess:['ember','edge'],cost:7,desc:'Ember + Edge. Crits apply +2 Burn',hooks:{onCrit:(u,t,B)=>applyStatus(u,t,'burn',2,B)}},
+ quicksilver:{name:'Quicksilver',rare:1,ess:['swift','edge'],cost:7,desc:'Swift + Edge. Every 4th attack is a guaranteed crit',hooks:{onAttack:(u,a,B)=>{ if(nthAttack(u,4)) a.forceCrit=true; }}},
+ moonstone:{name:'Moonstone',rare:1,ess:['frost','vital'],cost:7,desc:'Frost + Vital. Whenever this hero applies Chill, heal the most injured ally 1',hooks:{onApply:(u,k,t,n,B)=>{ if(k==='chill') heal(lowestAlly(u,B),1,B,u); }}},
+ ambergold:{name:'Ambergold',rare:1,ess:['gilt','edge'],cost:7,desc:'Gilt + Edge. +1 gold for each enemy this hero kills',gold:{kill:1}},
+ verdigris:{name:'Verdigris',rare:1,ess:['venom','gilt'],cost:7,desc:'Venom + Gilt. Attacks apply +1 extra Poison',apply:{poison:1}},
+ frostfang:{name:'Frostfang',rare:1,ess:['frost','edge'],cost:7,desc:'Frost + Edge. Crits apply +2 Chill',hooks:{onCrit:(u,t,B)=>applyStatus(u,t,'chill',2,B)}},
+ oathstone:{name:'Oathstone',rare:1,ess:['ward','edge'],cost:7,desc:'Ward + Edge. Crits grant this hero 3 Shield',hooks:{onCrit:(u,t,B)=>addShield(u,3,B)}},
+ cinderwing:{name:'Cinderwing',rare:1,ess:['ember','swift'],cost:7,desc:'Ember + Swift. Every 3rd attack applies +3 Burn',hooks:{onAttack:(u,a,B)=>{ if(nthAttack(u,3)) addApply(a,'burn',3); }}},
+ luckstone:{name:'Luckstone',rare:1,ess:['gilt','swift'],cost:7,desc:'Gilt + Swift. Each dodge earns 1 gold (up to 3 a fight)',hooks:{onDodge:(u,src,B)=>{ if(!u.hero||(u.luckGold||0)>=3) return; u.luckGold=(u.luckGold||0)+1; B.bounty+=1; B.fx(u,'+1 gold','buff'); }}},
+ hallowstone:{name:'Hallowstone',rare:1,ess:['vital','ward'],cost:7,desc:'Vital + Ward. Start each fight with Shield equal to a tenth of max HP',hooks:{onStart:(u,B)=>addShield(u,Math.round(u.maxHp/10),B)}},
+ // rare: three essences (each grants its passive) with a drawback
+ chaosshard:{name:'Chaos Shard',rare:2,ess:['venom','ember','frost'],cost:12,desc:'Venom + Ember + Frost. Drawback: −25% max HP',mod:{hpMult:0.75}},
+ titanseye:{name:"Titan's Eye",rare:2,ess:['ward','vital','edge'],cost:12,desc:'Ward + Vital + Edge. Drawback: −25% attack speed',mod:{spdMult:0.75}},
+ stormheart:{name:'Stormheart',rare:2,ess:['swift','edge','ember'],cost:12,desc:'Swift + Edge + Ember. Drawback: −2 Armor and −15 HP',mod:{armor:-2,hp:-15}},
+ hollowpearl:{name:'Hollow Pearl',rare:2,ess:['venom','ward','swift'],cost:12,desc:'Venom + Ward + Swift. Drawback: this hero cannot be healed',flag:'noHeal'},
+ beaconstone:{name:'Beacon Stone',rare:2,ess:['ward','vital','swift'],cost:12,desc:'Ward + Vital + Swift. Drawback: enemies attack this hero first, even in the back row',flag:'beacon'},
+ martyrscoal:{name:"Martyr's Coal",rare:2,ess:['ember','vital','ward'],cost:12,desc:'Ember + Vital + Ward. Drawback: whenever this hero is healed, it gains 1 Burn',flag:'martyr'},
+ glasscomet:{name:'Glass Comet',rare:2,ess:['frost','edge','swift'],cost:12,desc:"Frost + Edge + Swift. Drawback: each enemy's first hit on this hero each fight is a crit",hooks:{onDefend:(u,src,ac,B)=>{ u.cometHit=u.cometHit||{}; if(!u.cometHit[src.uid]){ u.cometHit[src.uid]=1; ac.forceCrit=true; } }}},
+ hourglassheart:{name:'Hourglass Heart',rare:2,ess:['venom','ember','edge'],cost:12,desc:'Venom + Ember + Edge. Drawback: after 30 seconds, this hero\'s max HP drops to 1',hooks:{onSecond:(u,B)=>{ if(u.secs===30&&u.hero){ u.maxHp=1; u.hp=Math.min(u.hp,1); B.fx(u,'TIME','miss'); B.logf(`${u.name}'s hourglass runs out.`); } }}},
+ stillwater:{name:'Stillwater',rare:2,ess:['frost','ward','edge'],cost:12,desc:'Frost + Ward + Edge. Drawback: starts each fight with 10 Chill',hooks:{onStart:(u,B)=>gainStatus(u,'chill',10,B)}},
+ gamblersknot:{name:"Gambler's Knot",rare:2,ess:['gilt','swift','ward'],cost:12,desc:'Gilt + Swift + Ward. Bets 5 gold on each fight and pays back 6 if this hero is standing at the end',hooks:{onStart:(u,B)=>{ if(u.hero&&bank(B)>=5){ u.knotBet=1; B.bounty-=5; B.logf(`${u.name} bets 5 gold.`); } }, onWin:(u,B)=>{ if(u.knotBet){ B.bounty+=6; B.fx(u,'+6 gold','buff'); } }}},
+ midasheart:{name:'Midas Heart',rare:2,ess:['gilt','gilt','vital'],cost:12,desc:'Gilt ×2 + Vital. +2 gold after every won fight. Drawback: −4 ATK',mod:{atk:-4},gold:{win:2}},
 };
 for(const k in GEMS){ const g=GEMS[k]; if(g.hand&&!g.desc) g.desc=`Weapon/hand: ${g.hand} · Body/head: ${g.armor}`; if(!g.ess) g.ess=[k]; if(!g.letter) g.letter=''; if(!g.arch) g.arch=GEMS[g.ess[0]].arch; }
 const GEM_BY_LETTER={}; for(const k in GEMS) if(GEMS[k].letter) GEM_BY_LETTER[GEMS[k].letter]=k;
@@ -372,13 +384,13 @@ const SLOTS=L=>1+L; // ★ 2 slots, ★★ 3, ★★★ 4
 function needCounts(need){ const c={}; for(const ch of need){ const g=GEM_BY_LETTER[ch]; c[g]=(c[g]||0)+1; } return c; }
 function gemsOf(h){ return (h.gems||[]).filter(Boolean); } // h.gems[k] = gem in slot k (weapon, body, head, off-hand) or null when that slot is empty
 function gemCounts(h){ const c={}; gemsOf(h).forEach(g=>gemEss(g).forEach(e=>c[e]=(c[e]||0)+1)); return c; } // essences, for recipes
-function essenceCounts(h){ const c={}; gemsOf(h).forEach(g=>{ const d=GEMS[g]; (!d.rare?[g]:d.ess.length>=3?d.ess:[]).forEach(e=>c[e]=(c[e]||0)+1); }); return c; } // Prismatic Lens: 3-essence gems grant every essence's passive
 // Gear slots: 0 weapon & 3 off-hand = 'hand' (offensive passive), 1 body & 2 head = 'armor' (defensive passive)
 const GEM_HAND={wardShield:1,vitalHeal:2}, GEM_ARMOR={spikes:2,dodge:0.08}, GILT_PER_KILLS=2; // a Gilt weapon pays 1 gold per this many kills by its hero in a fight
 const HAND_SLOTS=[0,3], slotKind=(k,h)=>(HAND_SLOTS.includes(k)!==!!(h&&h.flip&&h.flip.includes(k)))?'hand':'armor'; // h.flip: sockets the Enchanter has turned to the other kind
-function slotCounts(h,prism){ const c={hand:{},armor:{}}; (h.gems||[]).forEach((g,k)=>{ if(!g) return; const t=c[slotKind(k,h)]; gemLeaves(g).forEach(l=>{ const d=GEMS[l]; const es=!d.rare?[l]:(prism&&d.ess.length>=3?d.ess:[]); es.forEach(e=>t[e]=(t[e]||0)+1); }); }); return c; }
-function basicCounts(h){ const c={}; gemsOf(h).forEach(g=>{ if(!GEMS[g].rare) c[g]=(c[g]||0)+1; }); return c; } // passives come only from basic gems
+function slotCounts(h){ const c={hand:{},armor:{}}; (h.gems||[]).forEach((g,k)=>{ if(!g) return; const t=c[slotKind(k,h)]; gemLeaves(g).forEach(l=>GEMS[l].ess.forEach(e=>t[e]=(t[e]||0)+1)); }); return c; } // every essence on every gem grants its passive for the socket's kind
 function skillActive(h,sk){ const have=gemCounts(h), need=needCounts(sk.need); return Object.keys(need).every(g=>(have[g]||0)>=need[g]); }
+// Shop odds for each gem offer, by act (endless uses Act 3's): no 3-essence gems in Act 1, and rares grow more common each act.
+const RARE_ODDS={1:{dual:0.08,triple:0},2:{dual:0.15,triple:0.05},3:{dual:0.22,triple:0.10}};
 const skillArch=sk=>GEMS[GEM_BY_LETTER[sk.need[0]]].arch;
 
 // ---------- Relics (guild-wide) ----------
@@ -392,15 +404,12 @@ const RELICS={
  plaguebanner:{name:'Plague Banner',tier:'rare',cost:7,desc:'Whenever a hero applies Poison, apply 1 more'},
  kindling:{name:'Kindling',tier:'rare',cost:7,desc:'Burn applied by heroes deals double damage'},
  coinpurse:{name:'Deep Purse',tier:'common',cost:6,desc:'+2 gold after every fight'},
- phoenix:{name:'Phoenix Feather',tier:'rare',cost:8,desc:'Once per battle, the first hero to die revives at half HP',
-  hooks:{onDeath:(u,B)=>{ if(!B.phoenixUsed){ B.phoenixUsed=true; u.alive=true; u.hp=Math.ceil(u.maxHp/2); B.fx(u,'REVIVE','heal'); B.logf(`${u.name} rises again!`); } }}},
  drums:{name:'Drums of War',tier:'common',cost:6,desc:'Every 3 seconds, all heroes gain +1 ATK',
   hooks:{onSecond:(u,B)=>{ if(u.secs%3===0){u.atk+=1;} }}},
  wildfire:{name:'Wildfire',tier:'rare',cost:7,desc:'Whenever Burn damages an enemy, 1 Burn spreads to another enemy'},
- glacialcore:{name:'Glacial Core',tier:'common',cost:5,desc:'Attacks on Chilled enemies deal +1 per Chill (up to 5)'},
- mirrorward:{name:'Mirror Ward',tier:'rare',cost:7,desc:"When a hero's Shield absorbs damage, the attacker takes that much"},
+ glacialcore:{name:'Glacial Core',tier:'common',cost:5,desc:'Attacks on Chilled enemies deal +1 per 4 Chill (up to +5)'},
  luckycoin:{name:'Lucky Coin',tier:'common',cost:6,desc:'All heroes +10% crit. Crits heal the attacker 3'},
- resonance:{name:'Resonance',tier:'rare',cost:7,desc:'Enemies carrying 3 different statuses take +30% damage from everything'},
+ resonance:{name:'Resonance',tier:'rare',cost:7,desc:'Marked enemies (Brittle, Blighted or Crippled) take +20% damage from everything'},
  steam:{name:'Steam Engine',tier:'common',cost:5,desc:'Burn on Chilled enemies deals double'},
  rally:{name:'Rally Banner',tier:'common',cost:5,desc:'Whenever a hero dies, the others gain +3 ATK',
   hooks:{onAllyDeath:(u,d,B)=>{ u.atk+=3; B.fx(u,'+3 ATK','buff'); }}},
@@ -409,19 +418,46 @@ const RELICS={
  cloak:{name:'Cloak of Shadows',tier:'rare',cost:7,desc:'All heroes +10% dodge. Dodging grants 3 Shield',
   hooks:{onDodge:(u,src,B)=>{ if(u.hero) addShield(u,3,B); }}},
  boots:{name:"Skirmisher's Boots",tier:'rare',cost:7,desc:'All heroes +20% attack speed and +10% dodge, but enemies can target the back row even while the front row stands'},
- tithe:{name:'Tithe Box',tier:'rare',cost:7,desc:'+1 gold for each enemy killed by Poison or Burn'},
  iron:{name:'Iron Discipline',tier:'rare',cost:8,desc:'The first time each hero would fall in a fight, they hold on at 1 HP instead'},
  smoke:{name:'Smoke Bomb',tier:'legendary',cost:9,desc:'The first time each hero drops below 50% HP, they vanish in smoke: they slip to the back row and cannot be targeted for 3 seconds'},
  marching:{name:'Marching Orders',tier:'legendary',cost:8,desc:'When a front-row hero falls, the healthiest back-row hero steps up to take their place, gaining Shield equal to their max HP'},
- grimoire:{name:"Necromancer's Grimoire",tier:'legendary',cost:10,desc:'Each enemy your guild slays rises as a Skeleton that fights for you until the battle ends'},
+ grimoire:{name:"Necromancer's Grimoire",tier:'rare',cost:7,desc:'Summons that fight for you (Skeletons, Wilfred) have +50% max HP and ATK'},
  contract:{name:'Contract of Blood',tier:'legendary',cost:9,desc:'+1 hero slot. In every fight, heroes in the front row lose 1 HP each second',
   hooks:{onSecond:(u,B)=>{ if(u.hero&&u.row==='front') dealDamage(null,u,1,{type:'drain',ignoreArmor:true,ignoreShield:true,silent:true},B); }}},
- prism:{name:'Prismatic Lens',tier:'legendary',cost:10,desc:'Gems with 3 essences also grant the passive effect of each essence they hold'},
- chalice:{name:'Overflowing Chalice',tier:'legendary',cost:9,desc:'Every hero heals 1 HP each second. Healing beyond max HP becomes Shield',
+ chalice:{name:'Overflowing Chalice',tier:'legendary',cost:9,desc:'Every hero heals 1 HP each second. Healing on heroes is 25% stronger',
   hooks:{onSecond:(u,B)=>{ if(u.hero) heal(u,1,B,u); }}},
+ prism:{name:'Prismatic Lens',tier:'legendary',cost:10,desc:'Every gem grants both its weapon and its armor passive, whichever socket it sits in'},
  twinaegis:{name:'Twin Aegis',tier:'legendary',cost:8,desc:'Whenever a hero gains Shield, another random hero gains the same amount'},
+// --- v36 ---
+ whetstone:{name:'Whetstone',tier:'common',cost:5,desc:"Each hero's first attack each fight is a crit",
+  hooks:{onAttack:(u,a,B)=>{ if(!u.whetted){ u.whetted=true; a.forceCrit=true; } }}},
+ timewatch:{name:"Timekeeper's Watch",tier:'common',cost:6,desc:'After 20 seconds, heroes attack 25% faster',
+  hooks:{onSecond:(u,B)=>{ if(u.secs===20){ addBuff(u,'timewatch','spd',0.25,Infinity,B); B.fx(u,'HASTE','buff'); } }}},
+ secondwind:{name:'Second Wind',tier:'common',cost:5,desc:'When the first hero falls, every other hero heals a quarter of their max HP',
+  hooks:{onAllyDeath:(u,d,B)=>{ if(!d.hero) return; B.firstFallen=B.firstFallen||d; if(B.firstFallen===d) heal(u,Math.round(u.maxHp/4),B); }}},
+ ledger:{name:"Merchant's Ledger",tier:'common',cost:6,desc:'The market offers a 4th gem'},
+ gamblersdie:{name:"Gambler's Die",tier:'common',cost:5,desc:'Each fight, one random hero gets +50% ATK'},
+ cruelty:{name:"Torturer's Kit",tier:'common',cost:6,desc:'Hero attacks deal +5% damage for each affliction (Frozen, Ablaze, Festering) on the target',
+  hooks:{onTarget:(u,t,ac,B)=>{ const n=afflictions(t); if(n) ac.mult*=1+0.05*n; }}},
+ censer:{name:'Purifying Censer',tier:'rare',cost:7,desc:'Every 5 seconds, each hero sheds 2 Poison, 2 Burn and 2 Chill',
+  hooks:{onSecond:(u,B)=>{ if(u.secs%5===0) STATUS_KEYS.forEach(k=>{ if(u.st[k]>0) loseStatus(u,k,2,B); }); }}},
+ trophy:{name:'Trophy Rack',tier:'rare',cost:7,desc:'Heroes gain +1 ATK in every fight for each elite fight won this run',
+  hooks:{onStart:(u,B)=>{ if(B.trophies) u.atk+=B.trophies; }}},
+ catalyst:{name:'Catalyst',tier:'rare',cost:7,desc:'When an enemy becomes Frozen, Ablaze or Festering, every other enemy gains 3 of that status'},
+ valor:{name:'Aegis of Valor',tier:'rare',cost:7,desc:'Heroes gain Shield equal to 10% of the attack damage they deal',
+  hooks:{onHit:(u,t,d,B)=>{ if(d<=0) return; u.valorAcc=(u.valorAcc||0)+d*0.1; const n=Math.floor(u.valorAcc); if(n>0){ u.valorAcc-=n; addShield(u,n,B); } }}},
+ hydra:{name:"Hydra's Tooth",tier:'legendary',cost:9,desc:'Hero attacks also hit an enemy next to the target for 30% of the damage',
+  hooks:{onHit:(u,t,d,B)=>{ if(d<=0) return; const adj=adjacentOf(t,B); if(adj.length) splash(u,pick(adj),Math.round(d*0.3),B); }}},
+// --- cursed: never sold; the Cursed Shrine offers them. A real upside with a cost that lasts the run. The Pawnbroker won't touch them.
+ gildedchains:{name:'Gilded Chains',tier:'cursed',cost:0,desc:'Gems cost 2 less. You can no longer reroll the market'},
+ pactofhaste:{name:'Pact of Haste',tier:'cursed',cost:0,desc:'Heroes attack 30% faster, but time runs out after 40 seconds instead of 60'},
+ crownofthorns:{name:'Crown of Thorns',tier:'cursed',cost:0,desc:'Every hero is Spiked: attackers take 3 damage. Heroes take 20% more damage from attacks'},
+ foolsbargain:{name:"Fool's Bargain",tier:'cursed',cost:0,desc:'Elite and boss fights pay +6 gold. Every enemy has 15% more HP'},
+ bloodidol:{name:'Blood Idol',tier:'cursed',cost:0,desc:'Heroes +30% ATK. Healing on heroes is halved'},
+ reddawn:{name:'Red Dawn',tier:'cursed',cost:0,desc:'For the first 3 seconds of every fight, all damage is doubled: yours and theirs'},
+ cursedhoard:{name:'Cursed Hoard',tier:'cursed',cost:0,desc:'+15 gold when taken. Boss spoils offer 2 relics instead of 3'},
 };
-const RELIC_TIERS=['common','rare','legendary'], TIER_LABEL={common:'Common',rare:'Rare',legendary:'Legendary'};
+const RELIC_TIERS=['common','rare','legendary'], TIER_LABEL={common:'Common',rare:'Rare',legendary:'Legendary',cursed:'Cursed'};
 const relicsOfTier=(t,owned)=>Object.keys(RELICS).filter(k=>RELICS[k].tier===t&&!(owned||[]).includes(k));
 
 
@@ -560,6 +596,8 @@ function genEncounter(floor,depth,kindOverride,bossId){
   const norm=kind==='boss'?bossNorm(floor,list[0]):null;
   return {floor,kind,act,mult:enemyMult(floor,depth),list:out,theme:kind==='fight'?tpl.name:null,...(norm?{norm}:{})};
 }
+// The prologue: the run's first fight, before floor 1. It isn't a floor and ignores depth: always floor 1 strength at depth 0.
+function genPrologue(){ return Object.assign(genEncounter(1,0,'fight'),{prologue:true}); }
 // What the camp offers on a floor: floor 1 and bosses are fixed; every other floor is fight vs elite.
 // (Events — Forge, Enchanter, Gem Cutter, Retirement, Scout's Camp — come as a bonus after each act's 2nd fight.)
 function genChoices(floor,depth,opts){
@@ -1002,7 +1040,7 @@ function promote(h,id){ h.path=heroPath(h).concat(id); h.id=id; return h; }
 // fits, through choose(options) when several (or left to the caller when choose is omitted). Returns the options, or null if it can't train.
 function trainHero(h,k,choose){ const opts=upgradeOptions(h); if(!opts.length) return null; h.lv++; if(k!==undefined&&!(h.open||[]).includes(k)) h.open=(h.open||[]).concat(k).sort(); if(opts.length===1) promote(h,opts[0]); else if(choose) promote(h,choose(opts)); return opts; }
 // ---------- Stats ----------
-// ctx: {gemMult} doubles basic gem socket effects (Master Jeweller). h.permAtk and h.souls are run-permanent gains (Bounty hunter, Reaper).
+// ctx: {gemMult} doubles gem socket effects (Master Jeweller). h.permAtk and h.souls are run-permanent gains (Bounty hunter, Reaper).
 function computeStats(h,relics,ctx){
   relics=relics||[];
   const L=h.lv, m=1+0.15*(L-1), base=classStats(h.root||rootOf(h.id),heroPath(h)); // the route's stats, grown 15% per ★
@@ -1010,7 +1048,8 @@ function computeStats(h,relics,ctx){
   const apply={};
   let statusMult=1, targetLowest=false, startShield=0, regen=0;
   const flags={};
-  const sc=slotCounts(h,relics.includes('prism')), gh=sc.hand, ga=sc.armor, gold={win:0,kill:0,interest:0,elite:0};
+  const sc=slotCounts(h), gh=sc.hand, ga=sc.armor, gold={win:0,kill:0,interest:0,elite:0};
+  if(relics.includes('prism')){ const all={}; [gh,ga].forEach(t=>{ for(const k in t) all[k]=(all[k]||0)+t[k]; }); for(const k in all){ gh[k]=all[k]; ga[k]=all[k]; } } // Prismatic Lens: every gem works as both kinds
   const gm=(ctx&&ctx.gemMult)||1; if(gm!==1){ for(const k in gh) gh[k]*=gm; for(const k in ga) ga[k]*=gm; }
   const retaliate={}; let spikes=0, lifesteal=0, shieldPerAttack=0;
   // hand (weapon / off-hand): offensive
@@ -1031,6 +1070,7 @@ function computeStats(h,relics,ctx){
   if(ga.vital){ hp+=12*ga.vital; regen=ga.vital; }
   if(ga.swift) dodge+=GEM_ARMOR.dodge*ga.swift;
   if(ga.gilt) gold.win+=ga.gilt;
+  if(relics.includes('crownofthorns')) spikes+=3;
   const skills=activeSkills(h), passives=heroPassives(h); // class passives along the route stack
   const gemDefs=gemsOf(h).flatMap(gemLeaves).map(g=>GEMS[g]).filter(g=>g.rare);
   let hpMult=1, applyBonus=0, healBonus=0; // Mage root: +1 per on-hit status, +1 per ability heal
@@ -1051,6 +1091,8 @@ function computeStats(h,relics,ctx){
   if(relics.includes('huntinghorn')&&h.row==='back') spd*=1.25;
   if(relics.includes('cloak')) dodge+=0.1;
   if(relics.includes('boots')){ spd*=1.2; dodge+=0.1; }
+  if(relics.includes('pactofhaste')) spd*=1.3;
+  if(relics.includes('bloodidol')) atk*=1.3;
   return {maxHpRaw:Math.round(hpRaw),maxHp:Math.max(1,Math.round(hp)),atk:Math.round(atk),spd:Math.round(spd*100)/100,armor,crit,dodge,apply,statusMult,targetLowest,flags,startShield,regen,retaliate,spikes,lifesteal,shieldPerAttack,giltHand:gh.gilt||0,giltArmor:ga.gilt||0,skills,passives,gold,applyBonus,healBonus,gemHooks:gemDefs.map(g=>g.hooks||{})};
 }
 
@@ -1063,7 +1105,11 @@ function baseUnit(def,side,row,s,B){
 // gold: the run's bank when the fight starts; skills that read "gold in the bank" see it plus whatever the fight has paid so far (B.bounty)
 // ctx: {spent} — gold spent this run (War Bonds). Master Jeweller (flag jeweller on any hero) doubles everyone's basic gem effects.
 function createBattle(heroes,enc,relics,gold,ctx){
-  const B={units:[],t:0,over:false,winner:null,log:[],relics,fx:()=>{},anim:()=>{},spawn:()=>{},move:()=>{},vanish:()=>{},phoenixUsed:false,uid:0,enc,flags:{},busy:{},bounty:0,gold:gold||0,spent:(ctx&&ctx.spent)||0};
+  const B={units:[],t:0,over:false,winner:null,log:[],relics,fx:()=>{},anim:()=>{},spawn:()=>{},move:()=>{},vanish:()=>{},uid:0,enc,flags:{},busy:{},bounty:0,gold:gold||0,spent:(ctx&&ctx.spent)||0};
+  // ctx.trial (Proving Grounds): this fight's handicap. Pact of Haste shortens the clock; Fool's Bargain and some trials toughen every enemy.
+  const tr=ctx&&ctx.trial; B.tLimit=relics.includes('pactofhaste')?40:60;
+  B.trophies=(ctx&&ctx.trophies)||0; // Trophy Rack: elite fights won this run
+  B.eHp=(relics.includes('foolsbargain')?1.15:1)*(tr==='ehp'?1.3:1); B.eAtk=tr==='eatk'?1.25:1;
   B.logf=s=>{B.log.push(`${B.t.toFixed(1)}s ${s}`); if(B.log.length>400) B.log.shift();};
   const sctx=heroes.some(h=>computeStats(h,relics).flags.jeweller)?{gemMult:2}:null;
   heroes.forEach(h=>{ const d=HEROES[h.id], s=computeStats(h,relics,sctx);
@@ -1074,7 +1120,9 @@ function createBattle(heroes,enc,relics,gold,ctx){
       onDamaged:(u,src,d,info,B)=>{ if(info.type!=='attack'||!src||!src.alive) return; for(const k in s.retaliate) applyStatus(u,src,k,s.retaliate[k],B); if(s.spikes) dealDamage(u,src,s.spikes,{type:'thorns',ignoreArmor:true},B); }};
     u.gemHooks=gemHooks; // Perfect Partners gives Wilfred the same socket passives
     u.hooks=[...s.passives.map(x=>x.hooks||{}), gemHooks, ...s.gemHooks, ...s.skills.map(x=>x.hooks||{}), ...relics.map(r=>RELICS[r].hooks||{})];
+    if(tr==='hhp'){ u.maxHp=u.maxHp0=Math.max(1,Math.round(u.maxHp*0.75)); u.hp=u.maxHp; }
     B.units.push(u); });
+  if(relics.includes('gamblersdie')){ const hs=B.units.filter(u=>u.hero); if(hs.length){ const u=pick(hs); u.atk=Math.round(u.atk*1.5); B.logf(`The die favours ${u.name}.`); } } // Gambler's Die
   enc.list.forEach(e=>makeEnemy(B,e.id,e.row));
   B.flags={}; B.units.forEach(u=>{ for(const f in u.flags) B.flags[f]=1; });
   B.units.forEach(u=>fire(u,'onStart',B));
@@ -1107,18 +1155,9 @@ const splash=(u,t,n,B)=>dealDamage(u,t,n,{type:'attack',splash:true},B);
 function startDuel(u,t,B){ if(!t||!t.alive) return false; u.duel=t; t.duel=u; B.fx(u,'DUEL','buff'); B.fx(t,'DUEL','buff'); B.logf(`${u.name} challenges ${t.name} to a duel.`); fire(u,'onDuelStart',t,B); return true; }
 // An ally raised mid-fight (Wilfred, Skeletons, Legion): a unit on the hero side with no hero record, so it counts as an ally, not a hero.
 // stats: {maxHp,atk,spd,armor,crit,dodge}; opts: {hooks, apply, flags, eid (sprite), fx}. Goes in the row asked for, else the other, else nowhere.
-function summonAlly(B,name,stats,row,opts){ opts=opts||{}; if(B.over) return null; const other=row==='front'?'back':'front'; row=rowRoom(B,'p',row)?row:rowRoom(B,'p',other)?other:null; if(!row) return null;
+function summonAlly(B,name,stats,row,opts){ opts=opts||{}; if(B.over) return null; if(B.relics.includes('grimoire')) stats=Object.assign({},stats,{maxHp:Math.round(stats.maxHp*1.5),atk:Math.round(stats.atk*1.5)}); // Necromancer's Grimoire const other=row==='front'?'back':'front'; row=rowRoom(B,'p',row)?row:rowRoom(B,'p',other)?other:null; if(!row) return null;
   const u=baseUnit({name},'p',row,stats,B); u.summon=true; u.timer=0; u.eid=opts.eid||'skeleton'; u.hooks=opts.hooks||[]; u.apply=Object.assign({},opts.apply||{}); if(opts.flags) u.flags=opts.flags;
   B.units.push(u); B.fx(u,opts.fx||'RISE','buff'); B.logf(`${name} joins your guild.`); B.move(u); fire(u,'onStart',B); return u; }
-// Necromancer's Grimoire: slain enemies rise on the hero side (half an enemy Skeleton of this floor, no relic hooks)
-function raiseSkeleton(B){
-  if(B.over) return;
-  const row=rowRoom(B,'p','front')?'front':rowRoom(B,'p','back')?'back':null; if(!row) return;
-  const d=ENEMIES.skeleton, m=B.enc.mult;
-  const s={maxHp:Math.round(d.hp*m*ENEMY_HP*0.5),atk:Math.round(d.atk*m*ENEMY_ATK*0.6),spd:d.spd,armor:d.armor||0,crit:0,dodge:0};
-  const u=baseUnit({name:'Risen Skeleton'},'p',row,s,B); u.name='Risen Skeleton'; u.eid='skeleton'; u.summon=true; u.timer=0; u.hooks=[];
-  B.units.push(u); B.fx(u,'RISE','buff'); B.logf('A Risen Skeleton joins your guild.'); B.move(u);
-}
 // row movement: 'vanguard' heroes step forward when no ally holds the front; 'retreat' heroes fall back when hurt
 function checkVanguard(B){
   const frontHeld=B.units.some(x=>x.side==='p'&&x.alive&&x.row==='front');
@@ -1142,7 +1181,7 @@ function checkWeave(u,B,dt){
 }
 const ELITE_BOOST=1.15; // elites are optional (and pay a free gem), so the elite itself hits a little harder
 function makeEnemy(B,id,row){
-  const d=ENEMIES[id], m=B.enc.mult*(d.elite?ELITE_BOOST:1), nz=(d.boss&&B.enc.norm)||{hp:1,atk:1}, bz=d.boss?{hp:BOSS_HP,atk:BOSS_ATK}:{hp:1,atk:1}; const s={maxHp:Math.round(d.hp*m*ENEMY_HP*nz.hp*bz.hp),atk:Math.round(d.atk*m*ENEMY_ATK*nz.atk*bz.atk),spd:d.spd,armor:d.armor||0,crit:d.crit||0,dodge:d.dodge||0};
+  const d=ENEMIES[id], m=B.enc.mult*(d.elite?ELITE_BOOST:1), nz=(d.boss&&B.enc.norm)||{hp:1,atk:1}, bz=d.boss?{hp:BOSS_HP,atk:BOSS_ATK}:{hp:1,atk:1}; const s={maxHp:Math.round(d.hp*m*ENEMY_HP*nz.hp*bz.hp*(B.eHp||1)),atk:Math.round(d.atk*m*ENEMY_ATK*nz.atk*bz.atk*(B.eAtk||1)),spd:d.spd,armor:d.armor||0,crit:d.crit||0,dodge:d.dodge||0};
   const u=baseUnit(d,'e',row,s,B); u.eid=id; u.apply=Object.assign({},d.apply||{}); u.flags=Object.assign({},d.flags||{}); u.targetLowest=!!d.targetLowest; u.hooks=[d.hooks||{}]; B.units.push(u); return u;
 }
 // mid-battle reinforcements (Slime splits, Necromancer raises). Capped at 6 living enemies.
@@ -1166,7 +1205,7 @@ const effSpd=u=>Math.min(SPD_CAP,u.spd*(1+buffSum(u,'spd'))*(1-CHILL_SLOW*Math.m
 function addShield(u,n,B,echo){ if(!u||!u.alive||n<=0) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.flags.shieldMult2) n*=2; u.shield+=n; B.fx(u,`+${n}`,'shield'); fireOnce(u,'onShieldGain',B,n);
   // Twin Aegis: copy to another random hero (the copy never copies itself)
   if(!echo&&u.hero&&B.relics.includes('twinaegis')){ const o=B.units.filter(x=>x!==u&&x.hero&&x.alive); if(o.length) addShield(pick(o),n,B,true); } }
-function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.side==='e'&&u.st.poison>0&&B.flags.quarantine) n=Math.floor(n/2); const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; B.fx(u,`+${r}`,'heal'); } if(n-r>0&&u.hero&&B.relics.includes('chalice')) addShield(u,Math.round(n-r),B); if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
+function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.side==='e'&&u.st.poison>0&&B.flags.quarantine) n=Math.floor(n/2); if(u.hero){ if(B.relics.includes('chalice')) n=Math.round(n*1.25); if(B.relics.includes('bloodidol')) n=Math.ceil(n/2); } const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; B.fx(u,`+${r}`,'heal'); } if(r>0&&u.flags.martyr) gainStatus(u,'burn',1,B); /* Martyr's Coal */ if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
 // a heal performed by a class ability: onHealing hooks scale it (Healer's bonuses), then the Mage root's +1; gem regeneration and lifesteal skip this
 function abilityHeal(src,t,n,B){ if(!t||!t.alive||n<=0) return; const h={n}; fire(src,'onHealing',t,h,B); heal(t,Math.round(h.n)+(src.healBonus||0),B,src); }
 // on-hit status: the attack's own applications, which get the Mage root's +1 and per-hit bonuses (u.hitBonus is set while a hit resolves)
@@ -1185,6 +1224,7 @@ function pickTarget(u,foes,a,B){
   if(u.side==='p'&&B.brand&&B.brand.t.alive&&B.brand.until>B.t&&foes.includes(B.brand.t)) return B.brand.t;
   if(u.lock&&u.lock.alive&&foes.includes(u.lock)) return u.lock; // Stalk: beats class rules
   if(u.nextTarget){ const t=u.nextTarget; u.nextTarget=null; if(t.alive&&foes.includes(t)) return t; }
+  if(u.side==='e'){ const bc=foes.filter(f=>f.flags.beacon); if(bc.length) return pick(bc); } // Beacon Stone draws every enemy's attacks
   if(u.targetRule){ const t=u.targetRule(u,foes,B); if(t&&t.alive&&foes.includes(t)) return t; }
   if(u.side==='e'&&B&&B.relics.includes('boots')&&!u.targetLowest&&!a.targetLowest&&!a.preferBack) return pick(foes); // Skirmisher's Boots: the back row is exposed
   if(a.preferBack){ const b=foes.filter(f=>f.row==='back'); if(b.length) return pick(b); }
@@ -1234,7 +1274,7 @@ function hit(u,t,a,B){
   fire(u,'onTarget',t,ac,B);
   fire(t,'onDefend',u,ac,B);
   for(const x of B.units){ if(!x.alive) continue; if(x.side===u.side) fire(x,'onAllyTarget',u,t,ac,B); else fire(x,'onAllyDefend',t,u,ac,B); } // side-wide auras, the attacker and defender included
-  if(t.st.chill>0&&u.side==='p'){ if(B.relics.includes('glacialcore')) ac.bonus+=chill5(t); if(B.flags.wintersgrip) ac.mult*=1.15; if(isFrozen(t)&&B.flags.abszero) ac.mult*=1.5; }
+  if(t.st.chill>0&&u.side==='p'){ if(B.relics.includes('glacialcore')) ac.bonus+=Math.min(5,Math.floor(t.st.chill/4)); if(B.flags.wintersgrip) ac.mult*=1.15; if(isFrozen(t)&&B.flags.abszero) ac.mult*=1.5; }
   let dmg=Math.max(1,Math.max(1,u.atk+ac.bonus)*ac.mult-(ac.reduce||0)), crit=false;
   // crit: forced unless ac.noForce turns the guarantee into a 100% roll (Elemental Rush), scaled by ac.critScale; ac.noCrit (Immovable, Spirit Ward) stops it
   const forcedCrit=ac.forceCrit&&!ac.noForce, chance=(ac.forceCrit?1:u.crit+(ac.critBonus||0)+buffSum(u,'crit'))*(ac.critScale||1);
@@ -1278,6 +1318,7 @@ function gainStatus(t,k,n,B){
   if(k==='chill'&&was<FROZEN_AT&&t.st.chill>=FROZEN_AT){ kind='frozen'; B.fx(t,'FROZEN','buff'); B.logf(`${t.name} is frozen.`); }
   if(k==='poison'&&was<FESTER_AT&&t.st.poison>=FESTER_AT){ kind='festering'; B.fx(t,'FESTERING','poison'); B.logf(`${t.name} is festering.`); }
   checkMarks(t,B);
+  if(kind&&t.side==='e'&&B.relics.includes('catalyst')&&!B.catalysing){ B.catalysing=true; const k2={frozen:'chill',ablaze:'burn',festering:'poison'}[kind]; B.units.forEach(x=>{ if(x.alive&&x.side==='e'&&x!==t) gainStatus(x,k2,3,B); }); B.catalysing=false; } // Catalyst: no chain reactions
   if(kind) B.units.forEach(x=>{ if(x.alive) fire(x,'onAffliction',t,kind,B); }); // everyone hears it; hooks check the side
 }
 // two afflictions at once mark the unit for the rest of the fight (see core); Ruined carries all three marks
@@ -1289,15 +1330,17 @@ function checkMarks(t,B){
 function dealDamage(src,t,amount,info,B){
   if(!t.alive) return 0;
   if(t.kw.ruined) amount*=1.5;
+  if(B.t<3&&B.relics.includes('reddawn')) amount*=2; // Red Dawn: both sides
   if(t.kw.blighted&&(info.type==='poison'||info.type==='burn')) amount*=1.25;
   if(info.type==='poison'&&t.flags.poisonResist) amount*=0.5; // Bone Dragon: resistant, not immune
   if(info.type==='attack'&&src) B.anim(src,t,info);
-  if(t.side==='e'&&B.relics.includes('resonance')&&['poison','burn','chill'].filter(k=>t.st[k]>0).length>=3) amount*=1.3;
+  if(t.side==='e'&&B.relics.includes('resonance')&&(t.kw.brittle||t.kw.blighted||t.kw.crippled)) amount*=1.2;
+  if(t.hero&&info.type==='attack'&&B.relics.includes('crownofthorns')) amount*=1.2;
   if(info.type==='attack'&&src&&t.duel&&t.duel.alive&&src!==t.duel) amount*=0.5; // a duellist takes half from anyone but the opponent
   if(info.type==='burn'&&src&&src.flags.ashen&&t.shield>0) amount*=2; // Ashen Guard: Burn doubles against Shield
   let dmg=Math.max(0,Math.round(amount));
   if(!info.ignoreArmor&&dmg>0&&!isFestering(t)) dmg=Math.max(1,dmg-t.armor); // Festering: Armor counts as 0
-  if((!info.ignoreShield||t.flags.shieldAll)&&t.shield>0&&dmg>0){ const ab=Math.min(t.shield,dmg); t.shield-=ab; dmg-=ab; if(ab){ B.fx(t,`-${ab}`,'shield'); if(info.type==='attack'&&src&&src.alive){ fire(t,'onShieldAbsorb',src,ab,B); if(t.side==='p'&&B.relics.includes('mirrorward')) dealDamage(t,src,ab,{type:'thorns',ignoreArmor:true},B); }
+  if((!info.ignoreShield||t.flags.shieldAll)&&t.shield>0&&dmg>0){ const ab=Math.min(t.shield,dmg); t.shield-=ab; dmg-=ab; if(ab){ B.fx(t,`-${ab}`,'shield'); if(info.type==='attack'&&src&&src.alive){ fire(t,'onShieldAbsorb',src,ab,B); }
     if(info.type==='burn'&&src&&src.alive&&src.flags.ashen) addShield(src,ab,B);
     if(t.shield<=0) alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyShieldBreak',t,src,B); }); } }
   t.hp-=dmg; t.stats.taken+=dmg; if(src) src.stats.dealt+=dmg;
@@ -1306,7 +1349,7 @@ function dealDamage(src,t,amount,info,B){
   if(dmg>0&&src) fire(t,'onDamaged',src,dmg,info,B);
   if(dmg>0){ alliesOf(t,B).forEach(x=>{ if(x!==t&&x.alive) fire(x,'onAllyDamaged',t,src,dmg,info,B); }); aliveEnemies(t,B).forEach(x=>fire(x,'onFoeDamaged',t,src,dmg,info,B)); }
   if(t.hp<=0&&t.hero&&!t.ironUsed&&B.relics.includes('iron')){ t.ironUsed=true; t.hp=1; B.fx(t,'ENDURE','buff'); B.logf(`${t.name} refuses to fall.`); }
-  if(t.hp<=0){ if(t.side==='e'&&(info.type==='poison'||info.type==='burn')&&src&&src.side==='p'&&B.relics.includes('tithe')){ B.bounty++; B.fx(t,'+1 gold','buff'); } die(t,src,B); }
+  if(t.hp<=0) die(t,src,B);
   else { checkSmoke(t,B); checkRetreat(t,B); }
   return dmg;
 }
@@ -1326,7 +1369,6 @@ function die(t,killer,B){
   if(killer&&killer.alive){ killer.stats.kills++; fire(killer,'onKill',t,B); alliesOf(killer,B).forEach(x=>{ if(x!==killer&&x.alive) fire(x,'onAllyKill',killer,t,B); }); }
   alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyDeath',t,B); });
   aliveEnemies(t,B).forEach(x=>fire(x,'onFoeDeath',t,B));
-  if(t.side==='e'&&killer&&killer.side==='p'&&B.relics.includes('grimoire')) raiseSkeleton(B);
   if(t.side==='p'&&t.row==='front'&&B.relics.includes('marching')){ const c=B.units.filter(x=>x.side==='p'&&x.alive&&x.row==='back'&&!x.summon); if(c.length){ const n=c.reduce((m,x)=>x.hp>m.hp?x:m); if(moveUnit(n,'front',B)){ n.retreated=false; n.resting=false; addShield(n,n.maxHp,B); B.fx(n,'STEP UP','buff'); B.logf(`${n.name} steps up to hold the line.`); } } }
   if(t.side==='p') checkVanguard(B);
 }
@@ -1353,7 +1395,7 @@ function tickStatus(u,B){
 function checkEnd(B){
   if(B.over) return true;
   const p=B.units.some(x=>x.side==='p'&&x.alive), e=B.units.some(x=>x.side==='e'&&x.alive);
-  if(!e){B.over=true;B.winner='p';} else if(!p){B.over=true;B.winner='e';}
+  if(!e){B.over=true;B.winner='p'; B.units.forEach(x=>{ if(x.alive) fire(x,'onWin',B); });} else if(!p){B.over=true;B.winner='e';}
   return B.over;
 }
 function stepBattle(B,dt){
@@ -1365,10 +1407,10 @@ function stepBattle(B,dt){
     u.timer+=dt*effSpd(u); if(u.timer>=1){ u.timer-=1; attack(u,B); }
     if(checkEnd(B)) return;
   }
-  if(B.t>=60){ B.over=true; B.winner='e'; B.logf('Time runs out. Your guild retreats.'); }
+  if(B.t>=(B.tLimit||60)){ B.over=true; B.winner='e'; B.logf('Time runs out. Your guild retreats.'); }
 }
 function runToEnd(B){ let n=0; while(!B.over&&n<4000){ stepBattle(B,0.05); n++; } return B; }
-if(typeof module!=='undefined') module.exports={GILT_PER_KILLS,closest,opposite,colOf,adjacentOf,CLASSES,STARTERS,ROOTS,newHero,trainHero,upgradeOptions,upgradesOf,promote,heroSkills,heroPath,HOOKS,rollActBoss,bossPool,bossNorm,BOSSES,enemyMult,gemLeaves,defineMergedGem,restoreMergedGems,genChoices,curAct,slotKind,HAND_SLOTS,HEROES,defaultRow,ROW_MAX,ENCOUNTERS,GEMS,BASIC_GEMS,RARE_GEMS,SLOTS,RELICS,ENEMIES,ARCH_LABEL,heroSkills,activeSkills,skillActive,needCounts,gemCounts,genEncounter,computeStats,createBattle,stepBattle,runToEnd,actOf,kindOf,FLOORS};
+if(typeof module!=='undefined') module.exports={GILT_PER_KILLS,closest,opposite,colOf,adjacentOf,CLASSES,STARTERS,ROOTS,newHero,trainHero,upgradeOptions,upgradesOf,promote,heroSkills,heroPath,HOOKS,rollActBoss,bossPool,bossNorm,BOSSES,enemyMult,gemLeaves,defineMergedGem,restoreMergedGems,genChoices,genPrologue,RARE_ODDS,actOf,curAct,slotKind,HAND_SLOTS,HEROES,defaultRow,ROW_MAX,ENCOUNTERS,GEMS,BASIC_GEMS,RARE_GEMS,SLOTS,RELICS,ENEMIES,ARCH_LABEL,heroSkills,activeSkills,skillActive,needCounts,gemCounts,genEncounter,computeStats,createBattle,stepBattle,runToEnd,actOf,kindOf,FLOORS};
 </script>
 
 <script id="ui">
@@ -1392,6 +1434,17 @@ titanseye:'M2 12c3-5 7-7 10-7s7 2 10 7c-3 5-7 7-10 7s-7-2-10-7z M12 9a3 3 0 1 0 
 stormheart:'M7 16a4 4 0 0 1 0-8 5 5 0 0 1 10 0 4 4 0 0 1 0 8 M13 12l-3 5h4l-2 4',
 hollowpearl:'M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16z M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6z',
 midasheart:'M12 20c-5-4-8-7-8-11a4 4 0 0 1 8-2 4 4 0 0 1 8 2c0 4-3 7-8 11z M12 7v8 M14 9h-3a1.5 1.5 0 0 0 0 3h2a1.5 1.5 0 0 1 0 3h-3',
+frostfang:'M5 20l7-7 M12 4l8 8-4 4-8-8z M18 3v6 M15 6h6',
+oathstone:'M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z M9 15l6-6 M10 9h5v5',
+cinderwing:'M3 12c4-6 9-7 13-5-3 0-5 2-6 4 3-2 7-2 11 1-4 0-7 2-9 5-3-3-6-5-9-5z',
+luckstone:'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M8 15c2-2 2-6 4-6s2 4 4 6 M9 12h6',
+hallowstone:'M12 3l8 5v8l-8 5-8-5V8z M12 8v8 M8 12h8',
+beaconstone:'M12 2v4 M12 18v4 M2 12h4 M18 12h4 M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8z',
+martyrscoal:'M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 M12 11v6 M9 14h6',
+glasscomet:'M4 20l9-9 M13 5l6 6-4 4-6-6z M3 13l3 1 M10 3l1 3',
+hourglassheart:'M6 3h12 M6 21h12 M7 3c0 5 5 6 5 9s-5 4-5 9 M17 3c0 5-5 6-5 9s5 4 5 9 M10 18h4',
+stillwater:'M3 9c3-2 6 2 9 0s6-2 9 0 M3 15c3-2 6 2 9 0s6-2 9 0 M12 3v3',
+gamblersknot:'M8 4h8v8H8z M10 6h.5 M13.5 9.5h.5 M12 12v4 M8 16c0 3 8 3 8 0',
 knight:'M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z M12 8v6 M9 11h6',
 berserker:'M4 20l9-9 M12 4l8 8c-2 1-4 3-5 5L12 4z',
 rogue:'M12 3v12 M8 15h8 M12 15v6 M9 8c2-1 4-1 6 0',
@@ -1452,8 +1505,8 @@ steam:'M6 21c0-3 2-4 2-7s-2-4-2-7 M12 21c0-3 2-4 2-7s-2-4-2-7 M18 21c0-3 2-4 2-7
 };
 const ARCH_G={poison:'venomvial',burn:'pyromancer',chill:'frostmage',shield:'knight',crit:'sparkgem',heal:'cleric',speed:'quickboots',dodge:'monk',kill:'reaper',tank:'ironskin',rage:'berserker'};
 const GEM_G={venom:'venomvial',ember:'emberring',frost:'frostmage',ward:'towershield',edge:'execedge',vital:'lifeleaf',swift:'quickboots',gilt:'coinpurse'};
-const RELIC_G={scales:'coinpurse',cloak:'guardiancharm',boots:'quickboots',tithe:'coinpurse',iron:'ironskin',smoke:'catalyst',marching:'towershield',grimoire:'execedge',contract:'bloodgem',prism:'sparkgem',chalice:'lifeleaf',twinaegis:'aegischarm'};
-const RELIC_C={scales:'crit',cloak:'dodge',boots:'speed',tithe:'poison',iron:'tank',smoke:'dodge',marching:'tank',grimoire:'kill',contract:'rage',prism:'crit',chalice:'heal',twinaegis:'shield',warhorn:'rage',bloodpact:'rage',bulwark:'tank',huntinghorn:'speed',hourglass:'speed',plaguebanner:'poison',kindling:'burn',coinpurse:'crit',phoenix:'heal',drums:'rage',rally:'rage',wildfire:'burn',glacialcore:'chill',mirrorward:'shield',luckycoin:'crit',resonance:'kill',steam:'burn'};
+const RELIC_G={timewatch:'hourglass',secondwind:'lifeleaf',ledger:'coinpurse',gamblersdie:'luckycoin',cruelty:'huntersmark',censer:'catalyst',trophy:'warhorn',valor:'aegischarm',hydra:'chainlightning',reddawn:'bloodgem',gildedchains:'ambergold',pactofhaste:'hourglass',crownofthorns:'thornmail',foolsbargain:'luckycoin',bloodidol:'bloodpact',cursedhoard:'coinpurse',scales:'coinpurse',cloak:'guardiancharm',boots:'quickboots',tithe:'coinpurse',iron:'ironskin',smoke:'catalyst',marching:'towershield',grimoire:'execedge',contract:'bloodgem',prism:'sparkgem',chalice:'lifeleaf',twinaegis:'aegischarm'};
+const RELIC_C={whetstone:'crit',timewatch:'speed',secondwind:'heal',ledger:'crit',gamblersdie:'rage',cruelty:'kill',censer:'heal',trophy:'rage',catalyst:'kill',valor:'shield',hydra:'kill',reddawn:'rage',gildedchains:'rage',pactofhaste:'rage',crownofthorns:'rage',foolsbargain:'rage',bloodidol:'rage',cursedhoard:'rage',scales:'crit',cloak:'dodge',boots:'speed',tithe:'poison',iron:'tank',smoke:'dodge',marching:'tank',grimoire:'kill',contract:'rage',prism:'crit',chalice:'heal',twinaegis:'shield',warhorn:'rage',bloodpact:'rage',bulwark:'tank',huntinghorn:'speed',hourglass:'speed',plaguebanner:'poison',kindling:'burn',coinpurse:'crit',phoenix:'heal',drums:'rage',rally:'rage',wildfire:'burn',glacialcore:'chill',mirrorward:'shield',luckycoin:'crit',resonance:'kill',steam:'burn'};
 // ---------- pixel sprites (16x16 heroes/enemies, 24x24 elites & bosses; one char = one pixel, "." = transparent) ----------
 const SPR_PAL={"K":"#1b1530","S":"#f1c9a5","s":"#c98f66","W":"#f7f3ea","w":"#c9c4bd","G":"#8d90a8","g":"#575a75","R":"#d94a5a","r":"#8e2b3c","O":"#ff9a4d","o":"#c95a1d","Y":"#f2c14e","y":"#b3832a","B":"#4f7fd9","b":"#2f4a8f","C":"#7fc8ff","c":"#3d86c9","U":"#d6ecff","P":"#9b6fe0","p":"#5a3d99","N":"#4faa5e","n":"#2d6b3a","L":"#9be15d","l":"#5f9a2d","T":"#a06a3c","t":"#6b4324","M":"#ff6b81","m":"#b53f57","E":"#e8e0c8","e":"#a89f84","V":"#7a9a3a","v":"#4a6323","H":"#3b3450","h":"#262138","D":"#d9b3ff","d":"#8a6fc0","Q":"#5ee0c8","q":"#2e9a86","X":"#ff4b3e","I":"#c9a061","i":"#8f6a3a","A":"#9a9a9a","a":"#5c5c66"};
 const SPR={
@@ -1559,7 +1612,7 @@ let speed=[0.5,1,2,3].includes(meta.speed)?meta.speed:1; // playback multiplier,
 // ---------- run ----------
 function newRun(depth){
   meta.runs++; save(KEY_META,meta);
-  run={depth,floor:1,gold:12,heroes:[],bag:[],relics:[],shop:null,enc:null,kills:0,fights:0,rerolls:0,startPick:true,merged:[],mergeN:0,mergeAct:0};
+  run={depth,floor:1,gold:6,prologue:true,heroes:[],bag:[],relics:[],shop:null,enc:null,kills:0,fights:0,rerolls:0,startPick:true,merged:[],mergeN:0,mergeAct:0};
   offerPaths();
   rollShop(false);
   saveRun();
@@ -1574,27 +1627,26 @@ const actKey=f=>Math.ceil(f/4); // act, or endless block
 function actBoss(){ run.bosses=run.bosses||{}; const k=actKey(run.floor); if(!run.bosses[k]) run.bosses[k]=rollActBoss(run.floor); return run.bosses[k]; }
 function offerPaths(){ run.choices=genChoices(run.floor,run.depth,{boss:actBoss()}); run.pick=run.choices.findIndex(c=>c.enc); if(run.pick<0) run.pick=0; run.enc=run.choices[run.pick].enc||null; }
 function pickPath(i){ run.pick=i; run.enc=run.choices[i].enc||null; }
-function loadRun(){ const r=load(KEY_RUN,null); if(!r) return null; if(r.heroes.some(h=>!CLASSES[h.id])) return null; /* a save from before the class tree */ restoreMergedGems(r.merged); if(!r.choices){ r.choices=[{kind:r.enc?r.enc.kind:'fight',enc:r.enc}]; r.pick=0; } if(r.mergeAct===undefined){ r.mergeAct=0; r.merged=r.merged||[]; r.mergeN=r.mergeN||0; } if(r.choices.some(c=>c.kind==='forge')){ r.choices=r.choices.filter(c=>c.kind!=='forge'); r.pick=0; r.enc=r.choices[0].enc; } return r; }
+function loadRun(){ const r=load(KEY_RUN,null); if(!r) return null; if(r.heroes.some(h=>!CLASSES[h.id])) return null; /* a save from before the class tree */ r.relics=r.relics.filter(k=>RELICS[k]); /* relics since removed */ restoreMergedGems(r.merged); if(!r.choices){ r.choices=[{kind:r.enc?r.enc.kind:'fight',enc:r.enc}]; r.pick=0; } if(r.mergeAct===undefined){ r.mergeAct=0; r.merged=r.merged||[]; r.mergeN=r.mergeN||0; } if(r.choices.some(c=>c.kind==='forge')){ r.choices=r.choices.filter(c=>c.kind!=='forge'); r.pick=0; r.enc=r.choices[0].enc; } return r; }
+const gemPrice=id=>Math.max(1,GEMS[id].cost-(run&&run.relics.includes('gildedchains')?2:0)); // Gilded Chains
 const rerollCost=()=>Math.max(0,1+(run.rr||0)-(run.relics.includes('scales')?1:0)-(heroFlag('fasttalker')?1:0)); // Fast Talker (Merchant)
-const gemFx=(g,active)=>{ const d=GEMS[g]; if(!d.hand) return esc(d.desc); const row=(k,lab)=>`<div class="gfx ${active&&active!==k?'off':''}"><span class="gk ${k}">${lab}</span> ${esc(d[k])}</div>`; return row('hand','Weapon')+row('armor','Armor'); };
-// rare gem body: bonus/drawback, plus (with Prismatic Lens, 3+ essences) every essence's socket effects
+const gemFx=(g,active)=>{ const d=GEMS[g]; if(!d.hand) return esc(d.desc); const row=(k,lab)=>`<div class="gfx ${active&&active!==k&&!(run&&run.relics.includes('prism'))?'off':''}"><span class="gk ${k}">${lab}</span> ${esc(d[k])}</div>`; return row('hand','Weapon')+row('armor','Armor'); };
+// rare gem body: bonus/drawback, then every essence's socket effects
 const rareFx=(g,activeKind)=>{ const d=GEMS[g], eff=esc(d.desc.replace(/^[^.]*\. ?/,''));
-  const prism=run&&run.relics.includes('prism')&&d.ess.length>=3;
-  if(!prism) return `<div class="tiny muted">Counts as ${d.ess.map(e=>GEMS[e].name).join(' + ')} for skill recipes, but gives none of their passives.</div><div style="margin-top:4px">${eff}</div>`;
-  return `<div class="tiny gold">Prismatic Lens: this gem also grants each of its essences' passives.</div><div style="margin-top:4px">${eff}</div>${d.ess.map(e=>`<div class="row" style="gap:6px;margin-top:4px;align-items:flex-start">${ic(e,'g',16,GEMS[e].name)}<div><b style="color:${ARCH_C[GEMS[e].arch]}">${esc(GEMS[e].name)}</b>${gemFx(e,activeKind)}</div></div>`).join('')}`; };
+  return `<div style="margin-top:4px">${eff}</div>${d.ess.map(e=>`<div class="row" style="gap:6px;margin-top:4px;align-items:flex-start">${ic(e,'g',16,GEMS[e].name)}<div><b style="color:${ARCH_C[GEMS[e].arch]}">${esc(GEMS[e].name)}</b>${gemFx(e,activeKind)}</div></div>`).join('')}`; };
 const tierPill=id=>{ const t=RELICS[id].tier; return `<span class="pill tier-${t}">${TIER_LABEL[t]}</span>`; };
 // shop relic rarity: 65% common, 30% rare, 5% legendary (falls back to any unowned relic)
 function rollRelic(weights,owned){ const r=Math.random(); let acc=0, t='common'; for(const k of RELIC_TIERS){ acc+=weights[k]; if(r<acc){ t=k; break; } }
-  const pool=relicsOfTier(t,owned); if(pool.length) return pick(pool); const any=Object.keys(RELICS).filter(k=>!owned.includes(k)); return any.length?pick(any):null; }
+  const pool=relicsOfTier(t,owned); if(pool.length) return pick(pool); const any=Object.keys(RELICS).filter(k=>!owned.includes(k)&&RELICS[k].tier!=='cursed'); return any.length?pick(any):null; }
 const SHOP_RELIC_W={common:0.65,rare:0.30,legendary:0.05};
 const RELIC_HOARD_GOLD=10; // boss reward when no relics are left
 function rollShop(charge){
-  if(charge){ const c=rerollCost(); if(run.gold<c) return; spend(c); run.rerolls++; run.rr=(run.rr||0)+1; if(run.frozen){ run.frozen=false; toast('Market unfrozen'); } }
+  if(charge){ const c=rerollCost(); if(run.gold<c||run.relics.includes('gildedchains')) return; spend(c); run.rerolls++; run.rr=(run.rr||0)+1; if(run.frozen){ run.frozen=false; toast('Market unfrozen'); } }
   else { run.rr=0; if(run.frozen&&run.shop){ run.frozen=false; saveRun(); return; } } // frozen: carry the same stock over once (bought slots stay empty), then unfreeze
   const owned=run.heroes.map(h=>h.id);
   const hpool=shuffle(unlockedHeroes().filter(h=>!owned.includes(h)));
   const heroes=hpool.slice(0,3).map(id=>({id,sold:false}));
-  const gems=rollGems(3).map(id=>({id,sold:false}));
+  const gems=rollGems(run.relics.includes('ledger')?4:3).map(id=>({id,sold:false}));
   const rid=rollRelic(SHOP_RELIC_W,run.relics); // one relic offer every floor
   const relic=rid?{id:rid,sold:false}:null;
   run.shop={heroes,gems,relic};
@@ -1608,11 +1660,15 @@ const openSet=h=>h.open||Array.from({length:SLOTS(h.lv)},(_,k)=>k); // unlocked 
 const slotOpen=(h,k)=>openSet(h).includes(k);
 // Training: pays, opens the slot and promotes. 'noupgrade' when the hero's gems meet none of its upgrades; several fits leave run.promo for the UI to resolve.
 function unlockSlot(h,k){ const c=lvCost(h); if(!c||run.gold<c||slotOpen(h,k)) return false; if(!upgradeOptions(h).length) return 'noupgrade'; spend(c); h.open=openSet(h); const opts=trainHero(h,k); if(opts.length>1) run.promo={hi:run.heroes.indexOf(h),opts}; return true; }
+// each offer is a basic, 2-essence or 3-essence gem by this act's RARE_ODDS; forceRare makes the last offer a rare (no triples in Act 1)
 function rollGems(n,forceRare){
-  const basics=shuffle(BASIC_GEMS), rares=shuffle(RARE_GEMS.filter(k=>GEMS[k].rare===1).concat(shuffle(RARE_GEMS.filter(k=>GEMS[k].rare===2)).slice(0,2)));
-  const out=[]; for(let i=0;i<n;i++){ const rare=(forceRare&&i===n-1)||(Math.random()<0.15+0.02*run.floor); out.push(rare&&rares.length?rares.shift():basics.shift()); }
+  const o=RARE_ODDS[actOf(run.floor)], basics=shuffle(BASIC_GEMS), duals=shuffle(RARE_GEMS.filter(k=>GEMS[k].rare===1)), triples=shuffle(RARE_GEMS.filter(k=>GEMS[k].rare===2));
+  const out=[]; for(let i=0;i<n;i++){ const r=forceRare&&i===n-1?Math.random()*(o.dual+o.triple):Math.random(); out.push((r<o.triple?triples:r<o.triple+o.dual?duals:basics).shift()||basics.shift()); }
   return shuffle(out);
 }
+// n rare gems for a prize: 2- or 3-essence by this act's odds (Act 1: duals only)
+function rollRares(n){ const o=RARE_ODDS[actOf(run.floor)], duals=shuffle(RARE_GEMS.filter(k=>GEMS[k].rare===1)), triples=shuffle(RARE_GEMS.filter(k=>GEMS[k].rare===2));
+  return Array.from({length:n},()=>((Math.random()*(o.dual+o.triple)<o.triple?triples:duals).shift()||duals.shift())).filter(Boolean); }
 const PARTY_START=3, SLOT_COST={3:6,4:10};
 const partyMax=()=>(run.partyMax||PARTY_START)+(run.relics.includes('contract')?1:0)+(heroFlag('guildslot')?1:0); // Guildmaster adds a slot
 const slotCost=()=>SLOT_COST[run.partyMax||PARTY_START]||null; // purchases ignore the Contract's bonus slot
@@ -1622,7 +1678,7 @@ function addHero(id){
   run.heroes.push(newHero(id,row));
 }
 function goldReward(enc,win,killsBy){
-  const base=3+enc.act+(enc.kind==='elite'?2:enc.kind==='boss'?4:0);
+  const base=3+enc.act+(enc.kind==='elite'?2:enc.kind==='boss'?4:0)+(enc.kind!=='fight'&&run.relics.includes('foolsbargain')?6:0);
   let cap=3, gems=0, skills=0;
   // Gilt weapons pay 1 per GILT_PER_KILLS kills by their hero; kill gold from skills (g.kill beyond the gems) is per kill
   run.heroes.forEach((h,i)=>{ const S=computeStats(h,run.relics), g=S.gold, kk=(killsBy&&killsBy[i])||0, gg=S.giltArmor+S.giltHand*Math.floor(kk/GILT_PER_KILLS); cap+=g.interest; gems+=gg; skills+=(g.win-S.giltArmor)+(g.kill-S.giltHand)*kk+((enc.kind==='elite'||enc.kind==='boss')?g.elite:0); });
@@ -1658,7 +1714,7 @@ $('#s-title').addEventListener('click',e=>{
   if(b.dataset.d!==undefined){ window._depth=+b.dataset.d; renderTitle(); return; }
   const a=b.dataset.a;
   if(a==='new'){ if(load(KEY_RUN,null)&&load(KEY_RUN,null).heroes){ modal(`<h2>Abandon current run?</h2><p class="muted">Your saved run on floor ${load(KEY_RUN,null).floor} will be lost.</p><div class="row"><button class="grow" data-x="close">Keep it</button><button class="grow primary" data-x="abandon">Start new</button></div>`); } else newRun(window._depth||0); }
-  if(a==='continue'){ run=loadRun(); if(run){ if(run.startPick) showStartPick(); else renderCamp(); } }
+  if(a==='continue'){ run=loadRun(); if(run){ if(run.startPick) showStartPick(); else if(run.prologue) startBattle(); else renderCamp(); } }
   if(a==='codex') showCodex('h');
   if(a==='help') showHelp();
 });
@@ -1673,7 +1729,7 @@ function showHelp(){
   <p><b>Front row</b> takes the hits. Enemies only reach the back row once the front has fallen. Same rule applies to them. <b>Mid</b> heroes (Rogue, Duelist) start in the back but their dodge skills let them move during a fight: Duelist's Riposte steps up when the front empties, Rogue's Shadowstep slips back when he is hurt.</p>
   <p><b>Gems</b> are the whole upgrade system. Each hero has slots (2 at ★, 3 at ★★, 4 at ★★★). Every gem you slot gives a small passive on its own — <b>which passive depends on where it sits</b>: in a <span class="gk hand">weapon</span> socket (weapon or off-hand) it boosts attacks, in an <span class="gk armor">armor</span> socket (body or head) it protects or punishes attackers — and <b>combinations of gems unlock that hero's unique skills</b>: Ward + Ward might be one skill, Ward + Venom another, and both stay active at once. Open a hero's <b>Equip</b> screen (Equip button at the top, or tap a hero) to see every skill they can learn and exactly which gems it takes. Tap a gem to slot or return it — the other gems stay where they are, and when several slots are free the open ones light up so you can choose. <b>Press and hold</b> any gem for its details. Gems can be moved between heroes freely at camp. Slotted gems show on the hero's gear. Every hero starts with two open sockets (weapon and body); you choose which of the other two to unlock.</p>
   <div class="gemlegend">${BASIC_GEMS.map(g=>`<div>${ic(g,'g',18)}<span><b style="color:${ARCH_C[GEMS[g].arch]}">${GEMS[g].name}</b>${gemFx(g)}</span></div>`).join('')}</div>
-  <p style="margin-top:8px"><b>Rare gems</b> (multi-coloured) carry two or three essences at once: they count as each of them for skill recipes but give <i>none</i> of the essence passives — a two-essence gem brings its own bonus effect instead, and a three-essence gem comes with a drawback. Slot efficiency for skills, at the cost of raw stats. Elite fights always offer one.</p>
+  <p style="margin-top:8px"><b>Rare gems</b> (multi-coloured) carry two or three essences at once: they count as each of them for skill recipes and give each essence's passive for the socket they sit in. A two-essence gem adds its own bonus effect; a three-essence gem comes with a drawback. They're rarer early on: no three-essence gems in Act 1. Elite fights always offer one.</p>
   <p><b>Gold:</b> Gilt gems and some heroes' skills (Pickpocket, Busking, Tithe…) earn extra gold; the camp header shows exactly what the next win pays.</p>
   <p><b>Icons:</b> heroes and enemies are pixel portraits, diamonds are gems, hexagons are relics, dashed squares are unlocked skills. Color shows the archetype: <span style="color:#9be15d">poison</span>, <span style="color:#ff5c3a">burn</span>, <span style="color:#8fe3ff">chill</span>, <span style="color:#5b8cff">shield</span>, <span style="color:#f0f0f8">crit</span>, <span style="color:#ff7ab8">healing</span>, <span style="color:#c47bff">tempo/dodge</span>, <span style="color:#ffd166">gold</span>. Tap anything for details.</p>
   <p><b>Statuses</b> work the same on heroes and enemies. <span class="pill p">Poison</span> deals its stacks each second (ignoring Armor and Shield), then loses 1; at 15 a unit is <b>Festering</b>: Armor counts as 0 and it can't be healed or gain Shield. <span class="pill b">Burn</span> deals its stacks each second, then halves; a unit that reaches 10 is <b>Ablaze</b> and its Burn never drops below 10. <span class="pill c">Chill</span> slows 2.5% per stack (up to 20); attacking halves it, but at 20 a unit is <b>Frozen</b>: its next attack deals half damage and spends 20 Chill. Two of these at once mark a unit for the fight: <b>Brittle</b> (Frozen + Ablaze: every Chill or Burn applied is +1), <b>Blighted</b> (Ablaze + Festering: +25% status damage), <b>Crippled</b> (Frozen + Festering: attacks 25% slower). All three: <b>Ruined</b>, +50% damage from everything. <span class="pill s">Shield</span> absorbs damage first. Armor reduces each attack by a flat amount (min 1). <b>Streaks:</b> each crit or dodge halves that chance until the next miss, so stacked chance never guarantees a run; no one attacks more than 3 times a second.</p>
@@ -1694,7 +1750,7 @@ function showStartPick(){
   $('#modal').dataset.lock='1';
   draw();
   $('#sheet').onclick=e=>{ const b=e.target.closest('button[data-pick]'); if(!b) return; run._picked.push(b.dataset.pick); addHero(b.dataset.pick);
-    if(run._picked.length>=2){ delete $('#modal').dataset.lock; $('#sheet').onclick=null; closeModal(); run.startPick=false; delete run._pick; delete run._picked; rollShop(false); saveRun(); startBattle(); } else draw(); }; // straight into the first fight; the market opens after it
+    if(run._picked.length>=2){ delete $('#modal').dataset.lock; $('#sheet').onclick=null; closeModal(); run.startPick=false; delete run._pick; delete run._picked; run.enc=genPrologue(); rollShop(false); saveRun(); startBattle(); } else draw(); }; // straight into the prologue fight; the market opens after it
 }
 
 // ---------- camp ----------
@@ -1765,12 +1821,12 @@ function renderCamp(){
   const wantCount=g=>run.heroes.reduce((n,h)=>n+heroSkills(h.id).filter(sk=>!skillActive(h,sk)&&skillActive(withGem(h,g),sk)).length,0);
   // v33 compact gem strip (icon · +N · price). Previous tall tiles kept for easy revert:
   // const tileI=sh.gems.map((o,i)=>{ const d=GEMS[o.id]; const can=!o.sold&&run.gold>=d.cost; const w=o.sold?0:wantCount(o.id); return `<div class="tile ${o.sold?'sold':''} ${d.rare?'rare':''}" data-oi="${i}">${ic(o.id,'g',36,d.name)}<div class="tl">${esc(d.name)}${w?` <span class="good">+${w}</span>`:''}</div><div class="tc ${can?'gold':'muted'}">${o.sold?'bought':d.cost+'g'}</div></div>`; }).join('');
-  const tileI=sh.gems.map((o,i)=>{ const d=GEMS[o.id]; const can=!o.sold&&run.gold>=d.cost; const w=o.sold?0:wantCount(o.id); return `<div class="tile gstrip ${o.sold?'sold':''} ${d.rare?'rare':''}" data-oi="${i}" title="${esc(d.name)}">${ic(o.id,'g',28,d.name)}<span class="gcol">${w?`<span class="good">+${w}</span>`:''}<span class="tc ${can?'gold':'muted'}">${o.sold?'—':d.cost+'g'}</span></span></div>`; }).join('');
+  const tileI=sh.gems.map((o,i)=>{ const d=GEMS[o.id]; const can=!o.sold&&run.gold>=gemPrice(o.id); const w=o.sold?0:wantCount(o.id); return `<div class="tile gstrip ${o.sold?'sold':''} ${d.rare?'rare':''}" data-oi="${i}" title="${esc(d.name)}">${ic(o.id,'g',28,d.name)}<span class="gcol">${w?`<span class="good">+${w}</span>`:''}<span class="tc ${can?'gold':'muted'}">${o.sold?'—':gemPrice(o.id)+'g'}</span></span></div>`; }).join('');
   const tileR=sh.relic?(()=>{ const o=sh.relic,d=RELICS[o.id]; const can=!o.sold&&run.gold>=d.cost; return `<div class="offer relic tier-${d.tier} ${o.sold?'sold':''}" data-or="1">${ic(o.id,'r',36,d.name)}<div class="body"><div class="t">${esc(d.name)} ${tierPill(o.id)}</div><div class="d">${esc(d.desc)}</div></div><div class="tc ${can?'gold':'muted'}" style="font-weight:700">${o.sold?'taken':d.cost+'g'}</div></div>`; })():'';
   $('#s-camp').innerHTML=`
-   <div class="topbar"><div class="grow"><div class="eyebrow">${run.floor>FLOORS?`Floor ${run.floor} · <span class="gold">Endless</span>`:`Floor ${run.floor}/${FLOORS} · Act ${act}`}${run.depth?` · <span title="Depth ${run.depth}">D${run.depth}</span>`:''}</div><div class="row" style="gap:8px"><span class="stat gold">◆ ${run.gold}</span>${enc?`<span class="tiny muted">+${goldReward(enc,true).total} if you win</span>`:''}</div></div><span class="bossprev" data-boss="${actBoss()}" title="${esc(ENEMIES[actBoss()].name)} awaits on floor ${actKey(run.floor)*4}">${spr(actBoss(),26,ENEMIES[actBoss()].name)}</span><button class="sm gold" data-a="equip" ${run.heroes.length?'':'disabled'}>Equip</button><button class="sm" data-a="codex">Codex</button><button class="sm ghost" data-a="quit">Menu</button></div>
+   <div class="topbar"><div class="grow"><div class="eyebrow">${run.floor>FLOORS?`Floor ${run.floor} · <span class="gold">Endless</span>`:`Floor ${run.floor}/${FLOORS} · Act ${act}`}${run.depth?` · <span title="Depth ${run.depth}">D${run.depth}</span>`:''}</div><div class="row" style="gap:8px"><span class="stat gold">◆ ${run.gold}</span>${enc?`<span class="tiny muted">+${goldReward(enc,true).total} if you win</span>`:''}</div>${run.trial?`<div class="tiny acc">Trial: ${esc(TRIAL_DEBUFFS[run.trial.debuff])} · win for ${esc(TRIAL_PRIZES[run.trial.prize])}</div>`:''}${run.wager?`<div class="tiny gold">Wager: ${run.wager}g on the next fight, doubled if no hero falls</div>`:''}</div><span class="bossprev" data-boss="${actBoss()}" title="${esc(ENEMIES[actBoss()].name)} awaits on floor ${actKey(run.floor)*4}">${spr(actBoss(),26,ENEMIES[actBoss()].name)}</span><button class="sm gold" data-a="equip" ${run.heroes.length?'':'disabled'}>Equip</button><button class="sm" data-a="codex">Codex</button><button class="sm ghost" data-a="quit">Menu</button></div>
    ${bonusHtml}${pathsHtml}
-   <div class="shop"><div class="row between"><div class="eyebrow">Market</div><div class="row" style="gap:6px"><button class="sm ${run.frozen?'frz':''}" data-a="freeze" title="Keep this stock for the next floor">${run.frozen?'Unfreeze':'Freeze'}</button><button class="sm" data-a="reroll" ${run.gold<rerollCost()?'disabled':''}>Reroll · ${rerollCost()}g</button></div></div><div class="grid3">${tileH}</div><div class="grid3">${tileI}</div>${tileR}${run.frozen?'<div class="tiny frzt">Frozen: this stock carries over to the next floor.</div>':''}</div>
+   <div class="shop"><div class="row between"><div class="eyebrow">Market</div><div class="row" style="gap:6px"><button class="sm ${run.frozen?'frz':''}" data-a="freeze" title="Keep this stock for the next floor">${run.frozen?'Unfreeze':'Freeze'}</button><button class="sm" data-a="reroll" ${run.gold<rerollCost()||run.relics.includes('gildedchains')?'disabled':''}>${run.relics.includes('gildedchains')?'No rerolls':`Reroll · ${rerollCost()}g`}</button></div></div><div class="grid3">${tileH}</div><div class="grid3"${sh.gems.length>3?' style="grid-template-columns:repeat(4,minmax(0,1fr))"':''}>${tileI}</div>${tileR}${run.frozen?'<div class="tiny frzt">Frozen: this stock carries over to the next floor.</div>':''}</div>
    <div>
      <div class="row between"><div class="eyebrow">Guild <span class="${freeSlotsN>0?'good':'acc'}" title="${freeSlotsN} slot${freeSlotsN===1?'':'s'} free">${run.heroes.length}/${partyMax()}</span>${sel.gem!==null?' · <span class="good">tap a hero to slot it</span>':''}</div>${sel.gem!==null?`<button class="sm" data-a="unsel">Cancel</button>`:slotCost()?`<button class="sm ${run.gold>=slotCost()?'gold':''}" data-a="expand" ${run.gold<slotCost()?'disabled':''}>+1 slot · ${slotCost()}g</button>`:''}</div>
      <div class="rowlabel">Front</div><div class="grid4">${fill(rows.front)}</div>
@@ -1850,8 +1906,15 @@ const EVENTS={
  cutter:{name:'Gem Cutter',sub:'reshape two gems',ok:()=>ownedGems().some(it=>!GEMS[it.g].merged),open:()=>openCutter()},
  retire:{name:'Retirement',sub:'pass on a hero\'s strength',ok:()=>run.heroes.length>=2,open:()=>openRetire()},
  scout:{name:"Scout's Camp",sub:'choose the act boss',ok:()=>true,open:()=>openScout()},
+ shrine:{name:'Cursed Shrine',sub:'power at a price',ok:()=>relicsOfTier('cursed',run.relics).length>0,open:()=>openShrine()},
+ trial:{name:'Proving Grounds',sub:'fight handicapped for a prize',ok:()=>!run.trial,open:()=>openTrial()},
+ mentor:{name:'Mentor',sub:"retrain a hero's last promotion",ok:()=>run.heroes.some(h=>siblingsOf(h).length),open:()=>openMentor()},
+ pawn:{name:'Pawnbroker',sub:'sell or trade up a relic',ok:()=>pawnable().length>0,open:()=>openPawn()},
+ den:{name:"Gambler's Den",sub:'bet on the next fight',ok:()=>run.gold>=5&&!run.wager,open:()=>openDen()},
 };
 const rollEvents=()=>shuffle(Object.keys(EVENTS).filter(k=>EVENTS[k].ok())).slice(0,2);
+// what an event rolled stays put until the bonus is done, so closing and reopening it can't reroll the offer
+const memo=(k,f)=>{ run.bonus=run.bonus||{opts:[]}; if(run.bonus[k]===undefined){ run.bonus[k]=f(); saveRun(); } return run.bonus[k]; };
 function finishBonus(){ run.bonus=null; sel.gem=null; saveRun(); renderCamp(); }
 const lockModal=()=>{ $('#modal').dataset.lock='1'; }, unlockModal=()=>{ $('#sheet').onclick=null; delete $('#modal').dataset.lock; closeModal(); };
 const slotName=(h,k)=>(((EQUIP[sprId(h)]||{}).l||[])[k])||['Weapon','Body','Head','Off-hand'][k];
@@ -1926,14 +1989,103 @@ function bossLine(id,floor){ const d=ENEMIES[id], m=enemyMult(floor,run.depth), 
 function openScout(){
   const k=actKey(run.floor), floor=k*4, cur=actBoss();
   const opts=[cur].concat(shuffle(bossPool(floor).filter(x=>x!==cur)).slice(0,2)); let ch=cur;
+  const nf=floor+1, nextEl=[...new Set(ELITES[nf>FLOORS?((Math.ceil(nf/4)-1)%3)+1:actOf(nf)])]; nextEl.forEach(id=>seen('e',id)); // the elites waiting in the next act (or endless block)
   const draw=()=>{ modal(`<h2>Scout's Camp</h2><div class="muted small">Your scouts found the lairs ahead. Choose which boss you face on floor ${floor}.</div>
      <div class="stack">${opts.map(id=>{ const d=ENEMIES[id]; return `<div class="ench ${ch===id?'sel':''}" data-sb="${id}"><div class="row" style="gap:8px">${spr(id,36,d.name)}<div class="grow"><b>${esc(d.name)}</b>${id===cur?' <span class="pill">current</span>':''}<div class="tiny muted num">${bossLine(id,floor)}</div></div></div><div class="tiny" style="margin-top:3px">${esc(d.ab||'')}</div></div>`; }).join('')}</div>
+     ${nextEl.length?`<div class="eyebrow" style="margin-top:6px">Next act's elites</div><div class="stack">${nextEl.map(id=>{ const d=ENEMIES[id]; return `<div class="ench"><div class="row" style="gap:8px">${spr(id,30,d.name)}<div class="grow"><b>${esc(d.name)}</b><div class="tiny">${esc(d.ab||'')}</div></div></div></div>`; }).join('')}</div>`:''}
      <div class="row"><button class="grow ghost" data-sx="cancel">Not now</button><button class="grow gold" data-sx="go">Choose</button></div>`); lockModal(); };
   draw();
   $('#sheet').onclick=e=>{ const c=e.target.closest('[data-sb]'); if(c){ ch=c.dataset.sb; return draw(); }
     const x=e.target.closest('[data-sx]'); if(!x) return; unlockModal();
     if(x.dataset.sx==='cancel') return renderCamp();
     run.bosses[k]=ch; seen('e',ch); toast(`${ENEMIES[ch].name} awaits on floor ${floor}`); finishBonus(); };
+}
+
+// Cursed Shrine: take one of two cursed relics, a real upside with a cost that lasts the run
+function openShrine(){
+  const opts=memo('shrine',()=>shuffle(relicsOfTier('cursed',run.relics)).slice(0,2)); let ch=null;
+  const draw=()=>{ modal(`<h2>Cursed Shrine</h2><div class="muted small">An altar hums with something old. Take one relic: its power is real, and so is its price. Cursed relics last the run and can't be sold.</div>
+     <div class="stack">${opts.map(id=>`<div class="ench ${ch===id?'sel':''}" data-cs="${id}"><div class="row" style="gap:8px">${ic(id,'r',30,RELICS[id].name)}<div class="grow"><b>${esc(RELICS[id].name)}</b> ${tierPill(id)}<div class="tiny">${esc(RELICS[id].desc)}</div></div></div></div>`).join('')}</div>
+     <div class="row"><button class="grow ghost" data-csx="cancel">Not now</button><button class="grow gold" data-csx="go" ${ch?'':'disabled'}>Take it</button></div>`); lockModal(); };
+  opts.forEach(id=>seen('r',id)); draw();
+  $('#sheet').onclick=e=>{ const c=e.target.closest('[data-cs]'); if(c){ ch=c.dataset.cs; return draw(); }
+    const x=e.target.closest('[data-csx]'); if(!x||(x.dataset.csx==='go'&&!ch)) return; unlockModal();
+    if(x.dataset.csx==='cancel') return renderCamp();
+    run.relics.push(ch); if(ch==='cursedhoard') run.gold+=15; toast(`${RELICS[ch].name} is yours`); finishBonus(); };
+}
+
+// Proving Grounds: accept a handicap for your next fight; win it and claim the prize. Losing still ends the run.
+const TRIAL_DEBUFFS={ehp:'enemies have +30% HP',eatk:'enemies have +25% ATK',hhp:'your heroes have −25% max HP',norelic:'your relics do nothing'};
+const TRIAL_PRIZES={relic:'a relic (pick 1 of 3)',gem:'a rare gem (pick 1 of 3)',gold:'15 gold'}, TRIAL_GOLD=15;
+function openTrial(){
+  const opts=memo('trial',()=>{ const ds=shuffle(Object.keys(TRIAL_DEBUFFS).filter(k=>k!=='norelic'||run.relics.length)), ps=shuffle(Object.keys(TRIAL_PRIZES)); return [0,1].map(i=>({debuff:ds[i],prize:ps[i]})); }); let ch=null;
+  const draw=()=>{ modal(`<h2>Proving Grounds</h2><div class="muted small">The arena master offers a wager of a different kind. Take a handicap into your next fight; win it and the prize is yours. Lose, and the run ends as usual.</div>
+     <div class="stack">${opts.map((o,i)=>`<div class="ench ${ch===i?'sel':''}" data-tr="${i}"><div class="small"><span class="acc">Handicap:</span> ${esc(TRIAL_DEBUFFS[o.debuff])}</div><div class="small"><span class="good">Prize:</span> ${esc(TRIAL_PRIZES[o.prize])}</div></div>`).join('')}</div>
+     <div class="row"><button class="grow ghost" data-trx="cancel">Not now</button><button class="grow gold" data-trx="go" ${ch!==null?'':'disabled'}>Accept</button></div>`); lockModal(); };
+  draw();
+  $('#sheet').onclick=e=>{ const c=e.target.closest('[data-tr]'); if(c){ ch=+c.dataset.tr; return draw(); }
+    const x=e.target.closest('[data-trx]'); if(!x||(x.dataset.trx==='go'&&ch===null)) return; unlockModal();
+    if(x.dataset.trx==='cancel') return renderCamp();
+    run.trial=Object.assign({},opts[ch]); toast('Trial accepted: your next fight is handicapped'); finishBonus(); };
+}
+function trialPrize(prize,next){
+  if(prize!=='gold') return freePick(prize,next,'trial');
+  run.gold+=TRIAL_GOLD;
+  modal(`<h2>Trial won</h2><div class="gold" style="font-size:18px;font-weight:700;margin:8px 0">+${TRIAL_GOLD} gold</div><button class="primary" data-tp="1">Continue</button>`); lockModal();
+  $('#sheet').onclick=e=>{ if(!e.target.closest('button[data-tp]')) return; unlockModal(); next(); };
+}
+
+// Mentor: re-route a hero's last promotion to any sibling class (another upgrade of the class before), whatever its gems
+const siblingsOf=h=>{ const p=heroPath(h); return p.length<3?[]:upgradesOf(p[p.length-2]).filter(id=>id!==h.id); };
+function openMentor(){
+  const elig=run.heroes.map((h,i)=>i).filter(i=>siblingsOf(run.heroes[i]).length); let hi=elig[0], ch=null;
+  const draw=()=>{ const h=run.heroes[hi], prev=heroPath(h)[heroPath(h).length-2];
+    modal(`<h2>Mentor</h2><div class="muted small">An old guildmaster can undo a hero's last promotion and train them down another path from ${esc(CLASSES[prev].name)}. Their gems don't need to match; skills still need their recipes.</div>
+     <div class="heronav">${elig.map(i=>`<button class="hn ${i===hi?'on':''}" data-mh="${i}">${hspr(run.heroes[i],32)}</button>`).join('')}</div>
+     <div class="tiny muted">${esc(HEROES[h.id].name)} now · ${routeLine(h)}</div>
+     <div class="stack">${siblingsOf(h).map(id=>{ const c=CLASSES[id]; return `<div class="ench ${ch===id?'sel':''}" data-mc="${id}"><div class="row" style="gap:8px">${ic(id,'h',30,c.name)}<div class="grow"><b>${esc(c.name)}</b> <span class="tiny muted">${c.role}</span> ${recipeHtml({need:c.need},h,14)}<div class="tiny">${esc(c.passive)}</div></div></div></div>`; }).join('')}</div>
+     <div class="row"><button class="grow ghost" data-mx="cancel">Not now</button><button class="grow gold" data-mx="go" ${ch?'':'disabled'}>Retrain</button></div>`); lockModal(); };
+  draw();
+  $('#sheet').onclick=e=>{ const n=e.target.closest('[data-mh]'); if(n){ hi=+n.dataset.mh; ch=null; return draw(); }
+    const c=e.target.closest('[data-mc]'); if(c){ ch=c.dataset.mc; return draw(); }
+    const x=e.target.closest('[data-mx]'); if(!x||(x.dataset.mx==='go'&&!ch)) return; unlockModal();
+    if(x.dataset.mx==='cancel') return renderCamp();
+    const h=run.heroes[hi], old=h.id; h.path=heroPath(h).slice(0,-1).concat(ch); h.id=ch; seen('h',ch);
+    toast(`${CLASSES[old].name} retrains as ${CLASSES[ch].name}`); finishBonus(); };
+}
+
+// Pawnbroker: sell a relic for what it cost, or trade it for one of three from the tier above (Legendary trades for Legendary).
+// Cursed relics are refused, and so is the Contract of Blood while its extra slot is filled.
+const TIER_UP={common:'rare',rare:'legendary',legendary:'legendary'};
+const pawnable=()=>run.relics.filter(r=>RELICS[r].tier!=='cursed'&&!(r==='contract'&&run.heroes.length>=partyMax()));
+function openPawn(){
+  let sel=null, pk=null;
+  const offers=r=>memo('pawn_'+r,()=>shuffle(relicsOfTier(TIER_UP[RELICS[r].tier],run.relics)).slice(0,3));
+  const draw=()=>{ const of=sel?offers(sel):[];
+    modal(`<h2>Pawnbroker</h2><div class="muted small">"I'll give you what you paid, or something better if you've the nerve to trade." Pick a relic to part with.</div>
+     <div class="stack">${pawnable().map(r=>`<div class="ench ${sel===r?'sel':''}" data-pr="${r}"><div class="row" style="gap:8px">${ic(r,'r',26,RELICS[r].name)}<div class="grow"><b>${esc(RELICS[r].name)}</b> ${tierPill(r)} <span class="tiny gold">sells for ${RELICS[r].cost}g</span></div></div></div>`).join('')}</div>
+     ${sel?`<div class="eyebrow" style="margin-top:6px">…or trade it for</div>${of.length?`<div class="stack">${of.map(r=>`<div class="ench ${pk===r?'sel':''}" data-po="${r}"><div class="row" style="gap:8px">${ic(r,'r',26,RELICS[r].name)}<div class="grow"><b>${esc(RELICS[r].name)}</b> ${tierPill(r)}<div class="tiny">${esc(RELICS[r].desc)}</div></div></div></div>`).join('')}</div>`:'<div class="tiny muted">Nothing better left to trade for.</div>'}`:''}
+     <div class="row"><button class="grow ghost" data-px="cancel">Not now</button><button class="grow" data-px="sell" ${sel?'':'disabled'}>Sell${sel?' · '+RELICS[sel].cost+'g':''}</button><button class="grow gold" data-px="trade" ${pk?'':'disabled'}>Trade</button></div>`); lockModal(); };
+  draw();
+  $('#sheet').onclick=e=>{ const r=e.target.closest('[data-pr]'); if(r){ sel=r.dataset.pr; pk=null; offers(sel).forEach(x=>seen('r',x)); return draw(); }
+    const o=e.target.closest('[data-po]'); if(o){ pk=o.dataset.po; return draw(); }
+    const x=e.target.closest('[data-px]'); if(!x) return; const a=x.dataset.px; if((a==='sell'&&!sel)||(a==='trade'&&!pk)) return; unlockModal();
+    if(a==='cancel') return renderCamp();
+    run.relics.splice(run.relics.indexOf(sel),1);
+    if(a==='sell'){ run.gold+=RELICS[sel].cost; toast(`Sold ${RELICS[sel].name} for ${RELICS[sel].cost}g`); }
+    else { run.relics.push(pk); toast(`${RELICS[sel].name} → ${RELICS[pk].name}`); }
+    finishBonus(); };
+}
+
+// Gambler's Den: stake gold on the next fight; if no hero falls, double it back
+const DEN_STAKES=[5,10];
+function openDen(){
+  modal(`<h2>Gambler's Den</h2><div class="muted small">A table in the back, dice already rolling. Stake gold on your next fight: if every hero is standing at the end, you get double back. If anyone falls, it's gone.</div>
+   <div class="row">${DEN_STAKES.map(n=>`<button class="grow gold" data-dn="${n}" ${run.gold>=n?'':'disabled'}>Stake ${n}g</button>`).join('')}</div>
+   <div class="row"><button class="grow ghost" data-dn="cancel">Not now</button></div>`); lockModal();
+  $('#sheet').onclick=e=>{ const b=e.target.closest('button[data-dn]'); if(!b) return; unlockModal();
+    if(b.dataset.dn==='cancel') return renderCamp();
+    const n=+b.dataset.dn; if(run.gold<n) return renderCamp(); run.gold-=n; run.wager=n; toast(`${n}g on the table`); finishBonus(); };
 }
 function recipeHtml(sk,h,size){
   const have=h?gemCounts(h):{}; const used={};
@@ -1946,7 +2098,7 @@ function skillRow(sk,h){
 }
 function offerSheet(kind,i){
   const o=kind==='h'?run.shop.heroes[i]:kind==='g'?run.shop.gems[i]:run.shop.relic; if(!o) return;
-  const d=kind==='h'?HEROES[o.id]:kind==='g'?GEMS[o.id]:RELICS[o.id]; const cost=kind==='h'?heroCost():d.cost;
+  const d=kind==='h'?HEROES[o.id]:kind==='g'?GEMS[o.id]:RELICS[o.id]; const cost=kind==='h'?heroCost():kind==='g'?gemPrice(o.id):d.cost;
   const full=kind==='h'&&run.heroes.length>=partyMax(); const can=!o.sold&&run.gold>=cost&&!full;
   let body='';
   if(kind==='h'){
@@ -2069,7 +2221,7 @@ $('#s-gems').addEventListener('click',e=>{
 function startBattle(){
   sel.gem=null; closeModal();
   const enc=run.enc; enc.list.forEach(e=>seen('e',e.id));
-  battle=createBattle(run.heroes,enc,run.relics,run.gold,{spent:run.spent||0});
+  const tr=run.trial&&run.trial.debuff; battle=createBattle(run.heroes,enc,tr==='norelic'?[]:run.relics,run.gold,{spent:run.spent||0,trial:tr,trophies:run.elitesWon||0}); // a Proving Grounds trial handicaps this fight
   const flash=(el,cls,ms)=>{ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(()=>el.classList.remove(cls),ms); };
   battle.fx=(u,txt,cls)=>{ if(speed>=99) return; const el=document.getElementById('u'+u.uid); if(!el) return;
     const go=()=>{ const s=document.createElement('span'); s.className='fx '+cls; s.textContent=txt; s.style.left=(35+Math.random()*30)+'%'; el.appendChild(s); setTimeout(()=>s.remove(),900); if(cls==='heal') flash(el,'healed',350); if(cls==='shield'&&txt[0]==='+') flash(el,'shielded',350); };
@@ -2104,7 +2256,7 @@ function startBattle(){
   // an empty row keeps its full height so summons or movement never shift the rest of the arena
   const GHOST=`<div class="unit ghost"><div class="art"></div><div class="nm"><span>&nbsp;</span></div><div class="hpbar"></div><div class="ln"><span>&nbsp;</span></div><div class="stt"></div></div>`;
   $('#s-battle').innerHTML=`
-   <div class="topbar"><div class="grow"><div class="eyebrow">Floor ${run.floor}${run.floor>FLOORS?' · <span class="gold">Endless</span>':''} · ${{fight:'Fight',elite:'Elite',boss:'Boss'}[enc.kind]}</div><div class="row" style="gap:12px"><span class="stat gold">◆ ${run.gold}</span><span class="num small muted" id="btime">0.0s</span></div></div><div class="spd row" style="gap:4px">${[0.5,1,2,3].map(m=>`<button data-s="${m}" class="${speed===m?'on':''}">${m}×</button>`).join('')}<button data-s="99">Skip</button></div></div>
+   <div class="topbar"><div class="grow"><div class="eyebrow">${enc.prologue?'Prologue':`Floor ${run.floor}${run.floor>FLOORS?' · <span class="gold">Endless</span>':''} · ${{fight:'Fight',elite:'Elite',boss:'Boss'}[enc.kind]}`}</div><div class="row" style="gap:12px"><span class="stat gold">◆ ${run.gold}</span><span class="num small muted" id="btime">0.0s</span></div></div><div class="spd row" style="gap:4px">${[0.5,1,2,3].map(m=>`<button data-s="${m}" class="${speed===m?'on':''}">${m}×</button>`).join('')}<button data-s="99">Skip</button></div></div>
    <div class="arena">
      <div class="side" id="eside">${rowHtml('e','back')}${rowHtml('e','front')}</div>
      <div class="mid"><div class="rift" style="margin:0;width:100%"></div></div>
@@ -2139,7 +2291,10 @@ function endBattle(){
   run.fights++;
   const killsBy={}; heroUnits.forEach(u=>{ killsBy[run.heroes.indexOf(u.hero)]=u.stats.kills; });
   const g=goldReward(enc,win,killsBy); g.bounty=battle.bounty||0; g.total=Math.max(0,g.total+g.bounty); if(win) run.gold+=g.total;
-  meta.bestFloor=Math.max(meta.bestFloor,run.floor);
+  if(run.wager){ g.wager=win&&heroUnits.every(u=>u.alive)?run.wager*2:-run.wager; if(g.wager>0) run.gold+=g.wager; run.wager=null; } // Gambler's Den: paid when staked, doubled back if no hero fell
+  const trial=run.trial; run.trial=null;
+  if(win&&enc.kind==='elite') run.elitesWon=(run.elitesWon||0)+1; // Trophy Rack
+  if(!enc.prologue) meta.bestFloor=Math.max(meta.bestFloor,run.floor);
   const unlocks=[];
   const tryUnlock=()=>{}; // milestone heroes are gone: every class is reached by training
   const victory=win&&run.floor===FLOORS; const dead=!win;
@@ -2153,26 +2308,29 @@ function endBattle(){
   const rows=heroUnits.slice().sort((a,b)=>b.stats.dealt-a.stats.dealt).map(u=>`<tr><td><span class="row" style="gap:5px">${ic(u.hero.id,'h',18)}${esc(u.name)}</span>${!u.alive?' <span class="tiny acc">fell</span>':''}</td><td>${u.stats.dealt}</td><td>${u.stats.taken}</td><td>${u.stats.healed}</td><td>${u.stats.kills}</td></tr>`).join('');
   const mvp=heroUnits.reduce((m,u)=>u.stats.dealt>m.stats.dealt?u:m,heroUnits[0]);
   modal(`<h2 class="${win?'good':'acc'}">${victory?'Dungeon cleared':win?'Victory':'Defeat'}</h2>
-   <div class="small muted">${battle.t.toFixed(1)}s · MVP ${esc(mvp.name)}${dead?` · <span class="acc">${battle.t>=60?'Time ran out.':'Your guild is broken.'}</span> ${enemyLeft} enem${enemyLeft===1?'y':'ies'} left standing.`:''}</div>
+   <div class="small muted">${battle.t.toFixed(1)}s · MVP ${esc(mvp.name)}${dead?` · <span class="acc">${battle.t>=battle.tLimit?'Time ran out.':'Your guild is broken.'}</span> ${enemyLeft} enem${enemyLeft===1?'y':'ies'} left standing.`:''}</div>
    <table class="rep"><tr><th>Hero</th><th>Dealt</th><th>Taken</th><th>Healed</th><th>Kills</th></tr>${rows}</table>
-   ${win?`<div class="small"><span class="gold">+${g.total} gold</span> <span class="muted">(win ${g.base}${g.interest?' · interest '+g.interest:''}${g.gems?' · Gilt '+g.gems:''}${g.skills?' · skills '+g.skills:''}${g.purse?' · Deep Purse '+g.purse:''}${g.bounty>0?' · loot '+g.bounty:g.bounty<0?' · stolen '+g.bounty:''})</span></div>`:''}
+   ${win?`<div class="small"><span class="gold">+${g.total} gold</span> <span class="muted">(win ${g.base}${g.interest?' · interest '+g.interest:''}${g.gems?' · Gilt '+g.gems:''}${g.skills?' · skills '+g.skills:''}${g.purse?' · Deep Purse '+g.purse:''}${g.bounty>0?' · loot '+g.bounty:g.bounty<0?' · stolen '+g.bounty:''})</span>${g.wager>0?` <span class="gold">· wager +${g.wager}</span>`:g.wager<0?' <span class="acc">· wager lost</span>':''}</div>`:''}
    ${unlocks.map(n=>`<div class="pill g">Unlocked hero: ${esc(n)}</div>`).join('')}
    <details class="small muted"><summary>Battle log</summary><div style="max-height:200px;overflow:auto;font-size:11px;margin-top:6px">${battle.log.map(esc).join('<br>')}</div></details>
    <button class="primary" data-next="1">${dead?'See run summary':victory?'Claim your victory':'Continue'}</button>`);
   $('#modal').dataset.lock='1';
   $('#sheet').onclick=e=>{ if(!e.target.closest('button[data-next]')) return; $('#sheet').onclick=null; delete $('#modal').dataset.lock; closeModal();
     if(dead) return runOver(false);
+    if(enc.prologue){ run.prologue=false; offerPaths(); rollShop(false); return renderCamp(); } // the prologue isn't a floor: floor 1 comes next
     const after=()=>{ run.floor++; if(run.floor%4===3) run.bonus={opts:rollEvents()}; if(run.bonus&&!run.bonus.opts.length) run.bonus=null; offerPaths(); rollShop(false); renderCamp(); };
     if(victory){ const goOn=()=>{ run.endless=true; toast('Endless: enemies keep growing until you fall'); after(); }; return endlessPrompt(goOn,()=>runOver(true),enc); }
-    if(win&&enc.kind==='elite') return freePick('gem',after);
-    if(win&&enc.kind==='boss') return freePick('relic',after);
-    after(); };
+    const queue=[]; if(win&&trial) queue.push('trial'); if(win&&enc.kind==='elite') queue.push('gem'); if(win&&enc.kind==='boss') queue.push('relic');
+    const next=()=>{ const k=queue.shift(); if(!k) return after(); if(k==='trial') return trialPrize(trial.prize,next); freePick(k,next); };
+    next(); };
 }
-function freePick(kind,after){
-  const src=kind==='gem'?GEMS:RELICS; let pool;
-  if(kind==='gem') pool=rollGems(3,true);
-  else { pool=[]; const own=()=>run.relics.concat(pool); const L=relicsOfTier('legendary',own()); if(L.length) pool.push(pick(L)); // boss spoils: one Legendary guaranteed
-    while(pool.length<3){ const r=rollRelic({common:0.45,rare:0.45,legendary:0.10},own()); if(!r) break; pool.push(r); } pool=shuffle(pool); }
+// mode 'trial' (a Proving Grounds prize): gems are all rares, relics have no guaranteed Legendary and ignore the Cursed Hoard
+function freePick(kind,after,mode){
+  const src=kind==='gem'?GEMS:RELICS; let pool; const trial=mode==='trial';
+  if(kind==='gem') pool=trial?rollRares(3):rollGems(3,true);
+  else { pool=[]; const own=()=>run.relics.concat(pool), n=!trial&&run.relics.includes('cursedhoard')?2:3;
+    if(!trial){ const L=relicsOfTier('legendary',own()); if(L.length) pool.push(pick(L)); } // boss spoils: one Legendary guaranteed
+    while(pool.length<n){ const r=rollRelic(trial?{common:0.5,rare:0.4,legendary:0.1}:{common:0.45,rare:0.45,legendary:0.10},own()); if(!r) break; pool.push(r); } pool=shuffle(pool); }
   // every relic already owned (long endless runs): pay out gold instead of an empty choice
   if(!pool.length){ const g=RELIC_HOARD_GOLD; run.gold+=g;
     modal(`<h2>Relic of the depths</h2><div class="muted small">Your guild already holds every relic in the dungeon. The boss's hoard is yours instead.</div><div class="gold" style="font-size:18px;font-weight:700;margin:8px 0">+${g} gold</div><button class="primary" data-fp-ok="1">Continue</button>`);
@@ -2181,7 +2339,7 @@ function freePick(kind,after){
     return; }
   pool.forEach(id=>seen(kind==='gem'?'g':'r',id));
   const uses=id=>{ const u=[]; run.heroes.forEach(h=>heroSkills(h.id).forEach(sk=>{ if(!skillActive(h,sk)&&skillActive(withGem(h,id),sk)) u.push(sk.name); })); return u; };
-  modal(`<h2>${kind==='gem'?'Spoils':'Relic of the depths'}</h2><div class="muted small">Choose one. It's free.</div><div class="choice">${pool.map(id=>{ const u=kind==='gem'?uses(id):[]; return `<button data-fp="${id}"><span class="row">${ic(id,kind==='gem'?'g':'r',22)} ${esc(src[id].name)}${kind==='gem'?'':' '+tierPill(id)}</span><span class="d">${esc(src[id].desc)}${u.length?` · <span class="good">unlocks ${u.map(esc).join(', ')}</span>`:''}</span></button>`; }).join('')}</div>`);
+  modal(`<h2>${trial?'Trial won':kind==='gem'?'Spoils':'Relic of the depths'}</h2><div class="muted small">Choose one. It's free.</div><div class="choice">${pool.map(id=>{ const u=kind==='gem'?uses(id):[]; return `<button data-fp="${id}"><span class="row">${ic(id,kind==='gem'?'g':'r',22)} ${esc(src[id].name)}${kind==='gem'?'':' '+tierPill(id)}</span><span class="d">${esc(src[id].desc)}${u.length?` · <span class="good">unlocks ${u.map(esc).join(', ')}</span>`:''}</span></button>`; }).join('')}</div>`);
   $('#modal').dataset.lock='1';
   $('#sheet').onclick=e=>{ const b=e.target.closest('button[data-fp]'); if(!b) return; $('#sheet').onclick=null; delete $('#modal').dataset.lock; closeModal();
     if(kind==='gem'){ run.bag.push(b.dataset.fp); } else run.relics.push(b.dataset.fp); after(); };
@@ -2213,8 +2371,8 @@ function showCodex(tab){
   let body='';
   if(tab==='h') body=[1,2,3].map(t=>`<div class="eyebrow" style="margin-top:6px">${['','Starters (hired)','Tier 3 (first training)','Capstones (second training)'][t]}</div>`+Object.keys(HEROES).filter(id=>HEROES[id].tier===t).map(id=>{ const d=HEROES[id], c=CLASSES[id];
     return `<div class="cx"><div class="t">${ic(id,'h',22)}${esc(d.name)} <span class="tiny muted">${d.row} · ${c.ess.map(e=>GEMS[e].name).join(' + ')} · from ${c.from.map(f=>CLASSES[f].name).join(', ')}</span></div><div class="d">${esc(c.passive)}</div></div>`; }).join('')).join('');
-  if(tab==='g') body=`<div class="cx"><div class="d">Each gem gives its passive to the hero holding it. A hero's skills unlock when their slotted gems match the recipe; several can be active at once. Rare gems count as several essences for recipes but carry no essence passives. Slots: 2 at ★, 3 at ★★, 4 at ★★★.</div></div>`+Object.keys(GEMS).filter(id=>!GEMS[id].merged).map(id=>{ const d=GEMS[id]; const s=meta.seen.g.includes(id); const users=Object.keys(SKILLS).filter(h=>!HEROES[h].locked||meta.unlocked.includes(h)).map(h=>({h,n:SKILLS[h].filter(sk=>sk.need.includes(d.letter)).length})).filter(x=>x.n); return `<div class="cx ${s?'':'unk'}"><div class="t">${s?ic(id,'g',22):''}${s?esc(d.name):'???'} ${d.rare?'<span class="pill g">rare</span>':''}<span class="tiny muted">${d.cost}g</span></div><div class="d">${s?esc(d.desc)+(d.rare?'':'<br><span class="tiny">Used in skills of: '+users.map(x=>HEROES[x.h].name+' ('+x.n+')').join(', ')+'</span>'):'Not yet discovered'}</div></div>`; }).join('');
-  if(tab==='r') body=RELIC_TIERS.flatMap(t=>relicsOfTier(t)).map(id=>{ const d=RELICS[id]; const s=meta.seen.r.includes(id); return `<div class="cx ${s?'':'unk'}"><div class="t">${s?ic(id,'r',22):''}${s?esc(d.name):'???'} ${tierPill(id)} <span class="tiny muted">${d.cost}g</span></div><div class="d">${s?esc(d.desc):'Not yet discovered'}</div></div>`; }).join('');
+  if(tab==='g') body=`<div class="cx"><div class="d">Each gem gives its passive to the hero holding it. A hero's skills unlock when their slotted gems match the recipe; several can be active at once. Rare gems count as several essences for recipes and give each essence's passive. Slots: 2 at ★, 3 at ★★, 4 at ★★★.</div></div>`+Object.keys(GEMS).filter(id=>!GEMS[id].merged).map(id=>{ const d=GEMS[id]; const s=meta.seen.g.includes(id); const users=Object.keys(HEROES).map(h=>({h,n:CLASSES[h].skills.filter(sk=>sk.need.includes(d.letter)).length})).filter(x=>x.n); return `<div class="cx ${s?'':'unk'}"><div class="t">${s?ic(id,'g',22):''}${s?esc(d.name):'???'} ${d.rare?'<span class="pill g">rare</span>':''}<span class="tiny muted">${d.cost}g</span></div><div class="d">${s?esc(d.desc)+(d.rare?'':'<br><span class="tiny">Used in skills of: '+users.map(x=>HEROES[x.h].name+' ('+x.n+')').join(', ')+'</span>'):'Not yet discovered'}</div></div>`; }).join('');
+  if(tab==='r') body=RELIC_TIERS.concat('cursed').flatMap(t=>relicsOfTier(t)).map(id=>{ const d=RELICS[id]; const s=meta.seen.r.includes(id); return `<div class="cx ${s?'':'unk'}"><div class="t">${s?ic(id,'r',22):''}${s?esc(d.name):'???'} ${tierPill(id)} <span class="tiny muted">${d.cost}g</span></div><div class="d">${s?esc(d.desc):'Not yet discovered'}</div></div>`; }).join('');
   if(tab==='e') body=Object.keys(ENEMIES).filter(id=>!ENEMIES[id].minion).map(id=>{ const d=ENEMIES[id]; const s=meta.seen.e.includes(id); return `<div class="cx ${s?'':'unk'}"><div class="t">${s?spr(id,22,d.name):''}${s?esc(d.name):'???'} <span class="tiny muted">${s?(d.boss?'boss · ':d.elite?'elite · ':'')+d.row+' · HP '+d.hp+' · ATK '+d.atk+' · SPD '+d.spd+(d.armor?' · ARM '+d.armor:''):''}</span></div><div class="d">${s?esc(d.ab||'No special ability.'):'Not yet encountered'}</div></div>`; }).join('');
   modal(`<div class="row between"><h2>Codex</h2><button class="sm" data-x="close">Close</button></div><div class="tabs">${tabs.map(t=>`<button data-tab="${t[0]}" class="${t[0]===tab?'on':''}">${t[1]}</button>`).join('')}</div><div class="codex">${body}</div>`);
   $('#sheet').onclick=e=>{ const b=e.target.closest('button[data-tab]'); if(b){ showCodex(b.dataset.tab); } if(e.target.closest('button[data-x]')){ $('#sheet').onclick=null; closeModal(); } };

@@ -2,7 +2,7 @@
 function startBattle(){
   sel.gem=null; closeModal();
   const enc=run.enc; enc.list.forEach(e=>seen('e',e.id));
-  battle=createBattle(run.heroes,enc,run.relics,run.gold,{spent:run.spent||0});
+  const tr=run.trial&&run.trial.debuff; battle=createBattle(run.heroes,enc,tr==='norelic'?[]:run.relics,run.gold,{spent:run.spent||0,trial:tr,trophies:run.elitesWon||0}); // a Proving Grounds trial handicaps this fight
   const flash=(el,cls,ms)=>{ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(()=>el.classList.remove(cls),ms); };
   battle.fx=(u,txt,cls)=>{ if(speed>=99) return; const el=document.getElementById('u'+u.uid); if(!el) return;
     const go=()=>{ const s=document.createElement('span'); s.className='fx '+cls; s.textContent=txt; s.style.left=(35+Math.random()*30)+'%'; el.appendChild(s); setTimeout(()=>s.remove(),900); if(cls==='heal') flash(el,'healed',350); if(cls==='shield'&&txt[0]==='+') flash(el,'shielded',350); };
@@ -37,7 +37,7 @@ function startBattle(){
   // an empty row keeps its full height so summons or movement never shift the rest of the arena
   const GHOST=`<div class="unit ghost"><div class="art"></div><div class="nm"><span>&nbsp;</span></div><div class="hpbar"></div><div class="ln"><span>&nbsp;</span></div><div class="stt"></div></div>`;
   $('#s-battle').innerHTML=`
-   <div class="topbar"><div class="grow"><div class="eyebrow">Floor ${run.floor}${run.floor>FLOORS?' · <span class="gold">Endless</span>':''} · ${{fight:'Fight',elite:'Elite',boss:'Boss'}[enc.kind]}</div><div class="row" style="gap:12px"><span class="stat gold">◆ ${run.gold}</span><span class="num small muted" id="btime">0.0s</span></div></div><div class="spd row" style="gap:4px">${[0.5,1,2,3].map(m=>`<button data-s="${m}" class="${speed===m?'on':''}">${m}×</button>`).join('')}<button data-s="99">Skip</button></div></div>
+   <div class="topbar"><div class="grow"><div class="eyebrow">${enc.prologue?'Prologue':`Floor ${run.floor}${run.floor>FLOORS?' · <span class="gold">Endless</span>':''} · ${{fight:'Fight',elite:'Elite',boss:'Boss'}[enc.kind]}`}</div><div class="row" style="gap:12px"><span class="stat gold">◆ ${run.gold}</span><span class="num small muted" id="btime">0.0s</span></div></div><div class="spd row" style="gap:4px">${[0.5,1,2,3].map(m=>`<button data-s="${m}" class="${speed===m?'on':''}">${m}×</button>`).join('')}<button data-s="99">Skip</button></div></div>
    <div class="arena">
      <div class="side" id="eside">${rowHtml('e','back')}${rowHtml('e','front')}</div>
      <div class="mid"><div class="rift" style="margin:0;width:100%"></div></div>
@@ -72,7 +72,10 @@ function endBattle(){
   run.fights++;
   const killsBy={}; heroUnits.forEach(u=>{ killsBy[run.heroes.indexOf(u.hero)]=u.stats.kills; });
   const g=goldReward(enc,win,killsBy); g.bounty=battle.bounty||0; g.total=Math.max(0,g.total+g.bounty); if(win) run.gold+=g.total;
-  meta.bestFloor=Math.max(meta.bestFloor,run.floor);
+  if(run.wager){ g.wager=win&&heroUnits.every(u=>u.alive)?run.wager*2:-run.wager; if(g.wager>0) run.gold+=g.wager; run.wager=null; } // Gambler's Den: paid when staked, doubled back if no hero fell
+  const trial=run.trial; run.trial=null;
+  if(win&&enc.kind==='elite') run.elitesWon=(run.elitesWon||0)+1; // Trophy Rack
+  if(!enc.prologue) meta.bestFloor=Math.max(meta.bestFloor,run.floor);
   const unlocks=[];
   const tryUnlock=()=>{}; // milestone heroes are gone: every class is reached by training
   const victory=win&&run.floor===FLOORS; const dead=!win;
@@ -86,26 +89,29 @@ function endBattle(){
   const rows=heroUnits.slice().sort((a,b)=>b.stats.dealt-a.stats.dealt).map(u=>`<tr><td><span class="row" style="gap:5px">${ic(u.hero.id,'h',18)}${esc(u.name)}</span>${!u.alive?' <span class="tiny acc">fell</span>':''}</td><td>${u.stats.dealt}</td><td>${u.stats.taken}</td><td>${u.stats.healed}</td><td>${u.stats.kills}</td></tr>`).join('');
   const mvp=heroUnits.reduce((m,u)=>u.stats.dealt>m.stats.dealt?u:m,heroUnits[0]);
   modal(`<h2 class="${win?'good':'acc'}">${victory?'Dungeon cleared':win?'Victory':'Defeat'}</h2>
-   <div class="small muted">${battle.t.toFixed(1)}s · MVP ${esc(mvp.name)}${dead?` · <span class="acc">${battle.t>=60?'Time ran out.':'Your guild is broken.'}</span> ${enemyLeft} enem${enemyLeft===1?'y':'ies'} left standing.`:''}</div>
+   <div class="small muted">${battle.t.toFixed(1)}s · MVP ${esc(mvp.name)}${dead?` · <span class="acc">${battle.t>=battle.tLimit?'Time ran out.':'Your guild is broken.'}</span> ${enemyLeft} enem${enemyLeft===1?'y':'ies'} left standing.`:''}</div>
    <table class="rep"><tr><th>Hero</th><th>Dealt</th><th>Taken</th><th>Healed</th><th>Kills</th></tr>${rows}</table>
-   ${win?`<div class="small"><span class="gold">+${g.total} gold</span> <span class="muted">(win ${g.base}${g.interest?' · interest '+g.interest:''}${g.gems?' · Gilt '+g.gems:''}${g.skills?' · skills '+g.skills:''}${g.purse?' · Deep Purse '+g.purse:''}${g.bounty>0?' · loot '+g.bounty:g.bounty<0?' · stolen '+g.bounty:''})</span></div>`:''}
+   ${win?`<div class="small"><span class="gold">+${g.total} gold</span> <span class="muted">(win ${g.base}${g.interest?' · interest '+g.interest:''}${g.gems?' · Gilt '+g.gems:''}${g.skills?' · skills '+g.skills:''}${g.purse?' · Deep Purse '+g.purse:''}${g.bounty>0?' · loot '+g.bounty:g.bounty<0?' · stolen '+g.bounty:''})</span>${g.wager>0?` <span class="gold">· wager +${g.wager}</span>`:g.wager<0?' <span class="acc">· wager lost</span>':''}</div>`:''}
    ${unlocks.map(n=>`<div class="pill g">Unlocked hero: ${esc(n)}</div>`).join('')}
    <details class="small muted"><summary>Battle log</summary><div style="max-height:200px;overflow:auto;font-size:11px;margin-top:6px">${battle.log.map(esc).join('<br>')}</div></details>
    <button class="primary" data-next="1">${dead?'See run summary':victory?'Claim your victory':'Continue'}</button>`);
   $('#modal').dataset.lock='1';
   $('#sheet').onclick=e=>{ if(!e.target.closest('button[data-next]')) return; $('#sheet').onclick=null; delete $('#modal').dataset.lock; closeModal();
     if(dead) return runOver(false);
+    if(enc.prologue){ run.prologue=false; offerPaths(); rollShop(false); return renderCamp(); } // the prologue isn't a floor: floor 1 comes next
     const after=()=>{ run.floor++; if(run.floor%4===3) run.bonus={opts:rollEvents()}; if(run.bonus&&!run.bonus.opts.length) run.bonus=null; offerPaths(); rollShop(false); renderCamp(); };
     if(victory){ const goOn=()=>{ run.endless=true; toast('Endless: enemies keep growing until you fall'); after(); }; return endlessPrompt(goOn,()=>runOver(true),enc); }
-    if(win&&enc.kind==='elite') return freePick('gem',after);
-    if(win&&enc.kind==='boss') return freePick('relic',after);
-    after(); };
+    const queue=[]; if(win&&trial) queue.push('trial'); if(win&&enc.kind==='elite') queue.push('gem'); if(win&&enc.kind==='boss') queue.push('relic');
+    const next=()=>{ const k=queue.shift(); if(!k) return after(); if(k==='trial') return trialPrize(trial.prize,next); freePick(k,next); };
+    next(); };
 }
-function freePick(kind,after){
-  const src=kind==='gem'?GEMS:RELICS; let pool;
-  if(kind==='gem') pool=rollGems(3,true);
-  else { pool=[]; const own=()=>run.relics.concat(pool); const L=relicsOfTier('legendary',own()); if(L.length) pool.push(pick(L)); // boss spoils: one Legendary guaranteed
-    while(pool.length<3){ const r=rollRelic({common:0.45,rare:0.45,legendary:0.10},own()); if(!r) break; pool.push(r); } pool=shuffle(pool); }
+// mode 'trial' (a Proving Grounds prize): gems are all rares, relics have no guaranteed Legendary and ignore the Cursed Hoard
+function freePick(kind,after,mode){
+  const src=kind==='gem'?GEMS:RELICS; let pool; const trial=mode==='trial';
+  if(kind==='gem') pool=trial?rollRares(3):rollGems(3,true);
+  else { pool=[]; const own=()=>run.relics.concat(pool), n=!trial&&run.relics.includes('cursedhoard')?2:3;
+    if(!trial){ const L=relicsOfTier('legendary',own()); if(L.length) pool.push(pick(L)); } // boss spoils: one Legendary guaranteed
+    while(pool.length<n){ const r=rollRelic(trial?{common:0.5,rare:0.4,legendary:0.1}:{common:0.45,rare:0.45,legendary:0.10},own()); if(!r) break; pool.push(r); } pool=shuffle(pool); }
   // every relic already owned (long endless runs): pay out gold instead of an empty choice
   if(!pool.length){ const g=RELIC_HOARD_GOLD; run.gold+=g;
     modal(`<h2>Relic of the depths</h2><div class="muted small">Your guild already holds every relic in the dungeon. The boss's hoard is yours instead.</div><div class="gold" style="font-size:18px;font-weight:700;margin:8px 0">+${g} gold</div><button class="primary" data-fp-ok="1">Continue</button>`);
@@ -114,7 +120,7 @@ function freePick(kind,after){
     return; }
   pool.forEach(id=>seen(kind==='gem'?'g':'r',id));
   const uses=id=>{ const u=[]; run.heroes.forEach(h=>heroSkills(h.id).forEach(sk=>{ if(!skillActive(h,sk)&&skillActive(withGem(h,id),sk)) u.push(sk.name); })); return u; };
-  modal(`<h2>${kind==='gem'?'Spoils':'Relic of the depths'}</h2><div class="muted small">Choose one. It's free.</div><div class="choice">${pool.map(id=>{ const u=kind==='gem'?uses(id):[]; return `<button data-fp="${id}"><span class="row">${ic(id,kind==='gem'?'g':'r',22)} ${esc(src[id].name)}${kind==='gem'?'':' '+tierPill(id)}</span><span class="d">${esc(src[id].desc)}${u.length?` · <span class="good">unlocks ${u.map(esc).join(', ')}</span>`:''}</span></button>`; }).join('')}</div>`);
+  modal(`<h2>${trial?'Trial won':kind==='gem'?'Spoils':'Relic of the depths'}</h2><div class="muted small">Choose one. It's free.</div><div class="choice">${pool.map(id=>{ const u=kind==='gem'?uses(id):[]; return `<button data-fp="${id}"><span class="row">${ic(id,kind==='gem'?'g':'r',22)} ${esc(src[id].name)}${kind==='gem'?'':' '+tierPill(id)}</span><span class="d">${esc(src[id].desc)}${u.length?` · <span class="good">unlocks ${u.map(esc).join(', ')}</span>`:''}</span></button>`; }).join('')}</div>`);
   $('#modal').dataset.lock='1';
   $('#sheet').onclick=e=>{ const b=e.target.closest('button[data-fp]'); if(!b) return; $('#sheet').onclick=null; delete $('#modal').dataset.lock; closeModal();
     if(kind==='gem'){ run.bag.push(b.dataset.fp); } else run.relics.push(b.dataset.fp); after(); };
