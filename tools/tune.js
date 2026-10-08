@@ -9,9 +9,9 @@ function rollRelic(w,own){ const r=Math.random(); let acc=0,t='common'; for(cons
 function addHero(run,id){ const rc=r=>run.heroes.filter(h=>h.row===r).length; let row=E.defaultRow(id); if(rc(row)>=(E.ROW_MAX||4)) row=row==='front'?'back':'front'; run.heroes.push(E.newHero(id,row)); }
 function newSkills(h,g){ const hh=Object.assign({},h,{gems:h.gems.filter(Boolean).concat([g])}); return E.activeSkills(hh).length-E.activeSkills(h).length; }
 const nGems=h=>h.gems.filter(Boolean).length;
-const openIdx=h=>[0,1,2,3].slice(0,E.SLOTS(h.lv)).filter(k=>!h.gems[k]);
+const openIdx=h=>h.open.filter(k=>!h.gems[k]); // the class route decides the sockets
 // front-liners put essences in armor sockets (they get hit), back-liners in weapon sockets; Gilt always armor
-function slotFor(h,g){ const o=openIdx(h); if(!o.length) return -1; const R=E.GEMS[g].rare; const wantArmor=!R&&(g==='gilt'||(h.row==='front'&&g!=='swift'))||(process.env.ALLHAND?false:false); const pref=o.filter(k=>(E.slotKind(k)==='armor')===wantArmor); return process.env.NAIVE?o[0]:(pref.length?pref[0]:o[0]); }
+function slotFor(h,g){ const o=openIdx(h); if(!o.length) return -1; const R=E.GEMS[g].rare; const wantArmor=!R&&(g==='gilt'||(h.row==='front'&&g!=='swift'))||(process.env.ALLHAND?false:false); const pref=o.filter(k=>(E.slotKind(k,h)==='armor')===wantArmor); return process.env.NAIVE?o[0]:(pref.length?pref[0]:o[0]); }
 function placeGems(run){ for(let n=0;n<50&&run.bag.length;n++){ let best=null; run.bag.forEach((g,bi)=>run.heroes.forEach(h=>{ if(!openIdx(h).length) return; const sc=newSkills(h,g)*10+Math.random(); if(!best||sc>best.sc) best={sc,bi,h}; })); if(!best) break; const g=run.bag.splice(best.bi,1)[0]; best.h.gems[slotFor(best.h,g)]=g; } }
 // one gem offer by the game's per-act odds (E.RARE_ODDS); rare=true always gives a rare (the elite's free pick)
 const ofRare=n=>E.RARE_GEMS.filter(k=>E.GEMS[k].rare===n);
@@ -29,7 +29,7 @@ function shopPhase(run){
   let bought=0; for(const x of scored){ const c=E.GEMS[x.g].cost; if(run.gold>=c&&bought<Math.max(1,gcap)&&(x.sc>0||Math.random()<0.5)){ run.gold-=c; run.bag.push(x.g); bought++; } }
   placeGems(run);
   // training: only heroes whose gems meet an upgrade can train; several fits pick at random
-  for(let k=0;k<2;k++){ const c=shuffle(run.heroes.filter(h=>lvCost(h)&&run.gold>=lvCost(h)&&E.upgradeOptions(h).length)); if(c.length&&(run.heroes.length>=3||run.floor>3)){ const h=c[0]; run.gold-=lvCost(h); E.trainHero(h,undefined,pick); } }
+  for(let k=0;k<2;k++){ const c=shuffle(run.heroes.filter(h=>lvCost(h)&&run.gold>=lvCost(h)&&E.upgradeOptions(h).length)); if(c.length&&(run.heroes.length>=3||run.floor>3)){ const h=c[0]; run.gold-=lvCost(h); E.trainHero(h,pick); } }
   placeGems(run);
 }
 // forge: fuse two loose gems if possible, else two gems on the hero holding the most, result back into that socket

@@ -250,15 +250,12 @@ table.rep th:first-child,table.rep td:first-child{text-align:left}
 .ico.g{clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);border:none}
 .ico.g.rare svg{filter:drop-shadow(0 0 2px #000)}
 .tile.rare{border-color:#8a6fd1;background:linear-gradient(180deg,var(--panel),#2a1f4d)}
-.slots{display:flex;gap:6px;flex-wrap:nowrap;justify-content:space-between}
-.slotw{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1 1 0;min-width:0}
+.slots{display:flex;gap:6px;flex-wrap:nowrap;justify-content:flex-start}
+.slotw{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 1 25%;min-width:0} /* a quarter each: a hero with fewer slots keeps them left-aligned */
 .slotw .sl{font-size:9px;line-height:1.15;color:var(--muted);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .slot{width:46px;height:46px;border:1.5px dashed var(--line2);border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.02);cursor:pointer;position:relative}
 .slot.filled{border-style:solid;border-color:var(--line2);background:var(--panel2)}
 .slot.locked{opacity:.4;cursor:default;border-style:dotted}
-.slot.unlock{opacity:1;cursor:pointer;border-style:dashed;border-color:#7a6220;background:#2e261233;padding:0;font:inherit;color:inherit}
-.slot.unlock .lk{color:var(--muted);font-size:10px}
-.slot.unlock:disabled{opacity:.45;cursor:default}
 .slot .lk{font-size:9px;color:var(--dim);text-align:center;line-height:1.1}
 .slot.open .lk{color:var(--good)}
 .slot.target{border:1.5px solid var(--good);box-shadow:0 0 0 2px rgba(111,227,165,.35);background:rgba(111,227,165,.1)}
@@ -977,7 +974,7 @@ const ROW_MAX=4; // cells per row, both sides
 // Where each class stands. Stats are a sum along the route: the root's base plus one contribution per class, by role and tier,
 // so a capstone reached by two routes has different stats. 'mid' classes start in the back row and may move.
 const CLASS_ROLE={
- Swordsman:'mid','Fire mage':'back','Frost mage':'back',Thief:'mid',Acrobat:'mid',Poisoner:'back',Healer:'back',Sentinel:'front',
+ Swordsman:'front','Fire mage':'back','Frost mage':'back',Thief:'mid',Acrobat:'mid',Poisoner:'back',Healer:'back',Sentinel:'front',
  Duelist:'mid',Mercenary:'mid',Flamecaller:'back',Elementalist:'back',Berserker:'front',Hearthguard:'front',Frostblade:'mid',Rimecaller:'back',
  'Glacier Warden':'front',Merchant:'back',Bard:'back',Windrunner:'mid',Cutthroat:'mid',Apothecary:'back',Plaguecaller:'back','Plague doctor':'back',
  Monk:'front','Blood mage':'back',Cleric:'back',Shieldmaiden:'front',
@@ -985,6 +982,17 @@ const CLASS_ROLE={
  Alchemist:'back',Assassin:'mid','Blade dancer':'mid',Bladestorm:'mid','Bounty hunter':'mid',Champion:'front',Firebomber:'back','Flame dancer':'mid',
  'Frost Stalker':'mid',Herald:'back',Heretic:'mid',Icemaiden:'front','Lava strider':'front',Necrodancer:'back',Necromancer:'back',Nightblade:'mid',
  Paladin:'front',Phoenix:'front','Prismatic magus':'back',Reaper:'mid',Runeguard:'front','Silver tongue':'back',Spellblade:'mid','Storm dancer':'mid','Witch Doctor':'back'};
+// Gear slots come from the class tree: a starter names its two, and each promotion adds one of the kind the new class names
+// (W weapon, A armor), so a hero's sockets follow its route. Up to four of a kind: an extra slot takes a socket of the other kind,
+// flipped (the ✦ badge). The Enchanter's flips (h.ench) sit on top.
+const CLASS_SLOTS={
+ Sentinel:'AA',Swordsman:'WA',Poisoner:'WW','Fire mage':'WW','Frost mage':'WW',Healer:'WA',Acrobat:'WA',Thief:'WA',
+ Apothecary:'W',Bard:'A',Berserker:'W','Blood mage':'W',Cleric:'A',Cutthroat:'W',Duelist:'W',Elementalist:'W',Flamecaller:'W',Frostblade:'W',
+ 'Glacier Warden':'A',Hearthguard:'A',Mercenary:'W',Merchant:'A',Monk:'A','Plague doctor':'W',Plaguecaller:'W',Rimecaller:'W',Shieldmaiden:'W',Windrunner:'W',
+ Blademaster:'W',Bulwark:'A',Cryomancer:'W',Guildmaster:'A',Pyromancer:'W','Shadow Archer':'W',Vampire:'W',Venomancer:'W',
+ Alchemist:'A',Assassin:'W','Blade dancer':'A',Bladestorm:'W','Bounty hunter':'W',Champion:'A',Firebomber:'W','Flame dancer':'A','Frost Stalker':'W',
+ Herald:'A',Heretic:'W',Icemaiden:'A','Lava strider':'A',Necrodancer:'A',Necromancer:'W',Nightblade:'W',Paladin:'A',Phoenix:'A','Prismatic magus':'W',
+ Reaper:'W',Runeguard:'A','Silver tongue':'A',Spellblade:'W','Storm dancer':'W','Witch Doctor':'W'};
 const ROOT_STATS={Mage:{hp:32,atk:5,spd:0.9,armor:0,row:'back'},Warrior:{hp:48,atk:5,spd:0.85,armor:1,row:'front'},Rogue:{hp:36,atk:6,spd:1.1,armor:0,row:'mid'}};
 const ROLE_GAIN={ // [starter, tier 3, capstone]
  front:[{hp:14,atk:1,spd:0,armor:0},{hp:22,atk:2,spd:0,armor:1},{hp:30,atk:3,spd:0,armor:1}],
@@ -1013,7 +1021,16 @@ for(const id in CLASSES){ const c=CLASSES[id]; if(c.tier===0) continue; const s=
 const BASE_HEROES=STARTERS;
 const defaultRow=id=>HEROES[id].row==='mid'?'back':HEROES[id].row; // 'mid' heroes start in the back and may move
 const sprId=x=>{ const id=x&&x.id||x; const c=CLASSES[id]; if(!c) return id; if(c.tier===0) return ROOT_SPR[c.name]; return c.name==='Necromancer'?'necromancerhero':c.name.toLowerCase().replace(/[^a-z]/g,''); }; // 'necromancer' is an enemy sprite
-function newHero(id,row){ const c=CLASSES[id]; const root=pick(c.from.filter(f=>CLASSES[f].tier===0)); return {id,root,path:[root,id],lv:1,gems:[],open:[0,1],row:row||defaultRow(id),kills:0}; }
+const slotKindsOf=id=>[...(CLASS_SLOTS[CLASSES[id].name]||'')].map(c=>c==='W'?'hand':'armor');
+const slotWords=id=>slotKindsOf(id).map(k=>k==='hand'?'weapon':'armor').join(' + ');
+const SOCKET_PREF={hand:[0,3,2,1],armor:[1,2,3,0]}; // the sockets each kind fills, in order: its own two, then the other kind's (flipped)
+function slotLayout(path){ const open=[], flip=[];
+  path.forEach(id=>{ if(CLASSES[id].tier===0) return; slotKindsOf(id).forEach(kind=>{ const free=SOCKET_PREF[kind].filter(k=>!open.includes(k)); let k=free.find(k=>HAND_SLOTS.includes(k)===(kind==='hand')); if(k===undefined){ k=free[0]; flip.push(k); } open.push(k); }); });
+  return {open:open.sort((a,b)=>a-b),flip}; }
+// sets h.open and h.flip from the hero's route and its Enchanter flips; returns any gems left in sockets that closed (only a re-route closes any)
+function relayout(h){ const L=slotLayout(heroPath(h)), en=h.ench||[]; h.open=L.open; h.flip=L.flip.filter(k=>!en.includes(k)).concat(en.filter(k=>!L.flip.includes(k)));
+  const out=[]; (h.gems||[]).forEach((g,k)=>{ if(g&&!h.open.includes(k)){ out.push(g); h.gems[k]=null; } }); return out; }
+function newHero(id,row){ const c=CLASSES[id]; const root=pick(c.from.filter(f=>CLASSES[f].tier===0)); const h={id,root,path:[root,id],lv:1,gems:[],ench:[],row:row||defaultRow(id),kills:0}; relayout(h); return h; }
 const heroPath=h=>h.path||routeTo(h.id);
 // a hero's skills: its current class's, plus every earlier class's (inherited)
 function heroSkills(x){ if(typeof x==='string') return CLASSES[x].skills.slice(); const out=[]; heroPath(x).forEach(id=>{ const c=CLASSES[id]; if(c.tier===0) return; c.skills.forEach(sk=>out.push(id===x.id?sk:Object.assign({},sk,{inherited:true}))); }); return out; }
@@ -1021,10 +1038,10 @@ function activeSkills(h){ return heroSkills(h).filter(sk=>skillActive(h,sk)); }
 const heroPassives=h=>heroPath(h).map(id=>CLASSES[id]).map(c=>Object.assign({name:c.name,passiveOf:c.id},c.def)); // root, then each class: they stack
 const meetsReq=(h,ess)=>{ const have=gemCounts(h), need={}; ess.forEach(e=>need[e]=(need[e]||0)+1); return Object.keys(need).every(e=>(have[e]||0)>=need[e]); };
 const upgradeOptions=h=>upgradesOf(h.id).filter(id=>meetsReq(h,CLASSES[id].ess));
-function promote(h,id){ h.path=heroPath(h).concat(id); h.id=id; return h; }
-// Training: a hero can only train when its gems meet at least one upgrade. Opens slot k, raises ★ and promotes: outright when one upgrade
-// fits, through choose(options) when several (or left to the caller when choose is omitted). Returns the options, or null if it can't train.
-function trainHero(h,k,choose){ const opts=upgradeOptions(h); if(!opts.length) return null; h.lv++; if(k!==undefined&&!(h.open||[]).includes(k)) h.open=(h.open||[]).concat(k).sort(); if(opts.length===1) promote(h,opts[0]); else if(choose) promote(h,choose(opts)); return opts; }
+function promote(h,id){ h.path=heroPath(h).concat(id); h.id=id; relayout(h); return h; } // training only ever adds a slot
+// Training: a hero can only train when its gems meet at least one upgrade. Raises ★ and promotes, which adds the new class's slot: outright
+// when one upgrade fits, through choose(options) when several (or left to the caller when choose is omitted). Returns the options, or null.
+function trainHero(h,choose){ const opts=upgradeOptions(h); if(!opts.length) return null; h.lv++; if(opts.length===1) promote(h,opts[0]); else if(choose) promote(h,choose(opts)); return opts; }
 // ---------- Stats ----------
 // ctx: {gemMult} doubles gem socket effects (Master Jeweller). h.permAtk and h.souls are run-permanent gains (Bounty hunter, Reaper).
 function computeStats(h,relics,ctx){
@@ -1396,7 +1413,7 @@ function stepBattle(B,dt){
   if(B.t>=(B.tLimit||60)){ B.over=true; B.winner='e'; B.logf('Time runs out. Your guild retreats.'); }
 }
 function runToEnd(B){ let n=0; while(!B.over&&n<4000){ stepBattle(B,0.05); n++; } return B; }
-if(typeof module!=='undefined') module.exports={GILT_PER_KILLS,closest,opposite,colOf,adjacentOf,CLASSES,STARTERS,ROOTS,newHero,trainHero,upgradeOptions,upgradesOf,promote,heroSkills,heroPath,HOOKS,rollActBoss,bossPool,bossNorm,BOSSES,enemyMult,gemLeaves,defineMergedGem,restoreMergedGems,genChoices,genPrologue,RARE_ODDS,actOf,curAct,slotKind,HAND_SLOTS,HEROES,defaultRow,ROW_MAX,ENCOUNTERS,GEMS,BASIC_GEMS,RARE_GEMS,SLOTS,RELICS,ENEMIES,ARCH_LABEL,heroSkills,activeSkills,skillActive,needCounts,gemCounts,genEncounter,computeStats,createBattle,stepBattle,runToEnd,actOf,kindOf,FLOORS};
+if(typeof module!=='undefined') module.exports={GILT_PER_KILLS,closest,opposite,colOf,adjacentOf,CLASSES,STARTERS,ROOTS,newHero,trainHero,upgradeOptions,upgradesOf,promote,heroSkills,heroPath,HOOKS,rollActBoss,bossPool,bossNorm,BOSSES,enemyMult,gemLeaves,defineMergedGem,restoreMergedGems,genChoices,genPrologue,slotLayout,relayout,slotKindsOf,CLASS_SLOTS,RARE_ODDS,actOf,curAct,slotKind,HAND_SLOTS,HEROES,defaultRow,ROW_MAX,ENCOUNTERS,GEMS,BASIC_GEMS,RARE_GEMS,SLOTS,RELICS,ENEMIES,ARCH_LABEL,heroSkills,activeSkills,skillActive,needCounts,gemCounts,genEncounter,computeStats,createBattle,stepBattle,runToEnd,actOf,kindOf,FLOORS};
 </script>
 
 <script id="ui">
@@ -1656,7 +1673,7 @@ const actKey=f=>Math.ceil(f/4); // act, or endless block
 function actBoss(){ run.bosses=run.bosses||{}; const k=actKey(run.floor); if(!run.bosses[k]) run.bosses[k]=rollActBoss(run.floor); return run.bosses[k]; }
 function offerPaths(){ run.choices=genChoices(run.floor,run.depth,{boss:actBoss()}); run.pick=run.choices.findIndex(c=>c.enc); if(run.pick<0) run.pick=0; run.enc=run.choices[run.pick].enc||null; }
 function pickPath(i){ run.pick=i; run.enc=run.choices[i].enc||null; }
-function loadRun(){ const r=load(KEY_RUN,null); if(!r) return null; if(r.heroes.some(h=>!CLASSES[h.id])) return null; /* a save from before the class tree */ r.relics=r.relics.filter(k=>RELICS[k]); /* relics since removed */ restoreMergedGems(r.merged); if(!r.choices){ r.choices=[{kind:r.enc?r.enc.kind:'fight',enc:r.enc}]; r.pick=0; } if(r.mergeAct===undefined){ r.mergeAct=0; r.merged=r.merged||[]; r.mergeN=r.mergeN||0; } if(r.choices.some(c=>c.kind==='forge')){ r.choices=r.choices.filter(c=>c.kind!=='forge'); r.pick=0; r.enc=r.choices[0].enc; } return r; }
+function loadRun(){ const r=load(KEY_RUN,null); if(!r) return null; if(r.heroes.some(h=>!CLASSES[h.id])) return null; /* a save from before the class tree */ r.relics=r.relics.filter(k=>RELICS[k]); /* relics since removed */ r.heroes.forEach(h=>{ if(h.ench===undefined){ h.ench=h.flip||[]; r.bag.push(...relayout(h)); } }); /* before class slots: sockets follow the route now, old flips become Enchanter flips */ restoreMergedGems(r.merged); if(!r.choices){ r.choices=[{kind:r.enc?r.enc.kind:'fight',enc:r.enc}]; r.pick=0; } if(r.mergeAct===undefined){ r.mergeAct=0; r.merged=r.merged||[]; r.mergeN=r.mergeN||0; } if(r.choices.some(c=>c.kind==='forge')){ r.choices=r.choices.filter(c=>c.kind!=='forge'); r.pick=0; r.enc=r.choices[0].enc; } return r; }
 const gemPrice=id=>Math.max(1,GEMS[id].cost-(run&&run.relics.includes('gildedchains')?2:0)); // Gilded Chains
 const rerollCost=()=>Math.max(0,1+(run.rr||0)-(run.relics.includes('scales')?1:0)-(heroFlag('fasttalker')?1:0)); // Fast Talker (Merchant)
 const gemFx=(g,active)=>{ const d=GEMS[g]; if(!d.hand) return esc(d.desc); const row=(k,lab)=>`<div class="gfx ${active&&active!==k&&!(run&&run.relics.includes('prism'))?'off':''}"><span class="gk ${k}">${lab}</span> ${esc(d[k])}</div>`; return row('hand','Weapon')+row('armor','Armor'); };
@@ -1685,10 +1702,10 @@ function rollShop(charge){
 const heroFlag=f=>run.heroes.some(h=>computeStats(h,run.relics).flags[f]); // run-level effects of class skills (Silver tongue, Guildmaster, Fast Talker)
 const heroCost=()=>5-(heroFlag('silver')?1:0), lvCost=h=>h.lv===1?7:h.lv===2?11:null; // cost to unlock the next gear slot (also raises the hero's ★)
 const spend=n=>{ run.gold-=n; run.spent=(run.spent||0)+n; }; // War Bonds reads gold spent this run
-const openSet=h=>h.open||Array.from({length:SLOTS(h.lv)},(_,k)=>k); // unlocked gear slots; older saves: the first lv+1
+const openSet=h=>h.open||[]; // open gear slots: set by the class route (relayout)
 const slotOpen=(h,k)=>openSet(h).includes(k);
-// Training: pays, opens the slot and promotes. 'noupgrade' when the hero's gems meet none of its upgrades; several fits leave run.promo for the UI to resolve.
-function unlockSlot(h,k){ const c=lvCost(h); if(!c||run.gold<c||slotOpen(h,k)) return false; if(!upgradeOptions(h).length) return 'noupgrade'; spend(c); h.open=openSet(h); const opts=trainHero(h,k); if(opts.length>1) run.promo={hi:run.heroes.indexOf(h),opts}; return true; }
+// Training: pays and promotes (the new class adds its slot). 'noupgrade' when the hero's gems meet none of its upgrades; several fits leave run.promo for the UI to resolve.
+function train(h){ const c=lvCost(h); if(!c||run.gold<c) return false; if(!upgradeOptions(h).length) return 'noupgrade'; spend(c); const opts=trainHero(h); if(opts.length>1) run.promo={hi:run.heroes.indexOf(h),opts}; return true; }
 // each offer is a basic, 2-essence or 3-essence gem by this act's RARE_ODDS; forceRare makes the last offer a rare (no triples in Act 1)
 function rollGems(n,forceRare){
   const o=RARE_ODDS[actOf(run.floor)], basics=shuffle(BASIC_GEMS), duals=shuffle(RARE_GEMS.filter(k=>GEMS[k].rare===1)), triples=shuffle(RARE_GEMS.filter(k=>GEMS[k].rare===2));
@@ -1763,7 +1780,7 @@ function showHelp(){
   <p><b>Icons:</b> heroes and enemies are pixel portraits, diamonds are gems, hexagons are relics, dashed squares are unlocked skills. Color shows the archetype: <span style="color:#9be15d">poison</span>, <span style="color:#ff5c3a">burn</span>, <span style="color:#8fe3ff">chill</span>, <span style="color:#5b8cff">shield</span>, <span style="color:#f0f0f8">crit</span>, <span style="color:#ff7ab8">healing</span>, <span style="color:#c47bff">tempo/dodge</span>, <span style="color:#ffd166">gold</span>. Tap anything for details.</p>
   <p><b>Statuses</b> work the same on heroes and enemies. <span class="pill p">Poison</span> deals its stacks each second (ignoring Armor and Shield), then loses 1; at 15 a unit is <b>Festering</b>: Armor counts as 0 and it can't be healed or gain Shield. <span class="pill b">Burn</span> deals its stacks each second, then halves; a unit that reaches 10 is <b>Ablaze</b> and its Burn never drops below 10. <span class="pill c">Chill</span> slows 2.5% per stack (up to 20); attacking halves it, but at 20 a unit is <b>Frozen</b>: its next attack deals half damage and spends 20 Chill. Two of these at once mark a unit for the fight: <b>Brittle</b> (Frozen + Ablaze: every Chill or Burn applied is +1), <b>Blighted</b> (Ablaze + Festering: +25% status damage), <b>Crippled</b> (Frozen + Festering: attacks 25% slower). All three: <b>Ruined</b>, +50% damage from everything. <span class="pill s">Shield</span> absorbs damage first. Armor reduces each attack by a flat amount (min 1). <b>Streaks:</b> each crit or dodge halves that chance until the next miss, so stacked chance never guarantees a run; no one attacks more than 3 times a second.</p>
   <p><b>Guild size:</b> you start with room for 3 heroes; a 4th slot costs 6g and a 5th 10g (button above the formation).</p>
-  <p><b>Unlocking gear slots:</b> heroes start with their weapon and body sockets open. On the Equip screen, tap <b>Unlock</b> on the locked slot you want (first 7g, second 11g); each unlock also raises the hero a star (HP and ATK +15%, stronger ability).</p>
+  <p><b>Gear slots and training:</b> each class has its own slots: a starter comes with two (a Sentinel two armor, a Swordsman a weapon and an armor), and every promotion adds the slot its new class brings. Train a hero from the Equip screen (7g, then 11g) once its gems meet an upgrade's essences: it gains ★, +15% HP and ATK, a new class and its slot. A slot of a kind the gear has no socket for uses one of the other kind, marked ✦.</p>
   <p><b>Gold:</b> win fights, earn interest (1 per 5 gold held, up to 3). Gems cost 3g. Rerolls cost 1g, +1 for each further reroll on the same floor. <b>Freeze</b> keeps the current market stock for the next floor (what you already bought stays gone); it switches itself off once that market opens, and rerolling unfreezes too.</p>
   <p><b>Choose your path.</b> After the first floor, each camp offers a regular fight or an <b>elite</b> fight (harder, free gem on win). Every 4th floor is a boss (mandatory; free relic on win — one of the three is always Legendary).</p>
   <p><b>Bonus events.</b> After the second fight of each act you also get to pick one of two bonuses (or skip): <b>Gem Forge</b> fuses two gems into one <b>composite</b> that keeps every effect of both and counts as all their essences (composites can't be fused again) · <b>Enchanter</b> turns up to two sockets into the other kind (weapon ⇄ armor) · <b>Gem Cutter</b> reshapes up to two gems into others with the same number of essences · <b>Retirement</b> lets a hero leave and pass half their base HP and ATK to another · <b>Scout's Camp</b> lets you choose which of this act's bosses you'll face.</p>
@@ -1955,17 +1972,17 @@ const ENCHANTS=2;
 function openEnchanter(){
   let hi=0; const done=[]; // [{hi,k}] flips made this visit (tap again to undo)
   const draw=()=>{ const h=run.heroes[hi], left=ENCHANTS-done.length;
-    const rows=[0,1,2,3].map(k=>{ const kind=slotKind(k,h), g=(h.gems||[])[k], mine=done.some(x=>x.hi===hi&&x.k===k), open=slotOpen(h,k), can=mine||left>0;
-      return `<div class="ench ${mine?'sel':''} ${can?'':'off'}" ${can?`data-en="${k}"`:''}><div class="row" style="gap:6px"><b class="small">${esc(slotName(h,k))}</b><span class="gk ${kind}">${kind==='hand'?'weapon':'armor'}${(h.flip||[]).includes(k)?' ✦':''}</span>${open?'':'<span class="tiny muted">locked</span>'}<span class="grow"></span>${g?ic(g,'g',20,GEMS[g].name):''}</div>${g&&GEMS[g].hand?`<div class="tiny muted" style="margin-top:2px">${esc(GEMS[g][kind])}</div>`:''}</div>`; }).join('');
-    modal(`<h2>Enchanter</h2><div class="muted small">Turn a socket into the other kind: weapon sockets power attacks, armor sockets protect and punish attackers. Locked sockets can be enchanted too. <b class="gold">${left} enchantment${left===1?'':'s'} left.</b></div>
+    const rows=openSet(h).map(k=>{ const kind=slotKind(k,h), g=(h.gems||[])[k], mine=done.some(x=>x.hi===hi&&x.k===k), can=mine||left>0;
+      return `<div class="ench ${mine?'sel':''} ${can?'':'off'}" ${can?`data-en="${k}"`:''}><div class="row" style="gap:6px"><b class="small">${esc(slotName(h,k))}</b><span class="gk ${kind}">${kind==='hand'?'weapon':'armor'}${(h.flip||[]).includes(k)?' ✦':''}</span><span class="grow"></span>${g?ic(g,'g',20,GEMS[g].name):''}</div>${g&&GEMS[g].hand?`<div class="tiny muted" style="margin-top:2px">${esc(GEMS[g][kind])}</div>`:''}</div>`; }).join('');
+    modal(`<h2>Enchanter</h2><div class="muted small">Turn a socket into the other kind: weapon sockets power attacks, armor sockets protect and punish attackers. <b class="gold">${left} enchantment${left===1?'':'s'} left.</b></div>
      <div class="heronav">${run.heroes.map((x,i)=>`<button class="hn ${i===hi?'on':''}" data-eh="${i}">${hspr(x,32)}</button>`).join('')}</div>
      <div class="stack">${rows}</div>
      <div class="row"><button class="grow ${done.length?'gold':'ghost'}" data-ex="${done.length?'done':'cancel'}">${done.length?'Done':'Not now'}</button></div>`); lockModal(); };
   draw();
   $('#sheet').onclick=e=>{ const n=e.target.closest('[data-eh]'); if(n){ hi=+n.dataset.eh; return draw(); }
-    const c=e.target.closest('[data-en]'); if(c){ const k=+c.dataset.en, h=run.heroes[hi]; const fl=(h.flip||[]).includes(k)?h.flip.filter(x=>x!==k):(h.flip||[]).concat(k);
-      if(computeStats(Object.assign({},h,{flip:fl}),run.relics).maxHpRaw<1) return toast('That would drop this hero below 1 max HP');
-      h.flip=fl; const j=done.findIndex(x=>x.hi===hi&&x.k===k); if(j>=0) done.splice(j,1); else done.push({hi,k}); saveRun(); return draw(); }
+    const c=e.target.closest('[data-en]'); if(c){ const k=+c.dataset.en, h=run.heroes[hi]; const en=(h.ench||[]).includes(k)?h.ench.filter(x=>x!==k):(h.ench||[]).concat(k);
+      const tmp=Object.assign({},h,{ench:en,gems:h.gems.slice()}); relayout(tmp); if(computeStats(tmp,run.relics).maxHpRaw<1) return toast('That would drop this hero below 1 max HP');
+      h.ench=en; relayout(h); const j=done.findIndex(x=>x.hi===hi&&x.k===k); if(j>=0) done.splice(j,1); else done.push({hi,k}); saveRun(); return draw(); }
     const b=e.target.closest('[data-ex]'); if(!b) return; unlockModal(); if(b.dataset.ex==='done'){ toast('Sockets enchanted'); finishBonus(); } else renderCamp(); };
 }
 
@@ -2069,7 +2086,7 @@ const siblingsOf=h=>{ const p=heroPath(h); return p.length<3?[]:upgradesOf(p[p.l
 function openMentor(){
   const elig=run.heroes.map((h,i)=>i).filter(i=>siblingsOf(run.heroes[i]).length); let hi=elig[0], ch=null;
   const draw=()=>{ const h=run.heroes[hi], prev=heroPath(h)[heroPath(h).length-2];
-    modal(`<h2>Mentor</h2><div class="muted small">An old guildmaster can undo a hero's last promotion and train them down another path from ${esc(CLASSES[prev].name)}. Their gems don't need to match; skills still need their recipes.</div>
+    modal(`<h2>Mentor</h2><div class="muted small">An old guildmaster can undo a hero's last promotion and train them down another path from ${esc(CLASSES[prev].name)}. Their gems don't need to match; skills still need their recipes. The new class brings its own slot, so a gem in a slot that changes kind may need moving.</div>
      <div class="heronav">${elig.map(i=>`<button class="hn ${i===hi?'on':''}" data-mh="${i}">${hspr(run.heroes[i],32)}</button>`).join('')}</div>
      <div class="tiny muted">${esc(HEROES[h.id].name)} now · ${routeLine(h)}</div>
      <div class="stack">${siblingsOf(h).map(id=>{ const c=CLASSES[id]; return `<div class="ench ${ch===id?'sel':''}" data-mc="${id}"><div class="row" style="gap:8px">${ic(id,'h',30,c.name)}<div class="grow"><b>${esc(c.name)}</b> <span class="tiny muted">${c.role}</span> ${recipeHtml({need:c.need},h,14)}<div class="tiny">${esc(c.passive)}</div></div></div></div>`; }).join('')}</div>
@@ -2079,7 +2096,7 @@ function openMentor(){
     const c=e.target.closest('[data-mc]'); if(c){ ch=c.dataset.mc; return draw(); }
     const x=e.target.closest('[data-mx]'); if(!x||(x.dataset.mx==='go'&&!ch)) return; unlockModal();
     if(x.dataset.mx==='cancel') return renderCamp();
-    const h=run.heroes[hi], old=h.id; h.path=heroPath(h).slice(0,-1).concat(ch); h.id=ch; seen('h',ch);
+    const h=run.heroes[hi], old=h.id; h.path=heroPath(h).slice(0,-1).concat(ch); h.id=ch; run.bag.push(...relayout(h)); seen('h',ch);
     toast(`${CLASSES[old].name} retrains as ${CLASSES[ch].name}`); finishBonus(); };
 }
 
@@ -2131,7 +2148,7 @@ function offerSheet(kind,i){
   const full=kind==='h'&&run.heroes.length>=partyMax(); const can=!o.sold&&run.gold>=cost&&!full;
   let body='';
   if(kind==='h'){
-    body=`<div class="small num">${d.row} row · HP ${d.hp} · ATK ${d.atk} · SPD ${d.spd}${d.armor?' · ARM '+d.armor:''}</div><div class="tiny muted">Root: ${CLASSES[o.id].from.map(f=>CLASSES[f].name).join(' or ')} (decided on hire) · trains into ${upgradesOf(o.id).map(u=>CLASSES[u].name).join(', ')}</div><div class="small">${esc(d.ab(1))}</div><div class="eyebrow" style="margin-top:6px">Skills (unlocked by gems)</div><div class="stack" style="gap:4px">${heroSkills(o.id).map(sk=>skillRow(sk,null)).join('')}</div>`; }
+    body=`<div class="small num">${d.row} row · HP ${d.hp} · ATK ${d.atk} · SPD ${d.spd}${d.armor?' · ARM '+d.armor:''}</div><div class="tiny muted">Slots: ${slotWords(o.id)} · Root: ${CLASSES[o.id].from.map(f=>CLASSES[f].name).join(' or ')} (decided on hire) · trains into ${upgradesOf(o.id).map(u=>CLASSES[u].name).join(', ')}</div><div class="small">${esc(d.ab(1))}</div><div class="eyebrow" style="margin-top:6px">Skills (unlocked by gems)</div><div class="stack" style="gap:4px">${heroSkills(o.id).map(sk=>skillRow(sk,null)).join('')}</div>`; }
   else if(kind==='g'){
     const uses=[]; run.heroes.forEach(h=>heroSkills(h).forEach(sk=>{ if(!skillActive(h,sk)&&skillActive(withGem(h,o.id),sk)) uses.push(`${HEROES[h.id].name}: <b>${esc(sk.name)}</b>`); }));
     body=`${d.rare?`<div class="row" style="gap:4px;margin-bottom:4px"><span class="pill g">rare</span>${d.ess.map(e=>ic(e,'g',18,GEMS[e].name)).join('')}</div>`:''}<div class="small">${d.rare?rareFx(o.id,null):gemFx(o.id)}</div>${uses.length?`<div class="small good" style="margin-top:4px">Would unlock now · ${uses.join(' · ')}</div>`:`<div class="tiny muted" style="margin-top:4px">No skill in your guild is one ${esc(d.name)} away right now, but it still gives its passive.</div>`}`; }
@@ -2145,12 +2162,12 @@ function offerSheet(kind,i){
 }
 // the route so far, and what training could make of the hero next (lit recipes are met by its gems)
 function routeLine(h){ const path=heroPath(h).map(id=>esc(CLASSES[id].name)).join(' → '); const ups=upgradesOf(h.id);
-  const next=ups.length?`<div class="tiny muted" style="margin-top:2px">Trains into: ${ups.map(id=>`<span class="row" style="display:inline-flex;gap:3px;margin-right:6px">${recipeHtml({need:CLASSES[id].need},h,14)}${esc(CLASSES[id].name)}</span>`).join('')}</div>`:'<div class="tiny muted" style="margin-top:2px">A capstone: trains no further.</div>';
+  const next=ups.length?`<div class="tiny muted" style="margin-top:2px">Trains into: ${ups.map(id=>`<span class="row" style="display:inline-flex;gap:3px;margin-right:6px">${recipeHtml({need:CLASSES[id].need},h,14)}${esc(CLASSES[id].name)} <span class="tiny">+${slotWords(id)}</span></span>`).join('')}</div>`:'<div class="tiny muted" style="margin-top:2px">A capstone: trains no further.</div>';
   return `<div class="tiny muted">${path}</div>${next}`; }
 // several upgrades fit: the player chooses, and the choice is permanent
 function promoModal(){ const p=run.promo; if(!p) return; const h=run.heroes[p.hi];
   modal(`<h2>${esc(HEROES[h.id].name)} is ready to advance</h2><div class="muted small">Choose a class. The choice is permanent, and ${esc(HEROES[h.id].name)}'s skills come along.</div>
-   <div class="choice">${p.opts.map(id=>{ const c=CLASSES[id]; return `<button data-promo="${id}"><span class="row">${ic(id,'h',24)} ${esc(c.name)} <span class="tiny muted">${c.role} · ${c.ess.map(e=>GEMS[e].name).join(' + ')}</span></span><span class="d">${esc(c.passive)}</span></button>`; }).join('')}</div>`); lockModal();
+   <div class="choice">${p.opts.map(id=>{ const c=CLASSES[id]; return `<button data-promo="${id}"><span class="row">${ic(id,'h',24)} ${esc(c.name)} <span class="tiny muted">${c.role} · ${c.ess.map(e=>GEMS[e].name).join(' + ')} · +${slotWords(id)} slot</span></span><span class="d">${esc(c.passive)}</span></button>`; }).join('')}</div>`); lockModal();
   $('#sheet').onclick=e=>{ const b=e.target.closest('button[data-promo]'); if(!b) return; $('#sheet').onclick=null; const was=HEROES[h.id].name; promote(h,b.dataset.promo); delete run.promo; unlockModal(); closeModal(); toast(`${was} becomes ${HEROES[h.id].name}`); saveRun(); renderGems(p.hi); }; }
 function heroSheet(i){
   const h=run.heroes[i], d=HEROES[h.id], s=computeStats(h,run.relics), lc=lvCost(h);
@@ -2161,7 +2178,7 @@ function heroSheet(i){
    <div class="small num">HP ${s.maxHp} · ATK ${s.atk} · SPD ${s.spd} · ARM ${s.armor}${s.crit?' · CRIT '+Math.round(s.crit*100)+'%':''}${s.dodge?' · DODGE '+Math.round(s.dodge*100)+'%':''} · kills ${h.kills||0}${h.bonusHp?` · <span class="good">+${h.bonusHp} HP from kills</span>`:''}${h.giftHp?` · <span class="good">inherited +${h.giftHp} HP +${h.giftAtk} ATK</span>`:''}</div>
    <div class="row" style="gap:4px">${openSet(h).map(k=>{ const g=(h.gems||[])[k]; return g?ic(g,'g',22,GEMS[g].name):'<span class="ph" style="display:inline-block;width:22px;height:22px;border:1px dashed var(--line2);border-radius:24%"></span>'; }).join('')}<span class="tiny muted" style="margin-left:6px">${s.skills.length?s.skills.map(x=>esc(x.name)).join(', '):'no skills yet'}</span></div>
    <div class="actions">
-     <button data-hs="gems" class="gold"><span>Equip${lc?` <span class="tiny">· unlock a slot ${lc}g</span>`:''}</span><span>${gemCount(h)}/${SLOTS(h.lv)} slots</span></button>
+     <button data-hs="gems" class="gold"><span>Equip${lc?` <span class="tiny">· train ${lc}g</span>`:''}</span><span>${gemCount(h)}/${SLOTS(h.lv)} slots</span></button>
      <button data-hs="row" ${otherFull?'disabled':''}><span>Move to ${other} row${otherFull?' (full)':''}</span><span class="muted">free</span></button>
      <button data-hs="sell" ${run.heroes.length<=1?'disabled':''}><span>Dismiss</span><span class="gold">+${2+2*(h.lv-1)}g${gemCount(h)?' · gems kept':''}</span></button>
      <button data-x="close" class="ghost"><span>Close</span></button>
@@ -2209,7 +2226,7 @@ function renderGems(i,keepPick){
   const h=run.heroes[i], d=HEROES[h.id], lc=lvCost(h);
   const slots=[]; for(let k=0;k<4;k++){
     const lab=`<div class="sl">${esc((EQUIP[sprId(h)]&&EQUIP[sprId(h)].l[k])||['Weapon','Body','Head','Off-hand'][k])}<br><span class="gk ${slotKind(k,h)}">${slotKind(k,h)==='hand'?'weapon':'armor'}${(h.flip||[]).includes(k)?' ✦':''}</span></div>`;
-    if(!slotOpen(h,k)){ slots.push(`<div class="slotw"><button class="slot locked unlock" data-unlock="${k}" ${lc&&run.gold>=lc?'':'disabled'}><span class="lk">Unlock<br><b class="gold">${lc}g</b></span></button>${lab}</div>`); continue; }
+    if(!slotOpen(h,k)) continue; // locked sockets stay hidden until training opens them
     if(h.gems[k]) slots.push(`<div class="slotw"><div class="slot filled" data-slot="${k}">${ic(h.gems[k],'g',30,GEMS[h.gems[k]].name)}</div>${lab}</div>`);
     else slots.push(`<div class="slotw"><div class="slot open ${gemPick!==null?'target':''}" data-slot="${k}"><span class="lk">${gemPick!==null?'put here':'open'}</span></div>${lab}</div>`); }
   const skills=heroSkills(h);
@@ -2222,7 +2239,7 @@ function renderGems(i,keepPick){
      ${routeLine(h)}
      ${statLine(h,null)}
    </div>
-   <div><div class="eyebrow">${gemPick!==null?`<span class="good">Choose a slot for ${esc(GEMS[run.bag[gemPick]].name)}</span> · tap the gem again to cancel`:'Slots · tap to return · hold for details'}</div><div class="slots" style="margin-top:4px">${slots.join('')}</div>${lc?`<div class="tiny muted" style="margin-top:4px">Training (${lc}g) unlocks a slot, raises ${esc(d.name)} to ${'★'.repeat(h.lv+1)} (HP ${cur.maxHp}→<span class="good">${nx.maxHp}</span> · ATK ${cur.atk}→<span class="good">${nx.atk}</span>) and promotes to an upgrade whose essences the socketed gems meet.</div>`:''}</div>
+   <div><div class="eyebrow">${gemPick!==null?`<span class="good">Choose a slot for ${esc(GEMS[run.bag[gemPick]].name)}</span> · tap the gem again to cancel`:'Slots · tap to return · hold for details'}</div><div class="slots" style="margin-top:4px">${slots.join('')}</div>${lc?(()=>{ const ups=upgradeOptions(h), can=ups.length&&run.gold>=lc; return `<div class="row" style="margin-top:6px;gap:8px;align-items:center"><button class="sm ${can?'gold':''}" style="white-space:nowrap" data-train="1" ${can?'':'disabled'}>Train · ${lc}g</button><span class="tiny muted">${ups.length?`Becomes ${ups.map(id=>`${esc(CLASSES[id].name)} <span class="gk ${slotKindsOf(id)[0]}">+${slotWords(id)}</span>`).join(' or ')} · ${'★'.repeat(h.lv+1)} HP ${cur.maxHp}→<span class="good">${nx.maxHp}</span> · ATK ${cur.atk}→<span class="good">${nx.atk}</span>`:`Socket gems that meet an upgrade's essences to train`}</span></div>`; })():'<div class="tiny muted" style="margin-top:4px">A capstone: trains no further.</div>'}</div>
    <div><div class="eyebrow">Loose gems · tap to slot · hold for details${run.bag.length?'':' · none'}</div><div class="bag" style="margin-top:4px">${run.bag.map((id,k)=>`<div class="bagitem ${gemPick===k?'sel':''}" data-bag="${k}">${ic(id,'g',28,GEMS[id].name)}</div>`).join('')}</div></div>
    <div><div class="eyebrow">Skills · ${gemCount(h)?computeStats(h,run.relics).skills.length:0}/${skills.length} active</div><div class="stack" style="gap:5px;margin-top:4px">${skills.map(sk=>skillRow(sk,h)).join('')}</div></div>
    <details class="card small"><summary class="muted">What each gem does on its own</summary><div class="gemlegend" style="margin-top:6px">${BASIC_GEMS.map(g=>`<div>${ic(g,'g',18)}<span><b style="color:${ARCH_C[GEMS[g].arch]}">${GEMS[g].name}</b>${gemFx(g)}</span></div>`).join('')}</div></details>
@@ -2230,10 +2247,10 @@ function renderGems(i,keepPick){
   show('s-gems'); saveRun();
 }
 $('#s-gems').addEventListener('click',e=>{
-  const el=e.target.closest('[data-g],[data-slot],[data-bag],[data-unlock]'); if(!el||!run) return; const ds=el.dataset; const h=run.heroes[gemIdx];
+  const el=e.target.closest('[data-g],[data-slot],[data-bag],[data-train]'); if(!el||!run) return; const ds=el.dataset; const h=run.heroes[gemIdx];
   if(ds.g==='back') return renderCamp();
   if(ds.g==='hero') return renderGems(+ds.k);
-  if(ds.unlock!==undefined){ const k=+ds.unlock, lab=(EQUIP[sprId(h)]&&EQUIP[sprId(h)].l[k])||['Weapon','Body','Head','Off-hand'][k]; const was=HEROES[h.id].name; const r=unlockSlot(h,k); if(r==='noupgrade') return toast(`${was} can't train yet: socket gems that fit one of the upgrades`); if(!r) return toast(`Need ${lvCost(h)}g to train`); saveRun(); if(run.promo) return promoModal(); toast(`${lab} slot unlocked · ${was} becomes ${HEROES[h.id].name} ${'★'.repeat(h.lv)}`); return renderGems(gemIdx,gemPick!==null); }
+  if(ds.train!==undefined){ const was=HEROES[h.id].name; const r=train(h); if(r==='noupgrade') return toast(`${was} can't train yet: socket gems that fit one of the upgrades`); if(!r) return toast(`Need ${lvCost(h)}g to train`); saveRun(); if(run.promo) return promoModal(); toast(`${was} becomes ${HEROES[h.id].name} ${'★'.repeat(h.lv)} · +${slotWords(h.id)} slot`); return renderGems(gemIdx,gemPick!==null); }
   if(longPress.fired){ longPress.fired=false; return; }
   if(ds.slot!==undefined){ const k=+ds.slot;
     if(h.gems[k]){ const g=tryTake(h,k); if(g) run.bag.push(g); return renderGems(gemIdx,gemPick!==null); } // other gems stay in their slots

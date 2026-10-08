@@ -16,7 +16,7 @@ const actKey=f=>Math.ceil(f/4); // act, or endless block
 function actBoss(){ run.bosses=run.bosses||{}; const k=actKey(run.floor); if(!run.bosses[k]) run.bosses[k]=rollActBoss(run.floor); return run.bosses[k]; }
 function offerPaths(){ run.choices=genChoices(run.floor,run.depth,{boss:actBoss()}); run.pick=run.choices.findIndex(c=>c.enc); if(run.pick<0) run.pick=0; run.enc=run.choices[run.pick].enc||null; }
 function pickPath(i){ run.pick=i; run.enc=run.choices[i].enc||null; }
-function loadRun(){ const r=load(KEY_RUN,null); if(!r) return null; if(r.heroes.some(h=>!CLASSES[h.id])) return null; /* a save from before the class tree */ r.relics=r.relics.filter(k=>RELICS[k]); /* relics since removed */ restoreMergedGems(r.merged); if(!r.choices){ r.choices=[{kind:r.enc?r.enc.kind:'fight',enc:r.enc}]; r.pick=0; } if(r.mergeAct===undefined){ r.mergeAct=0; r.merged=r.merged||[]; r.mergeN=r.mergeN||0; } if(r.choices.some(c=>c.kind==='forge')){ r.choices=r.choices.filter(c=>c.kind!=='forge'); r.pick=0; r.enc=r.choices[0].enc; } return r; }
+function loadRun(){ const r=load(KEY_RUN,null); if(!r) return null; if(r.heroes.some(h=>!CLASSES[h.id])) return null; /* a save from before the class tree */ r.relics=r.relics.filter(k=>RELICS[k]); /* relics since removed */ r.heroes.forEach(h=>{ if(h.ench===undefined){ h.ench=h.flip||[]; r.bag.push(...relayout(h)); } }); /* before class slots: sockets follow the route now, old flips become Enchanter flips */ restoreMergedGems(r.merged); if(!r.choices){ r.choices=[{kind:r.enc?r.enc.kind:'fight',enc:r.enc}]; r.pick=0; } if(r.mergeAct===undefined){ r.mergeAct=0; r.merged=r.merged||[]; r.mergeN=r.mergeN||0; } if(r.choices.some(c=>c.kind==='forge')){ r.choices=r.choices.filter(c=>c.kind!=='forge'); r.pick=0; r.enc=r.choices[0].enc; } return r; }
 const gemPrice=id=>Math.max(1,GEMS[id].cost-(run&&run.relics.includes('gildedchains')?2:0)); // Gilded Chains
 const rerollCost=()=>Math.max(0,1+(run.rr||0)-(run.relics.includes('scales')?1:0)-(heroFlag('fasttalker')?1:0)); // Fast Talker (Merchant)
 const gemFx=(g,active)=>{ const d=GEMS[g]; if(!d.hand) return esc(d.desc); const row=(k,lab)=>`<div class="gfx ${active&&active!==k&&!(run&&run.relics.includes('prism'))?'off':''}"><span class="gk ${k}">${lab}</span> ${esc(d[k])}</div>`; return row('hand','Weapon')+row('armor','Armor'); };
@@ -45,10 +45,10 @@ function rollShop(charge){
 const heroFlag=f=>run.heroes.some(h=>computeStats(h,run.relics).flags[f]); // run-level effects of class skills (Silver tongue, Guildmaster, Fast Talker)
 const heroCost=()=>5-(heroFlag('silver')?1:0), lvCost=h=>h.lv===1?7:h.lv===2?11:null; // cost to unlock the next gear slot (also raises the hero's ★)
 const spend=n=>{ run.gold-=n; run.spent=(run.spent||0)+n; }; // War Bonds reads gold spent this run
-const openSet=h=>h.open||Array.from({length:SLOTS(h.lv)},(_,k)=>k); // unlocked gear slots; older saves: the first lv+1
+const openSet=h=>h.open||[]; // open gear slots: set by the class route (relayout)
 const slotOpen=(h,k)=>openSet(h).includes(k);
-// Training: pays, opens the slot and promotes. 'noupgrade' when the hero's gems meet none of its upgrades; several fits leave run.promo for the UI to resolve.
-function unlockSlot(h,k){ const c=lvCost(h); if(!c||run.gold<c||slotOpen(h,k)) return false; if(!upgradeOptions(h).length) return 'noupgrade'; spend(c); h.open=openSet(h); const opts=trainHero(h,k); if(opts.length>1) run.promo={hi:run.heroes.indexOf(h),opts}; return true; }
+// Training: pays and promotes (the new class adds its slot). 'noupgrade' when the hero's gems meet none of its upgrades; several fits leave run.promo for the UI to resolve.
+function train(h){ const c=lvCost(h); if(!c||run.gold<c) return false; if(!upgradeOptions(h).length) return 'noupgrade'; spend(c); const opts=trainHero(h); if(opts.length>1) run.promo={hi:run.heroes.indexOf(h),opts}; return true; }
 // each offer is a basic, 2-essence or 3-essence gem by this act's RARE_ODDS; forceRare makes the last offer a rare (no triples in Act 1)
 function rollGems(n,forceRare){
   const o=RARE_ODDS[actOf(run.floor)], basics=shuffle(BASIC_GEMS), duals=shuffle(RARE_GEMS.filter(k=>GEMS[k].rare===1)), triples=shuffle(RARE_GEMS.filter(k=>GEMS[k].rare===2));
