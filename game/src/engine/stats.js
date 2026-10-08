@@ -2,7 +2,7 @@
 // ctx: {gemMult} doubles gem socket effects (Master Jeweller). h.permAtk and h.souls are run-permanent gains (Bounty hunter, Reaper).
 function computeStats(h,relics,ctx){
   relics=relics||[];
-  const L=h.lv, m=1+0.15*(L-1), base=classStats(h.root||rootOf(h.id),heroPath(h)); // the route's stats, grown 15% per ★
+  const L=h.lv, m=1+STAR_GAIN*(L-1), base=classStats(h.root||rootOf(h.id),heroPath(h)); // the route's stats, grown STAR_GAIN per ★
   let hp=base.hp*m+(h.bonusHp||0)+(h.giftHp||0)+(h.souls||0), atk=base.atk*m+(h.giftAtk||0)+(h.permAtk||0), spd=base.spd, armor=base.armor, crit=base.crit, dodge=base.dodge;
   const apply={};
   let statusMult=1, targetLowest=false, startShield=0, regen=0;

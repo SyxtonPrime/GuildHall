@@ -61,7 +61,7 @@ function openCutter(){
 }
 
 // Retirement: one hero leaves the guild; another permanently inherits half of their base HP and ATK. The retiree's gems go to loose gems.
-const retireGift=h=>{ const d=HEROES[h.id], m=1+0.15*(h.lv-1); return {hp:Math.round(d.hp*m/2),atk:Math.round(d.atk*m/2)}; };
+const retireGift=h=>{ const d=HEROES[h.id], m=1+STAR_GAIN*(h.lv-1); return {hp:Math.round(d.hp*m/2),atk:Math.round(d.atk*m/2)}; };
 function openRetire(){
   let a=null, b=null;
   const card=(h,i,on,attr,extra)=>`<div class="ench ${on?'sel':''}" ${attr}="${i}"><div class="row" style="gap:8px">${hspr(h,32)}<div class="grow"><b>${esc(HEROES[h.id].name)}</b> <span class="stars gold">${'★'.repeat(h.lv)}</span><div class="tiny muted">${extra}</div></div></div></div>`;
