@@ -52,6 +52,11 @@ function startBattle(){
 $('#s-battle').addEventListener('click',e=>{ const b=e.target.closest('button[data-s]'); if(!b||!battle) return; const s=+b.dataset.s;
   if(s===99){ if(loop){clearInterval(loop);loop=null;} runToEnd(battle); renderUnits(); endBattle(); return; }
   speed=s; meta.speed=s; save(KEY_META,meta); b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',+x.dataset.s===s)); });
+// Brittle (Frozen + Ablaze), Blighted (Ablaze + Festering), Crippled (Frozen + Festering), Ruined (all three): a disc split in their colours
+const MARKS={brittle:{c:['var(--chill)','var(--burn)'],g:'mkcrack',d:'Frozen + Ablaze: every Chill or Burn applied to it is +1'},blighted:{c:['var(--burn)','var(--poison)'],g:'mkskull',d:'Ablaze + Festering: +25% damage from statuses'},
+ crippled:{c:['var(--chill)','var(--poison)'],g:'mkchain',d:'Frozen + Festering: attacks 25% slower'},ruined:{c:['var(--chill)','var(--burn)','var(--poison)'],g:'mkshatter',d:'All three: +50% damage from everything, and every mark'}};
+const markHtml=k=>{ const m=MARKS[k], n=m.c.length, bg=`conic-gradient(${m.c.map((c,i)=>`${c} ${Math.round(360*i/n)}deg ${Math.round(360*(i+1)/n)}deg`).join(',')})`;
+  return `<span class="mark" data-k="${k}" style="background:${bg}" title="${k[0].toUpperCase()+k.slice(1)}: ${m.d}"><svg viewBox="0 0 24 24"><use href="#g-${m.g}"/></svg></span>`; };
 function renderUnits(){
   if(!battle) return;
   $('#btime').textContent=battle.t.toFixed(1)+'s'+(battle.t>45?' · time running out':'');
@@ -59,10 +64,15 @@ function renderUnits(){
     const p=clamp(u.hp/u.maxHp,0,1), sp=clamp(u.shield/u.maxHp,0,1);
     el.querySelector('.f').style.width=(p*100)+'%'; el.querySelector('.sh').style.width=(sp*100)+'%'; el.querySelector('.tx').textContent=`${Math.max(0,Math.ceil(u.hp))}${u.maxHp!==u.maxHp0?'/'+u.maxHp:''}${u.shield?' +'+u.shield:''}`;
     el.querySelector('.a').textContent='ATK '+u.atk; el.querySelector('.s').textContent='SPD '+(Math.round(effSpd(u)*100)/100);
-    const st=[]; if(u.st.poison>0) st.push(`<span class="stx p" title="Poison ${u.st.poison}">${u.st.poison}</span>`); if(u.st.burn>0) st.push(`<span class="stx b" title="Burn ${u.st.burn}">${u.st.burn}</span>`); if(u.st.chill>0) st.push(`<span class="stx c${isFrozen(u)?' aff':''}" title="Chill ${u.st.chill}${isFrozen(u)?' (Frozen)':''}">${u.st.chill}</span>`);
-    if(u.ablaze) st[st.findIndex(x=>x.includes('stx b'))]=`<span class="stx b aff" title="Burn ${u.st.burn} (Ablaze)">${u.st.burn}</span>`; if(isFestering(u)) st[st.findIndex(x=>x.includes('stx p'))]=`<span class="stx p aff" title="Poison ${u.st.poison} (Festering)">${u.st.poison}</span>`;
-    for(const k in u.kw) st.push(`<span class="stx k" title="${k[0].toUpperCase()+k.slice(1)}">${k[0].toUpperCase()}</span>`);
-    const sh=st.join(''); if(el.querySelector('.stt').innerHTML!==sh) el.querySelector('.stt').innerHTML=sh; });
+    // afflictions show on the art (ice block, flames, green glow) and light up their status badge
+    const fz=u.alive&&isFrozen(u), ab=u.alive&&isAblaze(u), fe=u.alive&&isFestering(u);
+    el.classList.toggle('frozen',fz); el.classList.toggle('ablaze',ab); el.classList.toggle('festering',fe);
+    const badge=(k,n,cls,lab,aff,affLab)=>n>0?`<span class="stx ${cls}${aff?' aff':''}" title="${lab} ${n}${aff?` (${affLab})`:''}">${n}</span>`:'';
+    const sh=badge('p',u.st.poison,'p','Poison',fe,'Festering')+badge('b',u.st.burn,'b','Burn',ab,'Ablaze')+badge('c',u.st.chill,'c','Chill',fz,'Frozen');
+    if(el.querySelector('.stt').innerHTML!==sh) el.querySelector('.stt').innerHTML=sh;
+    // marks: one badge in the art's corner (any two marks mean all three afflictions, so Ruined stands for the rest)
+    const mk=u.alive?(u.kw.ruined?'ruined':['brittle','blighted','crippled'].find(k=>u.kw[k])):null, mEl=el.querySelector('.mark');
+    if((mEl?mEl.dataset.k:null)!==(mk||null)){ if(mEl) mEl.remove(); if(mk) el.querySelector('.art').insertAdjacentHTML('beforeend',markHtml(mk)); } });
 }
 function endBattle(){
   if(!battle||battle._ended) return; battle._ended=true;
