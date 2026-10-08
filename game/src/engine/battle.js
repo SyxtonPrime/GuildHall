@@ -2,7 +2,7 @@
 function baseUnit(def,side,row,s,B){
   return {uid:B.uid++,B,def,name:def.name,side,row,alive:true,hp:s.maxHp,maxHp:s.maxHp,maxHp0:s.maxHp,atk:s.atk,spd:s.spd,armor:s.armor,crit:s.crit||0,dodge:s.dodge||0,
     shield:0,st:{},kw:{},ablaze:false,critStreak:0,dodgeStreak:0,flags:{},tmpMult:1,timer:0.35+Math.random()*0.3,stTimer:Math.random()*0.2,secs:0,attacks:0,chain:0,L:1,apply:{},hooks:[],statusMult:1,targetLowest:false,hitAll:false,hitAllMult:1,
-    stats:{dealt:0,taken:0,healed:0,kills:0}};
+    stats:{dealt:0,taken:0,healed:0,healGiven:0,shieldGiven:0,kills:0}};
 }
 // gold: the run's bank when the fight starts; skills that read "gold in the bank" see it plus whatever the fight has paid so far (B.bounty)
 // ctx: {spent} — gold spent this run (War Bonds). Master Jeweller (flag jeweller on any hero) doubles everyone's basic gem effects.
@@ -25,7 +25,7 @@ function createBattle(heroes,enc,relics,gold,ctx){
     if(tr==='hhp'){ u.maxHp=u.maxHp0=Math.max(1,Math.round(u.maxHp*0.75)); u.hp=u.maxHp; }
     B.units.push(u); });
   if(relics.includes('gamblersdie')){ const hs=B.units.filter(u=>u.hero); if(hs.length){ const u=pick(hs); u.atk=Math.round(u.atk*1.5); B.logf(`The die favours ${u.name}.`); } } // Gambler's Die
-  enc.list.forEach(e=>makeEnemy(B,e.id,e.row));
+  enc.list.forEach(e=>makeEnemy(B,e.id,e.row,e.affix));
   B.flags={}; B.units.forEach(u=>{ for(const f in u.flags) B.flags[f]=1; });
   B.units.forEach(u=>fire(u,'onStart',B));
   checkVanguard(B);
@@ -82,9 +82,11 @@ function checkWeave(u,B,dt){
   else if(u.flags.meditate&&u.row==='back'&&u.hp<u.maxHp){ u.medAcc=(u.medAcc||0)+dt*WEAVE_REGEN*u.maxHp; if(u.medAcc>=1){ const n=Math.floor(u.medAcc); u.medAcc-=n; heal(u,n,B,u); } }
 }
 const ELITE_BOOST=1.15; // elites are optional (and pay a free gem), so the elite itself hits a little harder
-function makeEnemy(B,id,row){
+function makeEnemy(B,id,row,affix){
   const d=ENEMIES[id], m=B.enc.mult*(d.elite?ELITE_BOOST:1), nz=(d.boss&&B.enc.norm)||{hp:1,atk:1}, bz=d.boss?{hp:BOSS_HP,atk:BOSS_ATK}:{hp:1,atk:1}; const s={maxHp:Math.round(d.hp*m*ENEMY_HP*nz.hp*bz.hp*(B.eHp||1)),atk:Math.round(d.atk*m*ENEMY_ATK*nz.atk*bz.atk*(B.eAtk||1)),spd:d.spd,armor:d.armor||0,crit:d.crit||0,dodge:d.dodge||0};
-  const u=baseUnit(d,'e',row,s,B); u.eid=id; u.apply=Object.assign({},d.apply||{}); u.flags=Object.assign({},d.flags||{}); u.targetLowest=!!d.targetLowest; u.hooks=[d.hooks||{}]; B.units.push(u); return u;
+  const u=baseUnit(d,'e',row,s,B); u.eid=id; u.apply=Object.assign({},d.apply||{}); u.flags=Object.assign({},d.flags||{}); u.targetLowest=!!d.targetLowest; u.hooks=[d.hooks||{}];
+  if(affix&&AFFIXES[affix]){ const A=AFFIXES[affix]; u.affix=affix; u.name=A.name+' '+u.name; if(A.mod) A.mod(u,B); if(A.hooks) u.hooks.push(A.hooks); }
+  B.units.push(u); return u;
 }
 // mid-battle reinforcements (Slime splits, Necromancer raises). Capped at 6 living enemies.
 function spawnEnemy(B,id,row){
@@ -94,7 +96,8 @@ function spawnEnemy(B,id,row){
   if(cells(row)>=ROW_MAX){ row=row==='front'?'back':'front'; if(cells(row)>=ROW_MAX) return null; }
   const u=makeEnemy(B,id,row); u.timer=0; u.summon=true; B.logf(`${u.name} joins the fight.`); fire(u,'onStart',B); B.spawn(u); return u;
 }
-function fire(u,name,...args){ for(const h of u.hooks){ if(h[name]) h[name](u,...args); } }
+// B.cur: whose hook is running, so healing and Shield it hands out are credited to it (the end-of-fight table)
+function fire(u,name,...args){ const B=u.B, prev=B&&B.cur; if(B) B.cur=u; try{ for(const h of u.hooks){ if(h[name]) h[name](u,...args); } } finally{ if(B) B.cur=prev; } }
 // a hook that must not re-enter itself (onApply from onApply); a different hook fired from inside it still runs
 function fireOnce(u,name,B,...args){ if(B.busy[name]) return; B.busy[name]=1; try{ fire(u,name,...args,B); } finally{ B.busy[name]=0; } }
 const alliesOf=(u,B)=>B.units.filter(x=>x.side===u.side);
@@ -104,10 +107,10 @@ function randomEnemy(u,B,not){ const f=aliveEnemies(u,B).filter(x=>x!==not); ret
 // hard caps so stacking buffs can never run away: attack speed at 3 attacks/s, kill-chains at one per possible kill (crit and dodge use streaks instead, see core)
 const SPD_CAP=3, KILL_CHAIN_MAX=ROW_MAX*2;
 const effSpd=u=>Math.min(SPD_CAP,u.spd*(1+buffSum(u,'spd'))*(1-CHILL_SLOW*Math.min(CHILL_SLOW_MAX,u.st.chill||0))*(u.kw.crippled?0.75:1));
-function addShield(u,n,B,echo){ if(!u||!u.alive||n<=0) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.flags.shieldMult2) n*=2; u.shield+=n; B.fx(u,`+${n}`,'shield'); fireOnce(u,'onShieldGain',B,n);
+function addShield(u,n,B,echo){ if(!u||!u.alive||n<=0) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.flags.shieldMult2) n*=2; u.shield+=n; if(B.cur) B.cur.stats.shieldGiven+=n; B.fx(u,`+${n}`,'shield'); fireOnce(u,'onShieldGain',B,n);
   // Twin Aegis: copy to another random hero (the copy never copies itself)
   if(!echo&&u.hero&&B.relics.includes('twinaegis')){ const o=B.units.filter(x=>x!==u&&x.hero&&x.alive); if(o.length) addShield(pick(o),n,B,true); } }
-function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.side==='e'&&u.st.poison>0&&B.flags.quarantine) n=Math.floor(n/2); if(u.hero){ if(B.relics.includes('chalice')) n=Math.round(n*1.25); if(B.relics.includes('bloodidol')) n=Math.ceil(n/2); } const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; B.fx(u,`+${r}`,'heal'); } if(r>0&&u.flags.martyr) gainStatus(u,'burn',1,B); /* Martyr's Coal */ if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
+function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.side==='e'&&u.st.poison>0&&B.flags.quarantine) n=Math.floor(n/2); if(u.hero){ if(B.relics.includes('chalice')) n=Math.round(n*1.25); if(B.relics.includes('bloodidol')) n=Math.ceil(n/2); } const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; const g=src||B.cur; if(g) g.stats.healGiven+=r; B.fx(u,`+${r}`,'heal'); } if(r>0&&u.flags.martyr) gainStatus(u,'burn',1,B); /* Martyr's Coal */ if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
 // a heal performed by a class ability: onHealing hooks scale it (Healer's bonuses), then the Mage root's +1; gem regeneration and lifesteal skip this
 function abilityHeal(src,t,n,B){ if(!t||!t.alive||n<=0) return; const h={n}; fire(src,'onHealing',t,h,B); heal(t,Math.round(h.n)+(src.healBonus||0),B,src); }
 // on-hit status: the attack's own applications, which get the Mage root's +1 and per-hit bonuses (u.hitBonus is set while a hit resolves)
@@ -147,7 +150,7 @@ function attack(u,B,forced,opts){
   if(u.blind){ u.blind=false; a.forceDodge=true; B.fx(u,'BLIND','miss'); } // Shadow Archer: the next attack misses
   u.lastA=a; aliveEnemies(u,B).forEach(x=>fire(x,'onEnemyAttack',u,a,B));
   const fz=Math.floor((u.st.chill||0)/FROZEN_AT); if(fz) a.mult/=Math.pow(2,fz); // Frozen: half damage per 20 Chill, consumed after the attack
-  let foes=aliveEnemies(u,B).filter(f=>!(f.veilUntil>B.t)); if(isFrozen(u)) foes=foes.filter(f=>!f.flags.frostshadow); if(!foes.length&&!(forced&&forced.alive)) return;
+  let foes=aliveEnemies(u,B).filter(f=>u.flags.unerring||!(f.veilUntil>B.t)); if(isFrozen(u)) foes=foes.filter(f=>!f.flags.frostshadow); if(!foes.length&&!(forced&&forced.alive)) return; // Unerring enemies find the untargetable
   let targets;
   if(forced&&forced.alive) targets=[forced];
   else if(u.hitAll||a.hitAll){ targets=foes.slice(); if(u.hitAll) a.mult*=u.hitAllMult; }
@@ -172,7 +175,7 @@ function hit(u,t,a,B){
   t=intercept(u,t,B);
   const ac=Object.assign({mult:1,bonus:0},a);
   fire(t,'onIncoming',u,ac,B); // before the dodge roll: ac.dodgeBonus
-  if(sureDodge(t,B)||ac.forceDodge||streakRoll(t.dodge+(ac.dodgeBonus||0)+buffSum(t,'dodge'),t,'dodgeStreak')){ B.anim(u,t,{type:'miss'}); B.fx(t,'miss','miss'); B.logf(`${t.name} dodges ${u.name}.`); fire(t,'onDodge',u,B); alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyDodge',t,u,B); }); return; }
+  if(ac.forceDodge||(!u.flags.unerring&&(sureDodge(t,B)||streakRoll(t.dodge+(ac.dodgeBonus||0)+buffSum(t,'dodge'),t,'dodgeStreak')))) { B.anim(u,t,{type:'miss'}); B.fx(t,'miss','miss'); B.logf(`${t.name} dodges ${u.name}.`); fire(t,'onDodge',u,B); alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyDodge',t,u,B); }); return; }
   fire(u,'onTarget',t,ac,B);
   fire(t,'onDefend',u,ac,B);
   for(const x of B.units){ if(!x.alive) continue; if(x.side===u.side) fire(x,'onAllyTarget',u,t,ac,B); else fire(x,'onAllyDefend',t,u,ac,B); } // side-wide auras, the attacker and defender included
@@ -312,4 +315,4 @@ function stepBattle(B,dt){
   if(B.t>=(B.tLimit||60)){ B.over=true; B.winner='e'; B.logf('Time runs out. Your guild retreats.'); }
 }
 function runToEnd(B){ let n=0; while(!B.over&&n<4000){ stepBattle(B,0.05); n++; } return B; }
-if(typeof module!=='undefined') module.exports={GILT_PER_KILLS,closest,opposite,colOf,adjacentOf,CLASSES,STARTERS,ROOTS,newHero,trainHero,upgradeOptions,upgradesOf,promote,heroSkills,heroPath,HOOKS,rollActBoss,bossPool,bossNorm,BOSSES,enemyMult,gemLeaves,defineMergedGem,restoreMergedGems,genChoices,genPrologue,slotLayout,relayout,slotKindsOf,CLASS_SLOTS,RARE_ODDS,actOf,curAct,slotKind,HAND_SLOTS,HEROES,defaultRow,ROW_MAX,ENCOUNTERS,GEMS,BASIC_GEMS,RARE_GEMS,SLOTS,RELICS,ENEMIES,ARCH_LABEL,heroSkills,activeSkills,skillActive,needCounts,gemCounts,genEncounter,computeStats,createBattle,stepBattle,runToEnd,actOf,kindOf,FLOORS};
+if(typeof module!=='undefined') module.exports={GILT_PER_KILLS,closest,opposite,colOf,adjacentOf,CLASSES,STARTERS,ROOTS,newHero,trainHero,upgradeOptions,upgradesOf,promote,heroSkills,heroPath,HOOKS,rollActBoss,bossPool,bossNorm,BOSSES,enemyMult,gemLeaves,defineMergedGem,restoreMergedGems,genChoices,genPrologue,AFFIXES,affixOdds,depthRate,STAR_GAIN,ROLE_GAIN,slotLayout,relayout,slotKindsOf,CLASS_SLOTS,RARE_ODDS,actOf,curAct,slotKind,HAND_SLOTS,HEROES,defaultRow,ROW_MAX,ENCOUNTERS,GEMS,BASIC_GEMS,RARE_GEMS,SLOTS,RELICS,ENEMIES,ARCH_LABEL,heroSkills,activeSkills,skillActive,needCounts,gemCounts,genEncounter,computeStats,createBattle,stepBattle,runToEnd,actOf,kindOf,FLOORS};

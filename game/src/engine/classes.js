@@ -31,10 +31,13 @@ const CLASS_SLOTS={
  Herald:'A',Heretic:'W',Icemaiden:'A','Lava strider':'A',Necrodancer:'A',Necromancer:'W',Nightblade:'W',Paladin:'A',Phoenix:'A','Prismatic magus':'W',
  Reaper:'W',Runeguard:'A','Silver tongue':'A',Spellblade:'W','Storm dancer':'W','Witch Doctor':'W'};
 const ROOT_STATS={Mage:{hp:32,atk:5,spd:0.9,armor:0,row:'back'},Warrior:{hp:48,atk:5,spd:0.85,armor:1,row:'front'},Rogue:{hp:36,atk:6,spd:1.1,armor:0,row:'mid'}};
+// Starters gain the most and later tiers less, so a trained hero is stronger without dwarfing the rest of the guild (front-line starters
+// get their Armor up front: they have to hold Act 1). With ★ at +10% HP/ATK a capstone ends near 1.8× a starter, down from 2.4×.
 const ROLE_GAIN={ // [starter, tier 3, capstone]
- front:[{hp:14,atk:1,spd:0,armor:0},{hp:22,atk:2,spd:0,armor:1},{hp:30,atk:3,spd:0,armor:1}],
- mid:[{hp:8,atk:2,spd:0.05,armor:0},{hp:14,atk:3,spd:0.1,armor:0},{hp:20,atk:4,spd:0.1,armor:0}],
- back:[{hp:4,atk:3,spd:0,armor:0},{hp:8,atk:4,spd:0.05,armor:0},{hp:12,atk:5,spd:0.05,armor:0}]};
+ front:[{hp:22,atk:1,spd:0,armor:1},{hp:16,atk:2,spd:0,armor:0},{hp:18,atk:2,spd:0,armor:1}],
+ mid:[{hp:12,atk:2,spd:0.05,armor:0},{hp:10,atk:2,spd:0.05,armor:0},{hp:12,atk:2,spd:0.05,armor:0}],
+ back:[{hp:8,atk:3,spd:0,armor:0},{hp:6,atk:3,spd:0.05,armor:0},{hp:8,atk:3,spd:0.05,armor:0}]};
+const STAR_GAIN=0.10; // HP and ATK per ★ above the first
 const BASE_CRIT=0.1; // every hero crits 10% of the time before gems
 // Sprites: every class has its own sprite, keyed by its name in lowercase letters (art/sprites/fixes/<id>.txt); roots show their first starter's look.
 const ROOT_SPR={Mage:'frostmage',Warrior:'sentinel',Rogue:'thief'};

@@ -212,7 +212,7 @@ const ENEMIES={
  minotaur:{name:'Minotaur',row:'front',hp:80,atk:7,spd:0.7,elite:true,ab:'Charge: every 4th attack hits your whole front row for ×2. Below half HP it attacks 40% faster.',
   hooks:{onAttack:(u,a)=>{ if(nthAttack(u,4)){ a.hitRow='front'; a.mult*=2; } }, onDamaged:(u)=>{ if(!u.enraged&&u.hp<u.maxHp/2){ u.enraged=true; u.spd*=1.4; } }}},
  // --- bosses ---
- goblinking:{name:'Goblin King',row:'front',hp:175,atk:12,spd:0.9,boss:true,ab:'Every 3s, all enemies gain +15% speed.',
+ goblinking:{name:'Goblin King',row:'front',hp:140,atk:10,spd:0.9,boss:true,ab:'Every 3s, all enemies gain +15% speed.',
   hooks:{onSecond:(u,B)=>{ if(u.secs%3===0) alliesOf(u,B).forEach(x=>{x.spd*=1.15;}); }}},
  lich:{name:'Lich',row:'back',hp:140,atk:10,spd:0.8,boss:true,apply:{poison:2},ab:'Attacks apply 2 Poison and heal the Lich for damage dealt.',
   hooks:{onHit:(u,t,dmg,B)=>heal(u,dmg,B)}},
@@ -221,9 +221,9 @@ const ENEMIES={
  bonedragon:{name:'Bone Dragon',row:'front',hp:160,atk:8,spd:0.7,armor:1,boss:true,ab:'Every 5th attack breathes on everyone. Heals 20 whenever another enemy dies. Takes half damage from Poison.',flags:{poisonResist:1},
   hooks:{onAttack:(u,a)=>{ if(nthAttack(u,5)) a.hitAll=true; }, onAllyDeath:(u,d,B)=>heal(u,20,B)}},
  // --- bosses added v35 (Scout's Camp picks between an act's own bosses) ---
- ratking:{name:'Rat King',row:'front',hp:162,atk:9,spd:0.9,boss:true,ab:'Every 5s, two Rats join the fight. +1 ATK for every Rat alive.',
+ ratking:{name:'Rat King',row:'front',hp:130,atk:7,spd:0.9,boss:true,ab:'Every 5s, two Rats join the fight. +1 ATK for every Rat alive.',
   hooks:{onSecond:(u,B)=>{ if(u.secs%RK_EVERY===0){ for(let k=0;k<RK_N;k++) spawnEnemy(B,'rat','front'); } }, onAttack:(u,a,B)=>{ a.bonus+=B.units.filter(x=>x.alive&&x.eid==='rat').length; }}},
- broodmother:{name:'Broodmother',row:'front',hp:194,atk:10,spd:0.8,boss:true,apply:{poison:2},ab:'Attacks apply 2 Poison. Each time she loses a quarter of her HP, a Spiderling hatches.',
+ broodmother:{name:'Broodmother',row:'front',hp:155,atk:8,spd:0.8,boss:true,apply:{poison:2},ab:'Attacks apply 2 Poison. Each time she loses a quarter of her HP, a Spiderling hatches.',
   hooks:{onDamaged:(u,src,d,info,B)=>{ if(u.hp<=0) return; while((u.hatched||0)<3&&u.hp<=u.maxHp*(0.75-0.25*(u.hatched||0))){ u.hatched=(u.hatched||0)+1; B.fx(u,'HATCH','buff'); for(let k=0;k<BR_N;k++) spawnEnemy(B,'spiderling','front'); } }}},
  vampirelord:{name:'Vampire Lord',row:'front',hp:125,atk:7,spd:0.9,boss:true,ab:'Heals for half the damage he deals. At half HP he becomes a bat swarm: untargetable for 3s while three Bats join the fight.',
   hooks:{onHit:(u,t,d,B)=>{ if(d>0) heal(u,Math.ceil(d/2),B); }, onDamaged:(u,src,d,info,B)=>{ if(!u.batted&&u.hp>0&&u.hp<u.maxHp/2){ u.batted=true; u.veilUntil=B.t+3; B.fx(u,'BAT SWARM','buff'); B.logf(`${u.name} dissolves into bats.`); for(let k=0;k<3;k++) spawnEnemy(B,'bat','back'); } }}},
@@ -270,7 +270,10 @@ const curAct=f=>Math.ceil(f/4); // act (or 4-floor endless block) for once-per-a
 const BANSHEE_CHILL=6, PIT_BURN=2, RK_EVERY=5, RK_N=2, BR_N=1; // v35 boss numbers (tuned so each act's bosses have similar bot loss rates)
 const ACT_GROWTH=[ENV('G1',1.10),ENV('G2',1.12),ENV('G3',1.13)], ENDLESS_GROWTH=ENV('GE',1.20), ACT3_BOOST=ENV('ACT3',1.12);
 const floorGrowth=f=>f>FLOORS?ENDLESS_GROWTH:ACT_GROWTH[actOf(f-1)-1]; // an act's faster rate starts after its first floor, so entering the act is no cliff
-const enemyMult=(floor,depth)=>{ let m=0.7; for(let f=2;f<=floor;f++) m*=floorGrowth(f); return m*(1+0.10*depth)*(floor>=9?ACT3_BOOST:1); };
+// Depth (ascension) adds less early and more late: 4% a level through Act 1, rising to 15% by floor 12 (and in endless), so a good guild
+// of starters can still take the Act 1 boss at depth 3–5, and a built guild still meets resistance.
+const depthRate=floor=>floor<=4?0.04:0.04+0.11*(Math.min(floor,FLOORS)-4)/(FLOORS-4);
+const enemyMult=(floor,depth)=>{ let m=0.7; for(let f=2;f<=floor;f++) m*=floorGrowth(f); return m*(1+depthRate(floor)*depth)*(floor>=9?ACT3_BOOST:1); };
 const ENEMY_HP=ENV('EHP',2.1), ENEMY_ATK=ENV('EATK',1.25);
 const BOSS_HP=ENV('BOSSHP',1), BOSS_ATK=ENV('BOSSATK',1); // bosses on top of the floor multiplier (tools/boss-check.js sweeps these)
 
@@ -278,6 +281,20 @@ const bossPool=floor=>BOSSES[floor>FLOORS?((Math.ceil(floor/4)-1)%3)+1:actOf(flo
 const rollActBoss=floor=>pick(bossPool(floor)); // decided when an act (or endless block) begins
 // a boss brought in from another act (Scout's Camp) is rescaled to this act's own bosses' average HP and ATK
 function bossNorm(floor,id){ const nat=bossPool(floor); if(nat.includes(id)) return null; const d=ENEMIES[id], av=k=>nat.reduce((a,b)=>a+ENEMIES[b][k],0)/nat.length; return {hp:av('hp')/d.hp,atk:av('atk')/d.atk}; }
+// Affixes: Act 2 and 3 enemies may carry one (Act 2 15%, Act 3 30%, endless 40%, +5% a depth level). Act 2/3 elites always do; bosses never.
+// mod runs on the unit when it is made; hooks join its own. Spawned enemies (Necromancer skeletons, boss adds) never roll one.
+const AFFIXES={
+ vampiric:{name:'Vampiric',g:'bloodmage',c:'#e05d6f',d:'Heals for half the damage it deals',hooks:{onHit:(u,t,d,B)=>{ if(d>0) heal(u,Math.ceil(d/2),B,u); }}},
+ thorned:{name:'Thorned',g:'thornmail',c:'#c9a26b',d:'Attackers take a quarter of the damage they deal to it',hooks:{onDamaged:(u,src,d,info,B)=>{ if(info.type==='attack'&&src&&src.alive&&src.side!==u.side) dealDamage(u,src,Math.ceil(d/4),{type:'thorns',ignoreArmor:true},B); }}},
+ warded:{name:'Warded',g:'towershield',c:'#5b8cff',d:'Starts each fight with Shield equal to a third of its max HP',hooks:{onStart:(u,B)=>addShield(u,Math.round(u.maxHp/3),B)}},
+ hasty:{name:'Hasty',g:'quickboots',c:'#c47bff',d:'Attacks 30% faster',mod:u=>{ u.spd*=1.3; }},
+ venomous:{name:'Venomous',g:'venomvial',c:'#9be15d',d:'Attacks apply 2 Poison',mod:u=>{ u.apply.poison=(u.apply.poison||0)+2; }},
+ unerring:{name:'Unerring',g:'huntersmark',c:'#ffd166',d:"Its attacks can't be dodged and find heroes who can't be targeted",mod:u=>{ u.flags.unerring=1; }},
+ hunter:{name:'Hunter',g:'sniper',c:'#ff9f43',d:'Attacks the hero with the highest ATK, wherever they stand',mod:u=>{ u.targetRule=(u,foes)=>foes.length?foes.reduce((m,x)=>x.atk>m.atk?x:m):null; }},
+ enraged:{name:'Enraged',g:'berserker',c:'#ff5c3a',d:'Deals 50% more damage below half HP',hooks:{onTarget:(u,t,a)=>{ if(u.hp<u.maxHp/2) a.mult*=1.5; }}},
+};
+const AFFIX_ODDS={2:ENV('AFFIX2',0.15),3:ENV('AFFIX3',0.30)}, AFFIX_DEPTH=0.05;
+const affixOdds=(floor,depth)=>{ const a=actOf(floor); if(a<2) return 0; return Math.min(0.8,AFFIX_ODDS[a]+(floor>FLOORS?0.1:0)+AFFIX_DEPTH*depth); };
 function genEncounter(floor,depth,kindOverride,bossId){
   const act=actOf(floor), kind=kindOverride||kindOf(floor);
   const cyc=((Math.ceil(floor/4)-1)%3)+1; // endless: elites and bosses cycle through all three acts
@@ -290,6 +307,7 @@ function genEncounter(floor,depth,kindOverride,bossId){
   // rows: max ROW_MAX per row
   const out=[], cnt={front:0,back:0};
   list.forEach(id=>{ let r=ENEMIES[id].row; if(cnt[r]>=ROW_MAX) r=r==='front'?'back':'front'; cnt[r]++; out.push({id,row:r}); });
+  const ap=affixOdds(floor,depth); if(ap>0) out.forEach(x=>{ const d=ENEMIES[x.id]; if(!d.boss&&(d.elite||Math.random()<ap)) x.affix=pick(Object.keys(AFFIXES)); });
   const norm=kind==='boss'?bossNorm(floor,list[0]):null;
   return {floor,kind,act,mult:enemyMult(floor,depth),list:out,theme:kind==='fight'?tpl.name:null,...(norm?{norm}:{})};
 }
@@ -704,10 +722,13 @@ const CLASS_SLOTS={
  Herald:'A',Heretic:'W',Icemaiden:'A','Lava strider':'A',Necrodancer:'A',Necromancer:'W',Nightblade:'W',Paladin:'A',Phoenix:'A','Prismatic magus':'W',
  Reaper:'W',Runeguard:'A','Silver tongue':'A',Spellblade:'W','Storm dancer':'W','Witch Doctor':'W'};
 const ROOT_STATS={Mage:{hp:32,atk:5,spd:0.9,armor:0,row:'back'},Warrior:{hp:48,atk:5,spd:0.85,armor:1,row:'front'},Rogue:{hp:36,atk:6,spd:1.1,armor:0,row:'mid'}};
+// Starters gain the most and later tiers less, so a trained hero is stronger without dwarfing the rest of the guild (front-line starters
+// get their Armor up front: they have to hold Act 1). With ★ at +10% HP/ATK a capstone ends near 1.8× a starter, down from 2.4×.
 const ROLE_GAIN={ // [starter, tier 3, capstone]
- front:[{hp:14,atk:1,spd:0,armor:0},{hp:22,atk:2,spd:0,armor:1},{hp:30,atk:3,spd:0,armor:1}],
- mid:[{hp:8,atk:2,spd:0.05,armor:0},{hp:14,atk:3,spd:0.1,armor:0},{hp:20,atk:4,spd:0.1,armor:0}],
- back:[{hp:4,atk:3,spd:0,armor:0},{hp:8,atk:4,spd:0.05,armor:0},{hp:12,atk:5,spd:0.05,armor:0}]};
+ front:[{hp:22,atk:1,spd:0,armor:1},{hp:16,atk:2,spd:0,armor:0},{hp:18,atk:2,spd:0,armor:1}],
+ mid:[{hp:12,atk:2,spd:0.05,armor:0},{hp:10,atk:2,spd:0.05,armor:0},{hp:12,atk:2,spd:0.05,armor:0}],
+ back:[{hp:8,atk:3,spd:0,armor:0},{hp:6,atk:3,spd:0.05,armor:0},{hp:8,atk:3,spd:0.05,armor:0}]};
+const STAR_GAIN=0.10; // HP and ATK per ★ above the first
 const BASE_CRIT=0.1; // every hero crits 10% of the time before gems
 // Sprites: every class has its own sprite, keyed by its name in lowercase letters (art/sprites/fixes/<id>.txt); roots show their first starter's look.
 const ROOT_SPR={Mage:'frostmage',Warrior:'sentinel',Rogue:'thief'};
@@ -756,7 +777,7 @@ function trainHero(h,choose){ const opts=upgradeOptions(h); if(!opts.length) ret
 // ctx: {gemMult} doubles gem socket effects (Master Jeweller). h.permAtk and h.souls are run-permanent gains (Bounty hunter, Reaper).
 function computeStats(h,relics,ctx){
   relics=relics||[];
-  const L=h.lv, m=1+0.15*(L-1), base=classStats(h.root||rootOf(h.id),heroPath(h)); // the route's stats, grown 15% per ★
+  const L=h.lv, m=1+STAR_GAIN*(L-1), base=classStats(h.root||rootOf(h.id),heroPath(h)); // the route's stats, grown STAR_GAIN per ★
   let hp=base.hp*m+(h.bonusHp||0)+(h.giftHp||0)+(h.souls||0), atk=base.atk*m+(h.giftAtk||0)+(h.permAtk||0), spd=base.spd, armor=base.armor, crit=base.crit, dodge=base.dodge;
   const apply={};
   let statusMult=1, targetLowest=false, startShield=0, regen=0;
@@ -813,7 +834,7 @@ function computeStats(h,relics,ctx){
 function baseUnit(def,side,row,s,B){
   return {uid:B.uid++,B,def,name:def.name,side,row,alive:true,hp:s.maxHp,maxHp:s.maxHp,maxHp0:s.maxHp,atk:s.atk,spd:s.spd,armor:s.armor,crit:s.crit||0,dodge:s.dodge||0,
     shield:0,st:{},kw:{},ablaze:false,critStreak:0,dodgeStreak:0,flags:{},tmpMult:1,timer:0.35+Math.random()*0.3,stTimer:Math.random()*0.2,secs:0,attacks:0,chain:0,L:1,apply:{},hooks:[],statusMult:1,targetLowest:false,hitAll:false,hitAllMult:1,
-    stats:{dealt:0,taken:0,healed:0,kills:0}};
+    stats:{dealt:0,taken:0,healed:0,healGiven:0,shieldGiven:0,kills:0}};
 }
 // gold: the run's bank when the fight starts; skills that read "gold in the bank" see it plus whatever the fight has paid so far (B.bounty)
 // ctx: {spent} — gold spent this run (War Bonds). Master Jeweller (flag jeweller on any hero) doubles everyone's basic gem effects.
@@ -836,7 +857,7 @@ function createBattle(heroes,enc,relics,gold,ctx){
     if(tr==='hhp'){ u.maxHp=u.maxHp0=Math.max(1,Math.round(u.maxHp*0.75)); u.hp=u.maxHp; }
     B.units.push(u); });
   if(relics.includes('gamblersdie')){ const hs=B.units.filter(u=>u.hero); if(hs.length){ const u=pick(hs); u.atk=Math.round(u.atk*1.5); B.logf(`The die favours ${u.name}.`); } } // Gambler's Die
-  enc.list.forEach(e=>makeEnemy(B,e.id,e.row));
+  enc.list.forEach(e=>makeEnemy(B,e.id,e.row,e.affix));
   B.flags={}; B.units.forEach(u=>{ for(const f in u.flags) B.flags[f]=1; });
   B.units.forEach(u=>fire(u,'onStart',B));
   checkVanguard(B);
@@ -893,9 +914,11 @@ function checkWeave(u,B,dt){
   else if(u.flags.meditate&&u.row==='back'&&u.hp<u.maxHp){ u.medAcc=(u.medAcc||0)+dt*WEAVE_REGEN*u.maxHp; if(u.medAcc>=1){ const n=Math.floor(u.medAcc); u.medAcc-=n; heal(u,n,B,u); } }
 }
 const ELITE_BOOST=1.15; // elites are optional (and pay a free gem), so the elite itself hits a little harder
-function makeEnemy(B,id,row){
+function makeEnemy(B,id,row,affix){
   const d=ENEMIES[id], m=B.enc.mult*(d.elite?ELITE_BOOST:1), nz=(d.boss&&B.enc.norm)||{hp:1,atk:1}, bz=d.boss?{hp:BOSS_HP,atk:BOSS_ATK}:{hp:1,atk:1}; const s={maxHp:Math.round(d.hp*m*ENEMY_HP*nz.hp*bz.hp*(B.eHp||1)),atk:Math.round(d.atk*m*ENEMY_ATK*nz.atk*bz.atk*(B.eAtk||1)),spd:d.spd,armor:d.armor||0,crit:d.crit||0,dodge:d.dodge||0};
-  const u=baseUnit(d,'e',row,s,B); u.eid=id; u.apply=Object.assign({},d.apply||{}); u.flags=Object.assign({},d.flags||{}); u.targetLowest=!!d.targetLowest; u.hooks=[d.hooks||{}]; B.units.push(u); return u;
+  const u=baseUnit(d,'e',row,s,B); u.eid=id; u.apply=Object.assign({},d.apply||{}); u.flags=Object.assign({},d.flags||{}); u.targetLowest=!!d.targetLowest; u.hooks=[d.hooks||{}];
+  if(affix&&AFFIXES[affix]){ const A=AFFIXES[affix]; u.affix=affix; u.name=A.name+' '+u.name; if(A.mod) A.mod(u,B); if(A.hooks) u.hooks.push(A.hooks); }
+  B.units.push(u); return u;
 }
 // mid-battle reinforcements (Slime splits, Necromancer raises). Capped at 6 living enemies.
 function spawnEnemy(B,id,row){
@@ -905,7 +928,8 @@ function spawnEnemy(B,id,row){
   if(cells(row)>=ROW_MAX){ row=row==='front'?'back':'front'; if(cells(row)>=ROW_MAX) return null; }
   const u=makeEnemy(B,id,row); u.timer=0; u.summon=true; B.logf(`${u.name} joins the fight.`); fire(u,'onStart',B); B.spawn(u); return u;
 }
-function fire(u,name,...args){ for(const h of u.hooks){ if(h[name]) h[name](u,...args); } }
+// B.cur: whose hook is running, so healing and Shield it hands out are credited to it (the end-of-fight table)
+function fire(u,name,...args){ const B=u.B, prev=B&&B.cur; if(B) B.cur=u; try{ for(const h of u.hooks){ if(h[name]) h[name](u,...args); } } finally{ if(B) B.cur=prev; } }
 // a hook that must not re-enter itself (onApply from onApply); a different hook fired from inside it still runs
 function fireOnce(u,name,B,...args){ if(B.busy[name]) return; B.busy[name]=1; try{ fire(u,name,...args,B); } finally{ B.busy[name]=0; } }
 const alliesOf=(u,B)=>B.units.filter(x=>x.side===u.side);
@@ -915,10 +939,10 @@ function randomEnemy(u,B,not){ const f=aliveEnemies(u,B).filter(x=>x!==not); ret
 // hard caps so stacking buffs can never run away: attack speed at 3 attacks/s, kill-chains at one per possible kill (crit and dodge use streaks instead, see core)
 const SPD_CAP=3, KILL_CHAIN_MAX=ROW_MAX*2;
 const effSpd=u=>Math.min(SPD_CAP,u.spd*(1+buffSum(u,'spd'))*(1-CHILL_SLOW*Math.min(CHILL_SLOW_MAX,u.st.chill||0))*(u.kw.crippled?0.75:1));
-function addShield(u,n,B,echo){ if(!u||!u.alive||n<=0) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.flags.shieldMult2) n*=2; u.shield+=n; B.fx(u,`+${n}`,'shield'); fireOnce(u,'onShieldGain',B,n);
+function addShield(u,n,B,echo){ if(!u||!u.alive||n<=0) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.flags.shieldMult2) n*=2; u.shield+=n; if(B.cur) B.cur.stats.shieldGiven+=n; B.fx(u,`+${n}`,'shield'); fireOnce(u,'onShieldGain',B,n);
   // Twin Aegis: copy to another random hero (the copy never copies itself)
   if(!echo&&u.hero&&B.relics.includes('twinaegis')){ const o=B.units.filter(x=>x!==u&&x.hero&&x.alive); if(o.length) addShield(pick(o),n,B,true); } }
-function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.side==='e'&&u.st.poison>0&&B.flags.quarantine) n=Math.floor(n/2); if(u.hero){ if(B.relics.includes('chalice')) n=Math.round(n*1.25); if(B.relics.includes('bloodidol')) n=Math.ceil(n/2); } const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; B.fx(u,`+${r}`,'heal'); } if(r>0&&u.flags.martyr) gainStatus(u,'burn',1,B); /* Martyr's Coal */ if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
+function heal(u,n,B,src){ if(!u||!u.alive||n<=0||u.flags.noHeal) return; if(isFestering(u)){ B.fx(u,'festering','miss'); return; } if(u.side==='e'&&u.st.poison>0&&B.flags.quarantine) n=Math.floor(n/2); if(u.hero){ if(B.relics.includes('chalice')) n=Math.round(n*1.25); if(B.relics.includes('bloodidol')) n=Math.ceil(n/2); } const r=Math.max(0,Math.min(n,u.maxHp-u.hp)); if(r>0){ u.hp+=r; u.stats.healed+=r; const g=src||B.cur; if(g) g.stats.healGiven+=r; B.fx(u,`+${r}`,'heal'); } if(r>0&&u.flags.martyr) gainStatus(u,'burn',1,B); /* Martyr's Coal */ if(src&&src.alive) fireOnce(src,'onHeal',B,u,r,n-r); }
 // a heal performed by a class ability: onHealing hooks scale it (Healer's bonuses), then the Mage root's +1; gem regeneration and lifesteal skip this
 function abilityHeal(src,t,n,B){ if(!t||!t.alive||n<=0) return; const h={n}; fire(src,'onHealing',t,h,B); heal(t,Math.round(h.n)+(src.healBonus||0),B,src); }
 // on-hit status: the attack's own applications, which get the Mage root's +1 and per-hit bonuses (u.hitBonus is set while a hit resolves)
@@ -958,7 +982,7 @@ function attack(u,B,forced,opts){
   if(u.blind){ u.blind=false; a.forceDodge=true; B.fx(u,'BLIND','miss'); } // Shadow Archer: the next attack misses
   u.lastA=a; aliveEnemies(u,B).forEach(x=>fire(x,'onEnemyAttack',u,a,B));
   const fz=Math.floor((u.st.chill||0)/FROZEN_AT); if(fz) a.mult/=Math.pow(2,fz); // Frozen: half damage per 20 Chill, consumed after the attack
-  let foes=aliveEnemies(u,B).filter(f=>!(f.veilUntil>B.t)); if(isFrozen(u)) foes=foes.filter(f=>!f.flags.frostshadow); if(!foes.length&&!(forced&&forced.alive)) return;
+  let foes=aliveEnemies(u,B).filter(f=>u.flags.unerring||!(f.veilUntil>B.t)); if(isFrozen(u)) foes=foes.filter(f=>!f.flags.frostshadow); if(!foes.length&&!(forced&&forced.alive)) return; // Unerring enemies find the untargetable
   let targets;
   if(forced&&forced.alive) targets=[forced];
   else if(u.hitAll||a.hitAll){ targets=foes.slice(); if(u.hitAll) a.mult*=u.hitAllMult; }
@@ -983,7 +1007,7 @@ function hit(u,t,a,B){
   t=intercept(u,t,B);
   const ac=Object.assign({mult:1,bonus:0},a);
   fire(t,'onIncoming',u,ac,B); // before the dodge roll: ac.dodgeBonus
-  if(sureDodge(t,B)||ac.forceDodge||streakRoll(t.dodge+(ac.dodgeBonus||0)+buffSum(t,'dodge'),t,'dodgeStreak')){ B.anim(u,t,{type:'miss'}); B.fx(t,'miss','miss'); B.logf(`${t.name} dodges ${u.name}.`); fire(t,'onDodge',u,B); alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyDodge',t,u,B); }); return; }
+  if(ac.forceDodge||(!u.flags.unerring&&(sureDodge(t,B)||streakRoll(t.dodge+(ac.dodgeBonus||0)+buffSum(t,'dodge'),t,'dodgeStreak')))) { B.anim(u,t,{type:'miss'}); B.fx(t,'miss','miss'); B.logf(`${t.name} dodges ${u.name}.`); fire(t,'onDodge',u,B); alliesOf(t,B).forEach(x=>{ if(x.alive) fire(x,'onAllyDodge',t,u,B); }); return; }
   fire(u,'onTarget',t,ac,B);
   fire(t,'onDefend',u,ac,B);
   for(const x of B.units){ if(!x.alive) continue; if(x.side===u.side) fire(x,'onAllyTarget',u,t,ac,B); else fire(x,'onAllyDefend',t,u,ac,B); } // side-wide auras, the attacker and defender included
@@ -1123,4 +1147,4 @@ function stepBattle(B,dt){
   if(B.t>=(B.tLimit||60)){ B.over=true; B.winner='e'; B.logf('Time runs out. Your guild retreats.'); }
 }
 function runToEnd(B){ let n=0; while(!B.over&&n<4000){ stepBattle(B,0.05); n++; } return B; }
-if(typeof module!=='undefined') module.exports={GILT_PER_KILLS,closest,opposite,colOf,adjacentOf,CLASSES,STARTERS,ROOTS,newHero,trainHero,upgradeOptions,upgradesOf,promote,heroSkills,heroPath,HOOKS,rollActBoss,bossPool,bossNorm,BOSSES,enemyMult,gemLeaves,defineMergedGem,restoreMergedGems,genChoices,genPrologue,slotLayout,relayout,slotKindsOf,CLASS_SLOTS,RARE_ODDS,actOf,curAct,slotKind,HAND_SLOTS,HEROES,defaultRow,ROW_MAX,ENCOUNTERS,GEMS,BASIC_GEMS,RARE_GEMS,SLOTS,RELICS,ENEMIES,ARCH_LABEL,heroSkills,activeSkills,skillActive,needCounts,gemCounts,genEncounter,computeStats,createBattle,stepBattle,runToEnd,actOf,kindOf,FLOORS};
+if(typeof module!=='undefined') module.exports={GILT_PER_KILLS,closest,opposite,colOf,adjacentOf,CLASSES,STARTERS,ROOTS,newHero,trainHero,upgradeOptions,upgradesOf,promote,heroSkills,heroPath,HOOKS,rollActBoss,bossPool,bossNorm,BOSSES,enemyMult,gemLeaves,defineMergedGem,restoreMergedGems,genChoices,genPrologue,AFFIXES,affixOdds,depthRate,STAR_GAIN,ROLE_GAIN,slotLayout,relayout,slotKindsOf,CLASS_SLOTS,RARE_ODDS,actOf,curAct,slotKind,HAND_SLOTS,HEROES,defaultRow,ROW_MAX,ENCOUNTERS,GEMS,BASIC_GEMS,RARE_GEMS,SLOTS,RELICS,ENEMIES,ARCH_LABEL,heroSkills,activeSkills,skillActive,needCounts,gemCounts,genEncounter,computeStats,createBattle,stepBattle,runToEnd,actOf,kindOf,FLOORS};

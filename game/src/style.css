@@ -199,6 +199,8 @@ html,body,body *{-webkit-touch-callout:none!important;user-select:none!important
 .unit.frozen{border-color:var(--chill)}.unit.ablaze{border-color:var(--burn)}.unit.festering{border-color:var(--poison)}
 /* a mark: one disc in the art's top-left corner */
 .unit .art .mark{position:absolute;left:1px;top:0;z-index:3;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 1.5px #141126,0 0 6px rgba(255,255,255,.35)}
+.unit .art .affix{position:absolute;right:1px;top:0;z-index:3;width:15px;height:15px;border-radius:4px;display:flex;align-items:center;justify-content:center;background:#141126;box-shadow:0 0 0 1.5px var(--c),0 0 6px var(--c)}
+.unit .art .affix svg{width:11px;height:11px;fill:none;stroke:var(--c);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .unit .art .mark svg{width:11px;height:11px;fill:none;stroke:#141126;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .unit.ghost{visibility:hidden;border-color:transparent}
 .fx{position:absolute;left:50%;top:30%;transform:translateX(-50%);font-weight:700;font-size:14px;pointer-events:none;animation:fl .9s ease-out forwards;text-shadow:0 0 3px #000;z-index:3;white-space:nowrap}

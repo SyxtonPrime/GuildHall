@@ -31,7 +31,7 @@ function startBattle(){
   if(speed>=99) speed=[0.5,1,2,3].includes(meta.speed)?meta.speed:1;
   // names that still overflow their card (long single words) step down in size until they fit
   const fitNames=root=>{ (root||$('#s-battle')).querySelectorAll('.unit .nm').forEach(el=>{ const sp=el.firstElementChild; if(!sp) return; el.style.fontSize=''; let fs=parseFloat(getComputedStyle(el).fontSize), guard=8; const over=()=>[...sp.getClientRects()].some(r=>r.width>el.clientWidth+0.5); while(guard-->0&&over()&&fs>6.5){ fs-=0.5; el.style.fontSize=fs+'px'; } }); };
-  const unitHtml=u=>`<div class="unit ${u.side==='e'?'enemy':''} ${u.summon?'summon':''}" id="u${u.uid}"><div class="art">${u.hero?hspr(u.hero,32,u.name):spr(u.eid,36,u.name)}${u.hero?`<span class="lv" title="${u.L} star${u.L>1?'s':''}">${'<span>★</span>'.repeat(u.L)}</span>`:''}</div><div class="nm ${u.name.split(' ').some(w=>w.length>10)?'long':''}" title="${esc(u.name)}"><span>${esc(u.name)}</span></div><div class="hpbar"><div class="f"></div><div class="sh"></div><div class="tx"></div></div><div class="ln"><span class="a"></span><span class="s"></span></div><div class="stt"></div></div>`;
+  const unitHtml=u=>`<div class="unit ${u.side==='e'?'enemy':''} ${u.summon?'summon':''}" id="u${u.uid}"><div class="art">${u.hero?hspr(u.hero,32,u.name):spr(u.eid,36,u.name)}${u.hero?`<span class="lv" title="${u.L} star${u.L>1?'s':''}">${'<span>★</span>'.repeat(u.L)}</span>`:''}${u.affix?affixHtml(u.affix):''}</div><div class="nm ${u.name.split(' ').some(w=>w.length>10)?'long':''}" title="${esc(u.name)}"><span>${esc(u.name)}</span></div><div class="hpbar"><div class="f"></div><div class="sh"></div><div class="tx"></div></div><div class="ln"><span class="a"></span><span class="s"></span></div><div class="stt"></div></div>`;
   // a row shows its living units plus fallen ones while there is room (movement and summons can crowd a row)
   const rowHtml=(side,row)=>{ let us=battle.units.filter(u=>u.side===side&&u.row===row&&(u.alive||!u.summon)); let room=ROW_MAX-us.filter(u=>u.alive).length; us=us.filter(u=>u.alive||room-->0); return `<div class="grid4">${us.length?us.map(unitHtml).join(''):GHOST}</div>`; };
   // an empty row keeps its full height so summons or movement never shift the rest of the arena
@@ -52,6 +52,8 @@ function startBattle(){
 $('#s-battle').addEventListener('click',e=>{ const b=e.target.closest('button[data-s]'); if(!b||!battle) return; const s=+b.dataset.s;
   if(s===99){ if(loop){clearInterval(loop);loop=null;} runToEnd(battle); renderUnits(); endBattle(); return; }
   speed=s; meta.speed=s; save(KEY_META,meta); b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',+x.dataset.s===s)); });
+// an enemy's affix: a tile in the art's top-right corner, in the affix's colour
+const affixHtml=k=>{ const A=AFFIXES[k]; return `<span class="affix" style="--c:${A.c}" title="${A.name}: ${A.d}"><svg viewBox="0 0 24 24"><use href="#g-${A.g}"/></svg></span>`; };
 // Brittle (Frozen + Ablaze), Blighted (Ablaze + Festering), Crippled (Frozen + Festering), Ruined (all three): a disc split in their colours
 const MARKS={brittle:{c:['var(--chill)','var(--burn)'],g:'mkcrack',d:'Frozen + Ablaze: every Chill or Burn applied to it is +1'},blighted:{c:['var(--burn)','var(--poison)'],g:'mkskull',d:'Ablaze + Festering: +25% damage from statuses'},
  crippled:{c:['var(--chill)','var(--poison)'],g:'mkchain',d:'Frozen + Festering: attacks 25% slower'},ruined:{c:['var(--chill)','var(--burn)','var(--poison)'],g:'mkshatter',d:'All three: +50% damage from everything, and every mark'}};
@@ -96,11 +98,11 @@ function endBattle(){
     if(victory){ ds.streak++; ds.bestStreak=Math.max(ds.bestStreak,ds.streak); }
     else if(dead&&!run.cleared) ds.streak=0; }
   save(KEY_META,meta);
-  const rows=heroUnits.slice().sort((a,b)=>b.stats.dealt-a.stats.dealt).map(u=>`<tr><td><span class="row" style="gap:5px">${ic(u.hero.id,'h',18)}${esc(u.name)}</span>${!u.alive?' <span class="tiny acc">fell</span>':''}</td><td>${u.stats.dealt}</td><td>${u.stats.taken}</td><td>${u.stats.healed}</td><td>${u.stats.kills}</td></tr>`).join('');
+  const rows=heroUnits.slice().sort((a,b)=>b.stats.dealt-a.stats.dealt).map(u=>`<tr><td><span class="row" style="gap:5px">${ic(u.hero.id,'h',18)}${esc(u.name)}</span>${!u.alive?' <span class="tiny acc">fell</span>':''}</td><td>${u.stats.dealt}</td><td>${u.stats.taken}</td><td>${u.stats.healGiven}<span class="muted"> / </span>${u.stats.shieldGiven}</td><td>${u.stats.kills}</td></tr>`).join('');
   const mvp=heroUnits.reduce((m,u)=>u.stats.dealt>m.stats.dealt?u:m,heroUnits[0]);
   modal(`<h2 class="${win?'good':'acc'}">${victory?'Dungeon cleared':win?'Victory':'Defeat'}</h2>
    <div class="small muted">${battle.t.toFixed(1)}s · MVP ${esc(mvp.name)}${dead?` · <span class="acc">${battle.t>=battle.tLimit?'Time ran out.':'Your guild is broken.'}</span> ${enemyLeft} enem${enemyLeft===1?'y':'ies'} left standing.`:''}</div>
-   <table class="rep"><tr><th>Hero</th><th>Dealt</th><th>Taken</th><th>Healed</th><th>Kills</th></tr>${rows}</table>
+   <table class="rep"><tr><th>Hero</th><th>Dealt</th><th>Taken</th><th title="Healing and Shield this hero gave out, itself included">Heal / Shield</th><th>Kills</th></tr>${rows}</table>
    ${win?`<div class="small"><span class="gold">+${g.total} gold</span> <span class="muted">(win ${g.base}${g.interest?' · interest '+g.interest:''}${g.gems?' · Gilt '+g.gems:''}${g.skills?' · skills '+g.skills:''}${g.purse?' · Deep Purse '+g.purse:''}${g.bounty>0?' · loot '+g.bounty:g.bounty<0?' · stolen '+g.bounty:''})</span>${g.wager>0?` <span class="gold">· wager +${g.wager}</span>`:g.wager<0?' <span class="acc">· wager lost</span>':''}</div>`:''}
    ${unlocks.map(n=>`<div class="pill g">Unlocked hero: ${esc(n)}</div>`).join('')}
    <details class="small muted"><summary>Battle log</summary><div style="max-height:200px;overflow:auto;font-size:11px;margin-top:6px">${battle.log.map(esc).join('<br>')}</div></details>
