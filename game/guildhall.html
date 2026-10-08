@@ -186,12 +186,29 @@ html,body,body *{-webkit-touch-callout:none!important;user-select:none!important
 .unit .ln{display:flex;justify-content:space-between;gap:2px;color:var(--muted);font-variant-numeric:tabular-nums;font-size:9px;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;height:12px;line-height:12px}
 .unit .stt{display:flex;gap:3px;flex-wrap:nowrap;height:14px;overflow:hidden;justify-content:center}
 .stx{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:14px;padding:0 3px;border-radius:4px;font-size:9.5px;font-weight:700;line-height:1;color:#141126;font-variant-numeric:tabular-nums}
-.stx.p{background:var(--poison)}.stx.b{background:var(--burn)}.stx.c{background:var(--chill)}.stx.aff{outline:1.5px solid #fff;outline-offset:-1.5px}.stx.k{background:var(--gold)}
+.stx.p{background:var(--poison);--c:var(--poison)}.stx.b{background:var(--burn);--c:var(--burn)}.stx.c{background:var(--chill);--c:var(--chill)}
+/* an afflicted status: the badge inverts and glows */
+.stx.aff{background:#141126;color:var(--c);box-shadow:0 0 0 1.5px var(--c) inset,0 0 5px var(--c)}
+/* afflictions on the art: Frozen an ice block over the sprite, Ablaze flames behind it, Festering a green glow around it */
+.unit .art .spr{position:relative;z-index:1}
+.unit .art::before,.unit .art::after{content:'';position:absolute;left:50%;pointer-events:none;opacity:0;transition:opacity .25s}
+.unit .art::after{z-index:0;bottom:-3px;width:46px;height:34px;transform:translateX(-50%);transform-origin:50% 100%;border-radius:50% 50% 40% 40%;
+  background:radial-gradient(ellipse 50% 70% at 50% 100%,rgba(255,214,90,.95),rgba(255,92,58,.75) 45%,rgba(255,60,30,0) 75%)}
+.unit.ablaze .art::after{opacity:1;animation:flicker .45s ease-in-out infinite alternate}
+@keyframes flicker{0%{transform:translateX(-50%) scale(1,.9)}50%{transform:translateX(-52%) scale(1.04,1.05)}100%{transform:translateX(-48%) scale(.97,1.12)}}
+.unit .art::before{z-index:2;top:-1px;width:40px;height:38px;transform:translateX(-50%);border-radius:5px;border:1px solid rgba(220,250,255,.85);
+  background:linear-gradient(135deg,rgba(235,252,255,.55) 0 18%,rgba(143,227,255,.28) 19% 55%,rgba(220,248,255,.45) 56% 62%,rgba(143,227,255,.2) 63%);box-shadow:0 0 6px rgba(143,227,255,.6) inset}
+.unit.frozen .art::before{opacity:1}
+.unit.festering .art .spr{filter:drop-shadow(0 0 1px #3f8f1a) drop-shadow(0 0 3px var(--poison)) saturate(.7) sepia(.25) hue-rotate(40deg)}
+.unit.frozen{border-color:var(--chill)}.unit.ablaze{border-color:var(--burn)}.unit.festering{border-color:var(--poison)}
+/* a mark: one disc in the art's top-left corner */
+.unit .art .mark{position:absolute;left:1px;top:0;z-index:3;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 1.5px #141126,0 0 6px rgba(255,255,255,.35)}
+.unit .art .mark svg{width:11px;height:11px;fill:none;stroke:#141126;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .unit.ghost{visibility:hidden;border-color:transparent}
 .fx{position:absolute;left:50%;top:30%;transform:translateX(-50%);font-weight:700;font-size:14px;pointer-events:none;animation:fl .9s ease-out forwards;text-shadow:0 0 3px #000;z-index:3;white-space:nowrap}
 .fx.attack{color:#fff}.fx.crit{color:var(--gold);font-size:17px}.fx.poison{color:var(--poison)}.fx.burn{color:var(--burn)}.fx.heal{color:var(--good)}.fx.shield{color:var(--teal)}.fx.buff{color:var(--gold);font-size:11px}.fx.miss{color:var(--muted);font-size:11px}.fx.thorns{color:#d9b3ff}
 @keyframes fl{0%{opacity:1;top:35%}100%{opacity:0;top:-10%}}
-@media (prefers-reduced-motion:reduce){.fx{animation-duration:.4s}.unit{transition:none}}
+@media (prefers-reduced-motion:reduce){.fx{animation-duration:.4s}.unit{transition:none}.unit.ablaze .art::after{animation:none}}
 .mid{display:flex;align-items:center;padding:2px 0}
 .spd button{padding:5px 8px;font-size:12px}
 .spd button.on{background:var(--gold);color:#2b2000;border-color:var(--gold)}
@@ -1448,6 +1465,10 @@ glasscomet:'M4 20l9-9 M13 5l6 6-4 4-6-6z M3 13l3 1 M10 3l1 3',
 hourglassheart:'M6 3h12 M6 21h12 M7 3c0 5 5 6 5 9s-5 4-5 9 M17 3c0 5-5 6-5 9s5 4 5 9 M10 18h4',
 stillwater:'M3 9c3-2 6 2 9 0s6-2 9 0 M3 15c3-2 6 2 9 0s6-2 9 0 M12 3v3',
 gamblersknot:'M8 4h8v8H8z M10 6h.5 M13.5 9.5h.5 M12 12v4 M8 16c0 3 8 3 8 0',
+mkcrack:'M13 2l-3 6 4 3-4 5 2 6',
+mkskull:'M12 3a7 7 0 0 0-7 7c0 3 2 4 2 6h10c0-2 2-3 2-6a7 7 0 0 0-7-7z M9.5 10.5h.01 M14.5 10.5h.01 M10 20v-4 M14 20v-4',
+mkchain:'M9 15l-2 2a3 3 0 0 1-4-4l3-3 M15 9l2-2a3 3 0 0 1 4 4l-3 3 M8 7L6 5 M16 17l2 2',
+mkshatter:'M12 2v6 M12 16v6 M2 12h6 M16 12h6 M5 5l4 4 M15 15l4 4 M19 5l-4 4 M9 15l-4 4',
 knight:'M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z M12 8v6 M9 11h6',
 berserker:'M4 20l9-9 M12 4l8 8c-2 1-4 3-5 5L12 4z',
 rogue:'M12 3v12 M8 15h8 M12 15v6 M9 8c2-1 4-1 6 0',
@@ -2317,6 +2338,11 @@ function startBattle(){
 $('#s-battle').addEventListener('click',e=>{ const b=e.target.closest('button[data-s]'); if(!b||!battle) return; const s=+b.dataset.s;
   if(s===99){ if(loop){clearInterval(loop);loop=null;} runToEnd(battle); renderUnits(); endBattle(); return; }
   speed=s; meta.speed=s; save(KEY_META,meta); b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',+x.dataset.s===s)); });
+// Brittle (Frozen + Ablaze), Blighted (Ablaze + Festering), Crippled (Frozen + Festering), Ruined (all three): a disc split in their colours
+const MARKS={brittle:{c:['var(--chill)','var(--burn)'],g:'mkcrack',d:'Frozen + Ablaze: every Chill or Burn applied to it is +1'},blighted:{c:['var(--burn)','var(--poison)'],g:'mkskull',d:'Ablaze + Festering: +25% damage from statuses'},
+ crippled:{c:['var(--chill)','var(--poison)'],g:'mkchain',d:'Frozen + Festering: attacks 25% slower'},ruined:{c:['var(--chill)','var(--burn)','var(--poison)'],g:'mkshatter',d:'All three: +50% damage from everything, and every mark'}};
+const markHtml=k=>{ const m=MARKS[k], n=m.c.length, bg=`conic-gradient(${m.c.map((c,i)=>`${c} ${Math.round(360*i/n)}deg ${Math.round(360*(i+1)/n)}deg`).join(',')})`;
+  return `<span class="mark" data-k="${k}" style="background:${bg}" title="${k[0].toUpperCase()+k.slice(1)}: ${m.d}"><svg viewBox="0 0 24 24"><use href="#g-${m.g}"/></svg></span>`; };
 function renderUnits(){
   if(!battle) return;
   $('#btime').textContent=battle.t.toFixed(1)+'s'+(battle.t>45?' · time running out':'');
@@ -2324,10 +2350,15 @@ function renderUnits(){
     const p=clamp(u.hp/u.maxHp,0,1), sp=clamp(u.shield/u.maxHp,0,1);
     el.querySelector('.f').style.width=(p*100)+'%'; el.querySelector('.sh').style.width=(sp*100)+'%'; el.querySelector('.tx').textContent=`${Math.max(0,Math.ceil(u.hp))}${u.maxHp!==u.maxHp0?'/'+u.maxHp:''}${u.shield?' +'+u.shield:''}`;
     el.querySelector('.a').textContent='ATK '+u.atk; el.querySelector('.s').textContent='SPD '+(Math.round(effSpd(u)*100)/100);
-    const st=[]; if(u.st.poison>0) st.push(`<span class="stx p" title="Poison ${u.st.poison}">${u.st.poison}</span>`); if(u.st.burn>0) st.push(`<span class="stx b" title="Burn ${u.st.burn}">${u.st.burn}</span>`); if(u.st.chill>0) st.push(`<span class="stx c${isFrozen(u)?' aff':''}" title="Chill ${u.st.chill}${isFrozen(u)?' (Frozen)':''}">${u.st.chill}</span>`);
-    if(u.ablaze) st[st.findIndex(x=>x.includes('stx b'))]=`<span class="stx b aff" title="Burn ${u.st.burn} (Ablaze)">${u.st.burn}</span>`; if(isFestering(u)) st[st.findIndex(x=>x.includes('stx p'))]=`<span class="stx p aff" title="Poison ${u.st.poison} (Festering)">${u.st.poison}</span>`;
-    for(const k in u.kw) st.push(`<span class="stx k" title="${k[0].toUpperCase()+k.slice(1)}">${k[0].toUpperCase()}</span>`);
-    const sh=st.join(''); if(el.querySelector('.stt').innerHTML!==sh) el.querySelector('.stt').innerHTML=sh; });
+    // afflictions show on the art (ice block, flames, green glow) and light up their status badge
+    const fz=u.alive&&isFrozen(u), ab=u.alive&&isAblaze(u), fe=u.alive&&isFestering(u);
+    el.classList.toggle('frozen',fz); el.classList.toggle('ablaze',ab); el.classList.toggle('festering',fe);
+    const badge=(k,n,cls,lab,aff,affLab)=>n>0?`<span class="stx ${cls}${aff?' aff':''}" title="${lab} ${n}${aff?` (${affLab})`:''}">${n}</span>`:'';
+    const sh=badge('p',u.st.poison,'p','Poison',fe,'Festering')+badge('b',u.st.burn,'b','Burn',ab,'Ablaze')+badge('c',u.st.chill,'c','Chill',fz,'Frozen');
+    if(el.querySelector('.stt').innerHTML!==sh) el.querySelector('.stt').innerHTML=sh;
+    // marks: one badge in the art's corner (any two marks mean all three afflictions, so Ruined stands for the rest)
+    const mk=u.alive?(u.kw.ruined?'ruined':['brittle','blighted','crippled'].find(k=>u.kw[k])):null, mEl=el.querySelector('.mark');
+    if((mEl?mEl.dataset.k:null)!==(mk||null)){ if(mEl) mEl.remove(); if(mk) el.querySelector('.art').insertAdjacentHTML('beforeend',markHtml(mk)); } });
 }
 function endBattle(){
   if(!battle||battle._ended) return; battle._ended=true;

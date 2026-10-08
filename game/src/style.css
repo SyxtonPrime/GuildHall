@@ -182,12 +182,29 @@ html,body,body *{-webkit-touch-callout:none!important;user-select:none!important
 .unit .ln{display:flex;justify-content:space-between;gap:2px;color:var(--muted);font-variant-numeric:tabular-nums;font-size:9px;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;height:12px;line-height:12px}
 .unit .stt{display:flex;gap:3px;flex-wrap:nowrap;height:14px;overflow:hidden;justify-content:center}
 .stx{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:14px;padding:0 3px;border-radius:4px;font-size:9.5px;font-weight:700;line-height:1;color:#141126;font-variant-numeric:tabular-nums}
-.stx.p{background:var(--poison)}.stx.b{background:var(--burn)}.stx.c{background:var(--chill)}.stx.aff{outline:1.5px solid #fff;outline-offset:-1.5px}.stx.k{background:var(--gold)}
+.stx.p{background:var(--poison);--c:var(--poison)}.stx.b{background:var(--burn);--c:var(--burn)}.stx.c{background:var(--chill);--c:var(--chill)}
+/* an afflicted status: the badge inverts and glows */
+.stx.aff{background:#141126;color:var(--c);box-shadow:0 0 0 1.5px var(--c) inset,0 0 5px var(--c)}
+/* afflictions on the art: Frozen an ice block over the sprite, Ablaze flames behind it, Festering a green glow around it */
+.unit .art .spr{position:relative;z-index:1}
+.unit .art::before,.unit .art::after{content:'';position:absolute;left:50%;pointer-events:none;opacity:0;transition:opacity .25s}
+.unit .art::after{z-index:0;bottom:-3px;width:46px;height:34px;transform:translateX(-50%);transform-origin:50% 100%;border-radius:50% 50% 40% 40%;
+  background:radial-gradient(ellipse 50% 70% at 50% 100%,rgba(255,214,90,.95),rgba(255,92,58,.75) 45%,rgba(255,60,30,0) 75%)}
+.unit.ablaze .art::after{opacity:1;animation:flicker .45s ease-in-out infinite alternate}
+@keyframes flicker{0%{transform:translateX(-50%) scale(1,.9)}50%{transform:translateX(-52%) scale(1.04,1.05)}100%{transform:translateX(-48%) scale(.97,1.12)}}
+.unit .art::before{z-index:2;top:-1px;width:40px;height:38px;transform:translateX(-50%);border-radius:5px;border:1px solid rgba(220,250,255,.85);
+  background:linear-gradient(135deg,rgba(235,252,255,.55) 0 18%,rgba(143,227,255,.28) 19% 55%,rgba(220,248,255,.45) 56% 62%,rgba(143,227,255,.2) 63%);box-shadow:0 0 6px rgba(143,227,255,.6) inset}
+.unit.frozen .art::before{opacity:1}
+.unit.festering .art .spr{filter:drop-shadow(0 0 1px #3f8f1a) drop-shadow(0 0 3px var(--poison)) saturate(.7) sepia(.25) hue-rotate(40deg)}
+.unit.frozen{border-color:var(--chill)}.unit.ablaze{border-color:var(--burn)}.unit.festering{border-color:var(--poison)}
+/* a mark: one disc in the art's top-left corner */
+.unit .art .mark{position:absolute;left:1px;top:0;z-index:3;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 1.5px #141126,0 0 6px rgba(255,255,255,.35)}
+.unit .art .mark svg{width:11px;height:11px;fill:none;stroke:#141126;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .unit.ghost{visibility:hidden;border-color:transparent}
 .fx{position:absolute;left:50%;top:30%;transform:translateX(-50%);font-weight:700;font-size:14px;pointer-events:none;animation:fl .9s ease-out forwards;text-shadow:0 0 3px #000;z-index:3;white-space:nowrap}
 .fx.attack{color:#fff}.fx.crit{color:var(--gold);font-size:17px}.fx.poison{color:var(--poison)}.fx.burn{color:var(--burn)}.fx.heal{color:var(--good)}.fx.shield{color:var(--teal)}.fx.buff{color:var(--gold);font-size:11px}.fx.miss{color:var(--muted);font-size:11px}.fx.thorns{color:#d9b3ff}
 @keyframes fl{0%{opacity:1;top:35%}100%{opacity:0;top:-10%}}
-@media (prefers-reduced-motion:reduce){.fx{animation-duration:.4s}.unit{transition:none}}
+@media (prefers-reduced-motion:reduce){.fx{animation-duration:.4s}.unit{transition:none}.unit.ablaze .art::after{animation:none}}
 .mid{display:flex;align-items:center;padding:2px 0}
 .spd button{padding:5px 8px;font-size:12px}
 .spd button.on{background:var(--gold);color:#2b2000;border-color:var(--gold)}
