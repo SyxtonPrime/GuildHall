@@ -149,8 +149,9 @@ html,body,body *{-webkit-touch-callout:none!important;user-select:none!important
 .pill.tier-common{color:var(--muted);border-color:var(--line)}
 .pill.tier-rare{color:#7fc8ff;border-color:#3d86c9}
 .pill.tier-legendary{color:#f2c14e;border-color:#f2c14e;background:#f2c14e18}
+.pill.tier-cursed{color:#d46bff;border-color:#9b3fd0;background:#9b3fd018}
 .offer.relic.tier-common{border-color:var(--line)}.offer.relic.tier-rare{border-color:#3d86c9}.offer.relic.tier-legendary{border-color:#f2c14e;box-shadow:0 0 0 1px #f2c14e55 inset}
-.relicchip.tier-rare{border-color:#3d86c9}.relicchip.tier-legendary{border-color:#f2c14e}
+.relicchip.tier-cursed{border-color:#9b3fd0}.relicchip.tier-rare{border-color:#3d86c9}.relicchip.tier-legendary{border-color:#f2c14e}
 .unit.veiled{opacity:.35;filter:grayscale(.6)}
 .unit.vanishing{transition:opacity .4s,transform .4s!important;opacity:0!important;transform:scale(.85)!important}
 .unit.summon{border-style:dashed;border-color:#8a6fc0}

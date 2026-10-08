@@ -133,6 +133,8 @@ function genEncounter(floor,depth,kindOverride,bossId){
   const norm=kind==='boss'?bossNorm(floor,list[0]):null;
   return {floor,kind,act,mult:enemyMult(floor,depth),list:out,theme:kind==='fight'?tpl.name:null,...(norm?{norm}:{})};
 }
+// The prologue: the run's first fight, before floor 1. It isn't a floor and ignores depth: always floor 1 strength at depth 0.
+function genPrologue(){ return Object.assign(genEncounter(1,0,'fight'),{prologue:true}); }
 // What the camp offers on a floor: floor 1 and bosses are fixed; every other floor is fight vs elite.
 // (Events — Forge, Enchanter, Gem Cutter, Retirement, Scout's Camp — come as a bonus after each act's 2nd fight.)
 function genChoices(floor,depth,opts){

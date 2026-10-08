@@ -1,5 +1,5 @@
 // ---------- Stats ----------
-// ctx: {gemMult} doubles basic gem socket effects (Master Jeweller). h.permAtk and h.souls are run-permanent gains (Bounty hunter, Reaper).
+// ctx: {gemMult} doubles gem socket effects (Master Jeweller). h.permAtk and h.souls are run-permanent gains (Bounty hunter, Reaper).
 function computeStats(h,relics,ctx){
   relics=relics||[];
   const L=h.lv, m=1+0.15*(L-1), base=classStats(h.root||rootOf(h.id),heroPath(h)); // the route's stats, grown 15% per ★
@@ -7,7 +7,8 @@ function computeStats(h,relics,ctx){
   const apply={};
   let statusMult=1, targetLowest=false, startShield=0, regen=0;
   const flags={};
-  const sc=slotCounts(h,relics.includes('prism')), gh=sc.hand, ga=sc.armor, gold={win:0,kill:0,interest:0,elite:0};
+  const sc=slotCounts(h), gh=sc.hand, ga=sc.armor, gold={win:0,kill:0,interest:0,elite:0};
+  if(relics.includes('prism')){ const all={}; [gh,ga].forEach(t=>{ for(const k in t) all[k]=(all[k]||0)+t[k]; }); for(const k in all){ gh[k]=all[k]; ga[k]=all[k]; } } // Prismatic Lens: every gem works as both kinds
   const gm=(ctx&&ctx.gemMult)||1; if(gm!==1){ for(const k in gh) gh[k]*=gm; for(const k in ga) ga[k]*=gm; }
   const retaliate={}; let spikes=0, lifesteal=0, shieldPerAttack=0;
   // hand (weapon / off-hand): offensive
@@ -28,6 +29,7 @@ function computeStats(h,relics,ctx){
   if(ga.vital){ hp+=12*ga.vital; regen=ga.vital; }
   if(ga.swift) dodge+=GEM_ARMOR.dodge*ga.swift;
   if(ga.gilt) gold.win+=ga.gilt;
+  if(relics.includes('crownofthorns')) spikes+=3;
   const skills=activeSkills(h), passives=heroPassives(h); // class passives along the route stack
   const gemDefs=gemsOf(h).flatMap(gemLeaves).map(g=>GEMS[g]).filter(g=>g.rare);
   let hpMult=1, applyBonus=0, healBonus=0; // Mage root: +1 per on-hit status, +1 per ability heal
@@ -48,6 +50,8 @@ function computeStats(h,relics,ctx){
   if(relics.includes('huntinghorn')&&h.row==='back') spd*=1.25;
   if(relics.includes('cloak')) dodge+=0.1;
   if(relics.includes('boots')){ spd*=1.2; dodge+=0.1; }
+  if(relics.includes('pactofhaste')) spd*=1.3;
+  if(relics.includes('bloodidol')) atk*=1.3;
   return {maxHpRaw:Math.round(hpRaw),maxHp:Math.max(1,Math.round(hp)),atk:Math.round(atk),spd:Math.round(spd*100)/100,armor,crit,dodge,apply,statusMult,targetLowest,flags,startShield,regen,retaliate,spikes,lifesteal,shieldPerAttack,giltHand:gh.gilt||0,giltArmor:ga.gilt||0,skills,passives,gold,applyBonus,healBonus,gemHooks:gemDefs.map(g=>g.hooks||{})};
 }
 

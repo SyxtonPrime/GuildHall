@@ -10,21 +10,32 @@ const GEMS={
  vital:{name:'Vital',arch:'heal',letter:'H',cost:3,hand:'Each hit heals this hero 2',armor:'+12 HP · heal 1 every 2 seconds'},
  swift:{name:'Swift',arch:'speed',letter:'S',cost:3,hand:'+15% attack speed',armor:'+8% dodge'},
  gilt:{name:'Gilt',arch:'gold',letter:'G',cost:3,hand:'+1 gold for every 2 enemies this hero kills in a fight',armor:'+1 gold after every won fight'},
- // rare: two essences + a bonus effect
- bloodstone:{name:'Bloodstone',rare:1,ess:['venom','vital'],cost:5,desc:'Venom + Vital. Whenever this hero\'s Poison damages an enemy, heal 1',hooks:{onPoisonDamage:(u,t,d,B)=>{ if(t.poisonSrc===u) heal(u,1,B,u); }}},
- hearthstone:{name:'Hearthstone',rare:1,ess:['ember','ward'],cost:5,desc:'Ember + Ward. When this hero\'s Shield absorbs a hit, the attacker gains 1 Burn',hooks:{onShieldAbsorb:(u,src,ab,B)=>applyStatus(u,src,'burn',1,B)}},
- rimeheart:{name:'Rimeheart',rare:1,ess:['frost','ward'],cost:5,desc:'Frost + Ward. Whenever this hero applies Chill, gain 1 Shield',hooks:{onApply:(u,k,t,n,B)=>{ if(k==='chill') addShield(u,1,B); }}},
- sunstone:{name:'Sunstone',rare:1,ess:['ember','edge'],cost:5,desc:'Ember + Edge. Crits apply +2 Burn',hooks:{onCrit:(u,t,B)=>applyStatus(u,t,'burn',2,B)}},
- quicksilver:{name:'Quicksilver',rare:1,ess:['swift','edge'],cost:5,desc:'Swift + Edge. Every 4th attack is a guaranteed crit',hooks:{onAttack:(u,a,B)=>{ if(nthAttack(u,4)) a.forceCrit=true; }}},
- moonstone:{name:'Moonstone',rare:1,ess:['frost','vital'],cost:5,desc:'Frost + Vital. Whenever this hero applies Chill, heal the most injured ally 1',hooks:{onApply:(u,k,t,n,B)=>{ if(k==='chill') heal(lowestAlly(u,B),1,B,u); }}},
- ambergold:{name:'Ambergold',rare:1,ess:['gilt','edge'],cost:5,desc:'Gilt + Edge. +1 gold for each enemy this hero kills',gold:{kill:1}},
- verdigris:{name:'Verdigris',rare:1,ess:['venom','gilt'],cost:5,desc:'Venom + Gilt. Attacks apply +1 extra Poison',apply:{poison:1}},
- // rare: three essences with a drawback
- chaosshard:{name:'Chaos Shard',rare:2,ess:['venom','ember','frost'],cost:6,desc:'Venom + Ember + Frost. Drawback: −25% max HP',mod:{hpMult:0.75}},
- titanseye:{name:"Titan's Eye",rare:2,ess:['ward','vital','edge'],cost:6,desc:'Ward + Vital + Edge. Drawback: −25% attack speed',mod:{spdMult:0.75}},
- stormheart:{name:'Stormheart',rare:2,ess:['swift','edge','ember'],cost:6,desc:'Swift + Edge + Ember. Drawback: −2 Armor and −15 HP',mod:{armor:-2,hp:-15}},
- hollowpearl:{name:'Hollow Pearl',rare:2,ess:['venom','ward','swift'],cost:6,desc:'Venom + Ward + Swift. Drawback: this hero cannot be healed',flag:'noHeal'},
- midasheart:{name:'Midas Heart',rare:2,ess:['gilt','gilt','vital'],cost:6,desc:'Gilt ×2 + Vital. +2 gold after every won fight. Drawback: −4 ATK',mod:{atk:-4},gold:{win:2}},
+ // rare: two essences (each grants its socket passive, like a basic gem) + a bonus effect
+ bloodstone:{name:'Bloodstone',rare:1,ess:['venom','vital'],cost:7,desc:'Venom + Vital. Whenever this hero\'s Poison damages an enemy, heal 1',hooks:{onPoisonDamage:(u,t,d,B)=>{ if(t.poisonSrc===u) heal(u,1,B,u); }}},
+ hearthstone:{name:'Hearthstone',rare:1,ess:['ember','ward'],cost:7,desc:'Ember + Ward. When this hero\'s Shield absorbs a hit, the attacker gains 1 Burn',hooks:{onShieldAbsorb:(u,src,ab,B)=>applyStatus(u,src,'burn',1,B)}},
+ rimeheart:{name:'Rimeheart',rare:1,ess:['frost','ward'],cost:7,desc:'Frost + Ward. Whenever this hero applies Chill, gain 1 Shield',hooks:{onApply:(u,k,t,n,B)=>{ if(k==='chill') addShield(u,1,B); }}},
+ sunstone:{name:'Sunstone',rare:1,ess:['ember','edge'],cost:7,desc:'Ember + Edge. Crits apply +2 Burn',hooks:{onCrit:(u,t,B)=>applyStatus(u,t,'burn',2,B)}},
+ quicksilver:{name:'Quicksilver',rare:1,ess:['swift','edge'],cost:7,desc:'Swift + Edge. Every 4th attack is a guaranteed crit',hooks:{onAttack:(u,a,B)=>{ if(nthAttack(u,4)) a.forceCrit=true; }}},
+ moonstone:{name:'Moonstone',rare:1,ess:['frost','vital'],cost:7,desc:'Frost + Vital. Whenever this hero applies Chill, heal the most injured ally 1',hooks:{onApply:(u,k,t,n,B)=>{ if(k==='chill') heal(lowestAlly(u,B),1,B,u); }}},
+ ambergold:{name:'Ambergold',rare:1,ess:['gilt','edge'],cost:7,desc:'Gilt + Edge. +1 gold for each enemy this hero kills',gold:{kill:1}},
+ verdigris:{name:'Verdigris',rare:1,ess:['venom','gilt'],cost:7,desc:'Venom + Gilt. Attacks apply +1 extra Poison',apply:{poison:1}},
+ frostfang:{name:'Frostfang',rare:1,ess:['frost','edge'],cost:7,desc:'Frost + Edge. Crits apply +2 Chill',hooks:{onCrit:(u,t,B)=>applyStatus(u,t,'chill',2,B)}},
+ oathstone:{name:'Oathstone',rare:1,ess:['ward','edge'],cost:7,desc:'Ward + Edge. Crits grant this hero 3 Shield',hooks:{onCrit:(u,t,B)=>addShield(u,3,B)}},
+ cinderwing:{name:'Cinderwing',rare:1,ess:['ember','swift'],cost:7,desc:'Ember + Swift. Every 3rd attack applies +3 Burn',hooks:{onAttack:(u,a,B)=>{ if(nthAttack(u,3)) addApply(a,'burn',3); }}},
+ luckstone:{name:'Luckstone',rare:1,ess:['gilt','swift'],cost:7,desc:'Gilt + Swift. Each dodge earns 1 gold (up to 3 a fight)',hooks:{onDodge:(u,src,B)=>{ if(!u.hero||(u.luckGold||0)>=3) return; u.luckGold=(u.luckGold||0)+1; B.bounty+=1; B.fx(u,'+1 gold','buff'); }}},
+ hallowstone:{name:'Hallowstone',rare:1,ess:['vital','ward'],cost:7,desc:'Vital + Ward. Start each fight with Shield equal to a tenth of max HP',hooks:{onStart:(u,B)=>addShield(u,Math.round(u.maxHp/10),B)}},
+ // rare: three essences (each grants its passive) with a drawback
+ chaosshard:{name:'Chaos Shard',rare:2,ess:['venom','ember','frost'],cost:12,desc:'Venom + Ember + Frost. Drawback: −25% max HP',mod:{hpMult:0.75}},
+ titanseye:{name:"Titan's Eye",rare:2,ess:['ward','vital','edge'],cost:12,desc:'Ward + Vital + Edge. Drawback: −25% attack speed',mod:{spdMult:0.75}},
+ stormheart:{name:'Stormheart',rare:2,ess:['swift','edge','ember'],cost:12,desc:'Swift + Edge + Ember. Drawback: −2 Armor and −15 HP',mod:{armor:-2,hp:-15}},
+ hollowpearl:{name:'Hollow Pearl',rare:2,ess:['venom','ward','swift'],cost:12,desc:'Venom + Ward + Swift. Drawback: this hero cannot be healed',flag:'noHeal'},
+ beaconstone:{name:'Beacon Stone',rare:2,ess:['ward','vital','swift'],cost:12,desc:'Ward + Vital + Swift. Drawback: enemies attack this hero first, even in the back row',flag:'beacon'},
+ martyrscoal:{name:"Martyr's Coal",rare:2,ess:['ember','vital','ward'],cost:12,desc:'Ember + Vital + Ward. Drawback: whenever this hero is healed, it gains 1 Burn',flag:'martyr'},
+ glasscomet:{name:'Glass Comet',rare:2,ess:['frost','edge','swift'],cost:12,desc:"Frost + Edge + Swift. Drawback: each enemy's first hit on this hero each fight is a crit",hooks:{onDefend:(u,src,ac,B)=>{ u.cometHit=u.cometHit||{}; if(!u.cometHit[src.uid]){ u.cometHit[src.uid]=1; ac.forceCrit=true; } }}},
+ hourglassheart:{name:'Hourglass Heart',rare:2,ess:['venom','ember','edge'],cost:12,desc:'Venom + Ember + Edge. Drawback: after 30 seconds, this hero\'s max HP drops to 1',hooks:{onSecond:(u,B)=>{ if(u.secs===30&&u.hero){ u.maxHp=1; u.hp=Math.min(u.hp,1); B.fx(u,'TIME','miss'); B.logf(`${u.name}'s hourglass runs out.`); } }}},
+ stillwater:{name:'Stillwater',rare:2,ess:['frost','ward','edge'],cost:12,desc:'Frost + Ward + Edge. Drawback: starts each fight with 10 Chill',hooks:{onStart:(u,B)=>gainStatus(u,'chill',10,B)}},
+ gamblersknot:{name:"Gambler's Knot",rare:2,ess:['gilt','swift','ward'],cost:12,desc:'Gilt + Swift + Ward. Bets 5 gold on each fight and pays back 6 if this hero is standing at the end',hooks:{onStart:(u,B)=>{ if(u.hero&&bank(B)>=5){ u.knotBet=1; B.bounty-=5; B.logf(`${u.name} bets 5 gold.`); } }, onWin:(u,B)=>{ if(u.knotBet){ B.bounty+=6; B.fx(u,'+6 gold','buff'); } }}},
+ midasheart:{name:'Midas Heart',rare:2,ess:['gilt','gilt','vital'],cost:12,desc:'Gilt ×2 + Vital. +2 gold after every won fight. Drawback: −4 ATK',mod:{atk:-4},gold:{win:2}},
 };
 for(const k in GEMS){ const g=GEMS[k]; if(g.hand&&!g.desc) g.desc=`Weapon/hand: ${g.hand} · Body/head: ${g.armor}`; if(!g.ess) g.ess=[k]; if(!g.letter) g.letter=''; if(!g.arch) g.arch=GEMS[g.ess[0]].arch; }
 const GEM_BY_LETTER={}; for(const k in GEMS) if(GEMS[k].letter) GEM_BY_LETTER[GEMS[k].letter]=k;
@@ -42,12 +53,12 @@ const SLOTS=L=>1+L; // ★ 2 slots, ★★ 3, ★★★ 4
 function needCounts(need){ const c={}; for(const ch of need){ const g=GEM_BY_LETTER[ch]; c[g]=(c[g]||0)+1; } return c; }
 function gemsOf(h){ return (h.gems||[]).filter(Boolean); } // h.gems[k] = gem in slot k (weapon, body, head, off-hand) or null when that slot is empty
 function gemCounts(h){ const c={}; gemsOf(h).forEach(g=>gemEss(g).forEach(e=>c[e]=(c[e]||0)+1)); return c; } // essences, for recipes
-function essenceCounts(h){ const c={}; gemsOf(h).forEach(g=>{ const d=GEMS[g]; (!d.rare?[g]:d.ess.length>=3?d.ess:[]).forEach(e=>c[e]=(c[e]||0)+1); }); return c; } // Prismatic Lens: 3-essence gems grant every essence's passive
 // Gear slots: 0 weapon & 3 off-hand = 'hand' (offensive passive), 1 body & 2 head = 'armor' (defensive passive)
 const GEM_HAND={wardShield:1,vitalHeal:2}, GEM_ARMOR={spikes:2,dodge:0.08}, GILT_PER_KILLS=2; // a Gilt weapon pays 1 gold per this many kills by its hero in a fight
 const HAND_SLOTS=[0,3], slotKind=(k,h)=>(HAND_SLOTS.includes(k)!==!!(h&&h.flip&&h.flip.includes(k)))?'hand':'armor'; // h.flip: sockets the Enchanter has turned to the other kind
-function slotCounts(h,prism){ const c={hand:{},armor:{}}; (h.gems||[]).forEach((g,k)=>{ if(!g) return; const t=c[slotKind(k,h)]; gemLeaves(g).forEach(l=>{ const d=GEMS[l]; const es=!d.rare?[l]:(prism&&d.ess.length>=3?d.ess:[]); es.forEach(e=>t[e]=(t[e]||0)+1); }); }); return c; }
-function basicCounts(h){ const c={}; gemsOf(h).forEach(g=>{ if(!GEMS[g].rare) c[g]=(c[g]||0)+1; }); return c; } // passives come only from basic gems
+function slotCounts(h){ const c={hand:{},armor:{}}; (h.gems||[]).forEach((g,k)=>{ if(!g) return; const t=c[slotKind(k,h)]; gemLeaves(g).forEach(l=>GEMS[l].ess.forEach(e=>t[e]=(t[e]||0)+1)); }); return c; } // every essence on every gem grants its passive for the socket's kind
 function skillActive(h,sk){ const have=gemCounts(h), need=needCounts(sk.need); return Object.keys(need).every(g=>(have[g]||0)>=need[g]); }
+// Shop odds for each gem offer, by act (endless uses Act 3's): no 3-essence gems in Act 1, and rares grow more common each act.
+const RARE_ODDS={1:{dual:0.08,triple:0},2:{dual:0.15,triple:0.05},3:{dual:0.22,triple:0.10}};
 const skillArch=sk=>GEMS[GEM_BY_LETTER[sk.need[0]]].arch;
 
