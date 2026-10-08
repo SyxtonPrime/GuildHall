@@ -13,7 +13,7 @@ const byTier=t=>Object.keys(E.CLASSES).filter(id=>E.CLASSES[id].tier===t);
 const routeTo=id=>{ const p=[id]; let c=E.CLASSES[id]; while(c.tier>0){ const f=pick(c.from); p.unshift(f); c=E.CLASSES[f]; } return p; }; // a random valid route
 const union=lists=>{ const n={}; lists.forEach(l=>{ const c={}; for(const ch of l) c[ch]=(c[ch]||0)+1; for(const ch in c) n[ch]=Math.max(n[ch]||0,c[ch]); }); const g=[]; for(const ch in n) for(let i=0;i<n[ch];i++) g.push(LET[ch]); return g; };
 const need=id=>E.CLASSES[id].need; // the class requirement as letters
-function hero(id,lv,gems,row){ const path=routeTo(id); const h=E.newHero(id,row); h.root=path[0]; h.path=path; h.lv=lv; h.gems=gems; h.open=[0,1,2,3].slice(0,lv+1); return h; }
+function hero(id,lv,gems,row){ const path=routeTo(id); const h={id,root:path[0],path,lv,gems:[],ench:[],row:row||E.defaultRow(id),kills:0}; E.relayout(h); h.gems=[]; gems.forEach((g,i)=>{ h.gems[h.open[i]]=g; }); return h; } // gems fill the route's sockets in order
 const rowOf=id=>E.CLASSES[id].role==='front'?'front':'back';
 const fits=(gems,sk)=>{ const have={}; gems.forEach(g=>have[g]=(have[g]||0)+1); const n={}; for(const ch of sk.need) n[LET[ch]]=(n[LET[ch]]||0)+1; return Object.keys(n).every(g=>(have[g]||0)>=n[g]); };
 function bestThird(id){ const base=union([need(id)]); let best=null, bn=-1; for(const l in LET){ const g=base.concat(LET[l]); const n=E.heroSkills(id).filter(sk=>fits(g,sk)).length; if(n>bn){ bn=n; best=g; } } return best; }

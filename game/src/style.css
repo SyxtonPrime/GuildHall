@@ -246,15 +246,12 @@ table.rep th:first-child,table.rep td:first-child{text-align:left}
 .ico.g{clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);border:none}
 .ico.g.rare svg{filter:drop-shadow(0 0 2px #000)}
 .tile.rare{border-color:#8a6fd1;background:linear-gradient(180deg,var(--panel),#2a1f4d)}
-.slots{display:flex;gap:6px;flex-wrap:nowrap;justify-content:space-between}
-.slotw{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1 1 0;min-width:0}
+.slots{display:flex;gap:6px;flex-wrap:nowrap;justify-content:flex-start}
+.slotw{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 1 25%;min-width:0} /* a quarter each: a hero with fewer slots keeps them left-aligned */
 .slotw .sl{font-size:9px;line-height:1.15;color:var(--muted);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .slot{width:46px;height:46px;border:1.5px dashed var(--line2);border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.02);cursor:pointer;position:relative}
 .slot.filled{border-style:solid;border-color:var(--line2);background:var(--panel2)}
 .slot.locked{opacity:.4;cursor:default;border-style:dotted}
-.slot.unlock{opacity:1;cursor:pointer;border-style:dashed;border-color:#7a6220;background:#2e261233;padding:0;font:inherit;color:inherit}
-.slot.unlock .lk{color:var(--muted);font-size:10px}
-.slot.unlock:disabled{opacity:.45;cursor:default}
 .slot .lk{font-size:9px;color:var(--dim);text-align:center;line-height:1.1}
 .slot.open .lk{color:var(--good)}
 .slot.target{border:1.5px solid var(--good);box-shadow:0 0 0 2px rgba(111,227,165,.35);background:rgba(111,227,165,.1)}

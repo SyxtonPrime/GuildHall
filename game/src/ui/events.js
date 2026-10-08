@@ -25,17 +25,17 @@ const ENCHANTS=2;
 function openEnchanter(){
   let hi=0; const done=[]; // [{hi,k}] flips made this visit (tap again to undo)
   const draw=()=>{ const h=run.heroes[hi], left=ENCHANTS-done.length;
-    const rows=[0,1,2,3].map(k=>{ const kind=slotKind(k,h), g=(h.gems||[])[k], mine=done.some(x=>x.hi===hi&&x.k===k), open=slotOpen(h,k), can=mine||left>0;
-      return `<div class="ench ${mine?'sel':''} ${can?'':'off'}" ${can?`data-en="${k}"`:''}><div class="row" style="gap:6px"><b class="small">${esc(slotName(h,k))}</b><span class="gk ${kind}">${kind==='hand'?'weapon':'armor'}${(h.flip||[]).includes(k)?' ✦':''}</span>${open?'':'<span class="tiny muted">locked</span>'}<span class="grow"></span>${g?ic(g,'g',20,GEMS[g].name):''}</div>${g&&GEMS[g].hand?`<div class="tiny muted" style="margin-top:2px">${esc(GEMS[g][kind])}</div>`:''}</div>`; }).join('');
-    modal(`<h2>Enchanter</h2><div class="muted small">Turn a socket into the other kind: weapon sockets power attacks, armor sockets protect and punish attackers. Locked sockets can be enchanted too. <b class="gold">${left} enchantment${left===1?'':'s'} left.</b></div>
+    const rows=openSet(h).map(k=>{ const kind=slotKind(k,h), g=(h.gems||[])[k], mine=done.some(x=>x.hi===hi&&x.k===k), can=mine||left>0;
+      return `<div class="ench ${mine?'sel':''} ${can?'':'off'}" ${can?`data-en="${k}"`:''}><div class="row" style="gap:6px"><b class="small">${esc(slotName(h,k))}</b><span class="gk ${kind}">${kind==='hand'?'weapon':'armor'}${(h.flip||[]).includes(k)?' ✦':''}</span><span class="grow"></span>${g?ic(g,'g',20,GEMS[g].name):''}</div>${g&&GEMS[g].hand?`<div class="tiny muted" style="margin-top:2px">${esc(GEMS[g][kind])}</div>`:''}</div>`; }).join('');
+    modal(`<h2>Enchanter</h2><div class="muted small">Turn a socket into the other kind: weapon sockets power attacks, armor sockets protect and punish attackers. <b class="gold">${left} enchantment${left===1?'':'s'} left.</b></div>
      <div class="heronav">${run.heroes.map((x,i)=>`<button class="hn ${i===hi?'on':''}" data-eh="${i}">${hspr(x,32)}</button>`).join('')}</div>
      <div class="stack">${rows}</div>
      <div class="row"><button class="grow ${done.length?'gold':'ghost'}" data-ex="${done.length?'done':'cancel'}">${done.length?'Done':'Not now'}</button></div>`); lockModal(); };
   draw();
   $('#sheet').onclick=e=>{ const n=e.target.closest('[data-eh]'); if(n){ hi=+n.dataset.eh; return draw(); }
-    const c=e.target.closest('[data-en]'); if(c){ const k=+c.dataset.en, h=run.heroes[hi]; const fl=(h.flip||[]).includes(k)?h.flip.filter(x=>x!==k):(h.flip||[]).concat(k);
-      if(computeStats(Object.assign({},h,{flip:fl}),run.relics).maxHpRaw<1) return toast('That would drop this hero below 1 max HP');
-      h.flip=fl; const j=done.findIndex(x=>x.hi===hi&&x.k===k); if(j>=0) done.splice(j,1); else done.push({hi,k}); saveRun(); return draw(); }
+    const c=e.target.closest('[data-en]'); if(c){ const k=+c.dataset.en, h=run.heroes[hi]; const en=(h.ench||[]).includes(k)?h.ench.filter(x=>x!==k):(h.ench||[]).concat(k);
+      const tmp=Object.assign({},h,{ench:en,gems:h.gems.slice()}); relayout(tmp); if(computeStats(tmp,run.relics).maxHpRaw<1) return toast('That would drop this hero below 1 max HP');
+      h.ench=en; relayout(h); const j=done.findIndex(x=>x.hi===hi&&x.k===k); if(j>=0) done.splice(j,1); else done.push({hi,k}); saveRun(); return draw(); }
     const b=e.target.closest('[data-ex]'); if(!b) return; unlockModal(); if(b.dataset.ex==='done'){ toast('Sockets enchanted'); finishBonus(); } else renderCamp(); };
 }
 
@@ -139,7 +139,7 @@ const siblingsOf=h=>{ const p=heroPath(h); return p.length<3?[]:upgradesOf(p[p.l
 function openMentor(){
   const elig=run.heroes.map((h,i)=>i).filter(i=>siblingsOf(run.heroes[i]).length); let hi=elig[0], ch=null;
   const draw=()=>{ const h=run.heroes[hi], prev=heroPath(h)[heroPath(h).length-2];
-    modal(`<h2>Mentor</h2><div class="muted small">An old guildmaster can undo a hero's last promotion and train them down another path from ${esc(CLASSES[prev].name)}. Their gems don't need to match; skills still need their recipes.</div>
+    modal(`<h2>Mentor</h2><div class="muted small">An old guildmaster can undo a hero's last promotion and train them down another path from ${esc(CLASSES[prev].name)}. Their gems don't need to match; skills still need their recipes. The new class brings its own slot, so a gem in a slot that changes kind may need moving.</div>
      <div class="heronav">${elig.map(i=>`<button class="hn ${i===hi?'on':''}" data-mh="${i}">${hspr(run.heroes[i],32)}</button>`).join('')}</div>
      <div class="tiny muted">${esc(HEROES[h.id].name)} now · ${routeLine(h)}</div>
      <div class="stack">${siblingsOf(h).map(id=>{ const c=CLASSES[id]; return `<div class="ench ${ch===id?'sel':''}" data-mc="${id}"><div class="row" style="gap:8px">${ic(id,'h',30,c.name)}<div class="grow"><b>${esc(c.name)}</b> <span class="tiny muted">${c.role}</span> ${recipeHtml({need:c.need},h,14)}<div class="tiny">${esc(c.passive)}</div></div></div></div>`; }).join('')}</div>
@@ -149,7 +149,7 @@ function openMentor(){
     const c=e.target.closest('[data-mc]'); if(c){ ch=c.dataset.mc; return draw(); }
     const x=e.target.closest('[data-mx]'); if(!x||(x.dataset.mx==='go'&&!ch)) return; unlockModal();
     if(x.dataset.mx==='cancel') return renderCamp();
-    const h=run.heroes[hi], old=h.id; h.path=heroPath(h).slice(0,-1).concat(ch); h.id=ch; seen('h',ch);
+    const h=run.heroes[hi], old=h.id; h.path=heroPath(h).slice(0,-1).concat(ch); h.id=ch; run.bag.push(...relayout(h)); seen('h',ch);
     toast(`${CLASSES[old].name} retrains as ${CLASSES[ch].name}`); finishBonus(); };
 }
 
@@ -201,7 +201,7 @@ function offerSheet(kind,i){
   const full=kind==='h'&&run.heroes.length>=partyMax(); const can=!o.sold&&run.gold>=cost&&!full;
   let body='';
   if(kind==='h'){
-    body=`<div class="small num">${d.row} row · HP ${d.hp} · ATK ${d.atk} · SPD ${d.spd}${d.armor?' · ARM '+d.armor:''}</div><div class="tiny muted">Root: ${CLASSES[o.id].from.map(f=>CLASSES[f].name).join(' or ')} (decided on hire) · trains into ${upgradesOf(o.id).map(u=>CLASSES[u].name).join(', ')}</div><div class="small">${esc(d.ab(1))}</div><div class="eyebrow" style="margin-top:6px">Skills (unlocked by gems)</div><div class="stack" style="gap:4px">${heroSkills(o.id).map(sk=>skillRow(sk,null)).join('')}</div>`; }
+    body=`<div class="small num">${d.row} row · HP ${d.hp} · ATK ${d.atk} · SPD ${d.spd}${d.armor?' · ARM '+d.armor:''}</div><div class="tiny muted">Slots: ${slotWords(o.id)} · Root: ${CLASSES[o.id].from.map(f=>CLASSES[f].name).join(' or ')} (decided on hire) · trains into ${upgradesOf(o.id).map(u=>CLASSES[u].name).join(', ')}</div><div class="small">${esc(d.ab(1))}</div><div class="eyebrow" style="margin-top:6px">Skills (unlocked by gems)</div><div class="stack" style="gap:4px">${heroSkills(o.id).map(sk=>skillRow(sk,null)).join('')}</div>`; }
   else if(kind==='g'){
     const uses=[]; run.heroes.forEach(h=>heroSkills(h).forEach(sk=>{ if(!skillActive(h,sk)&&skillActive(withGem(h,o.id),sk)) uses.push(`${HEROES[h.id].name}: <b>${esc(sk.name)}</b>`); }));
     body=`${d.rare?`<div class="row" style="gap:4px;margin-bottom:4px"><span class="pill g">rare</span>${d.ess.map(e=>ic(e,'g',18,GEMS[e].name)).join('')}</div>`:''}<div class="small">${d.rare?rareFx(o.id,null):gemFx(o.id)}</div>${uses.length?`<div class="small good" style="margin-top:4px">Would unlock now · ${uses.join(' · ')}</div>`:`<div class="tiny muted" style="margin-top:4px">No skill in your guild is one ${esc(d.name)} away right now, but it still gives its passive.</div>`}`; }
@@ -215,12 +215,12 @@ function offerSheet(kind,i){
 }
 // the route so far, and what training could make of the hero next (lit recipes are met by its gems)
 function routeLine(h){ const path=heroPath(h).map(id=>esc(CLASSES[id].name)).join(' → '); const ups=upgradesOf(h.id);
-  const next=ups.length?`<div class="tiny muted" style="margin-top:2px">Trains into: ${ups.map(id=>`<span class="row" style="display:inline-flex;gap:3px;margin-right:6px">${recipeHtml({need:CLASSES[id].need},h,14)}${esc(CLASSES[id].name)}</span>`).join('')}</div>`:'<div class="tiny muted" style="margin-top:2px">A capstone: trains no further.</div>';
+  const next=ups.length?`<div class="tiny muted" style="margin-top:2px">Trains into: ${ups.map(id=>`<span class="row" style="display:inline-flex;gap:3px;margin-right:6px">${recipeHtml({need:CLASSES[id].need},h,14)}${esc(CLASSES[id].name)} <span class="tiny">+${slotWords(id)}</span></span>`).join('')}</div>`:'<div class="tiny muted" style="margin-top:2px">A capstone: trains no further.</div>';
   return `<div class="tiny muted">${path}</div>${next}`; }
 // several upgrades fit: the player chooses, and the choice is permanent
 function promoModal(){ const p=run.promo; if(!p) return; const h=run.heroes[p.hi];
   modal(`<h2>${esc(HEROES[h.id].name)} is ready to advance</h2><div class="muted small">Choose a class. The choice is permanent, and ${esc(HEROES[h.id].name)}'s skills come along.</div>
-   <div class="choice">${p.opts.map(id=>{ const c=CLASSES[id]; return `<button data-promo="${id}"><span class="row">${ic(id,'h',24)} ${esc(c.name)} <span class="tiny muted">${c.role} · ${c.ess.map(e=>GEMS[e].name).join(' + ')}</span></span><span class="d">${esc(c.passive)}</span></button>`; }).join('')}</div>`); lockModal();
+   <div class="choice">${p.opts.map(id=>{ const c=CLASSES[id]; return `<button data-promo="${id}"><span class="row">${ic(id,'h',24)} ${esc(c.name)} <span class="tiny muted">${c.role} · ${c.ess.map(e=>GEMS[e].name).join(' + ')} · +${slotWords(id)} slot</span></span><span class="d">${esc(c.passive)}</span></button>`; }).join('')}</div>`); lockModal();
   $('#sheet').onclick=e=>{ const b=e.target.closest('button[data-promo]'); if(!b) return; $('#sheet').onclick=null; const was=HEROES[h.id].name; promote(h,b.dataset.promo); delete run.promo; unlockModal(); closeModal(); toast(`${was} becomes ${HEROES[h.id].name}`); saveRun(); renderGems(p.hi); }; }
 function heroSheet(i){
   const h=run.heroes[i], d=HEROES[h.id], s=computeStats(h,run.relics), lc=lvCost(h);
@@ -231,7 +231,7 @@ function heroSheet(i){
    <div class="small num">HP ${s.maxHp} · ATK ${s.atk} · SPD ${s.spd} · ARM ${s.armor}${s.crit?' · CRIT '+Math.round(s.crit*100)+'%':''}${s.dodge?' · DODGE '+Math.round(s.dodge*100)+'%':''} · kills ${h.kills||0}${h.bonusHp?` · <span class="good">+${h.bonusHp} HP from kills</span>`:''}${h.giftHp?` · <span class="good">inherited +${h.giftHp} HP +${h.giftAtk} ATK</span>`:''}</div>
    <div class="row" style="gap:4px">${openSet(h).map(k=>{ const g=(h.gems||[])[k]; return g?ic(g,'g',22,GEMS[g].name):'<span class="ph" style="display:inline-block;width:22px;height:22px;border:1px dashed var(--line2);border-radius:24%"></span>'; }).join('')}<span class="tiny muted" style="margin-left:6px">${s.skills.length?s.skills.map(x=>esc(x.name)).join(', '):'no skills yet'}</span></div>
    <div class="actions">
-     <button data-hs="gems" class="gold"><span>Equip${lc?` <span class="tiny">· unlock a slot ${lc}g</span>`:''}</span><span>${gemCount(h)}/${SLOTS(h.lv)} slots</span></button>
+     <button data-hs="gems" class="gold"><span>Equip${lc?` <span class="tiny">· train ${lc}g</span>`:''}</span><span>${gemCount(h)}/${SLOTS(h.lv)} slots</span></button>
      <button data-hs="row" ${otherFull?'disabled':''}><span>Move to ${other} row${otherFull?' (full)':''}</span><span class="muted">free</span></button>
      <button data-hs="sell" ${run.heroes.length<=1?'disabled':''}><span>Dismiss</span><span class="gold">+${2+2*(h.lv-1)}g${gemCount(h)?' · gems kept':''}</span></button>
      <button data-x="close" class="ghost"><span>Close</span></button>
